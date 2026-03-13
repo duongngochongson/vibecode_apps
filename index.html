@@ -294,7 +294,7 @@
     <div class="apps-grid">
 
       <!-- Card 1: Đoán Ưu/Nhược (LIVE) -->
-      <article class="app-card pixel-box app-card--cyan">
+      <article class="app-card pixel-box app-card--cyan" onclick="location.href='apps/pros-cons/index.html'">
         <div class="app-card__icon">🎯</div>
         <div class="app-card__tag">GAME</div>
         <h3 class="app-card__title font-vi-h">Đoán Ưu/Nhược</h3>
@@ -302,7 +302,7 @@
           Kéo thả thẻ ưu điểm và nhược điểm vào đúng chủ đề tương ứng.
           Thử thách khả năng phân tích và tư duy phản biện của bạn!
         </p>
-        <a href="apps/pros-cons/index.html" class="app-card__btn">▶ PLAY</a>
+        <span class="app-card__btn">▶ PLAY</span>
       </article>
 
       <!-- Card 2: Coming Soon -->
@@ -370,10 +370,6 @@
     });
 
     adminSettingsClose.addEventListener('click', () => adminSettingsPanel.classList.add('hidden'));
-    adminSettingsPanel.addEventListener('click', e => {
-      if (e.target === adminSettingsPanel) adminSettingsPanel.classList.add('hidden');
-    });
-
     adminCancelBtn.addEventListener('click', () => {
       adminModal.classList.add('hidden');
     });
