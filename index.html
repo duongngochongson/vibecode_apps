@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PIXELVERSE — Apps &amp; Games</title>
   <link rel="stylesheet" href="css/style.css" />
+  <script src="js/sfx.js"></script>
+  <script src="js/admin-auth.js"></script>
   <style>
     /* ===== HOME-SPECIFIC STYLES ===== */
 
@@ -69,6 +71,7 @@
 
     .pixel-float {
       position: absolute;
+      bottom: 0;
       width: 8px;
       height: 8px;
       pointer-events: none;
@@ -79,11 +82,21 @@
       0%   { transform: translateY(0) rotate(0deg); opacity: 0.6; }
       100% { transform: translateY(-120vh) rotate(360deg); opacity: 0; }
     }
+    .pixel-float--1 { left: 8%;  background: var(--cyan);    animation-duration: 7s;  animation-delay: 0s; }
+    .pixel-float--2 { left: 20%; background: var(--magenta); animation-duration: 9s;  animation-delay: 2s; }
+    .pixel-float--3 { left: 35%; background: var(--yellow);  animation-duration: 6s;  animation-delay: 1s; }
+    .pixel-float--4 { left: 55%; background: var(--green);   animation-duration: 11s; animation-delay: 3s; }
+    .pixel-float--5 { left: 70%; background: var(--cyan);    animation-duration: 8s;  animation-delay: 0.5s; }
+    .pixel-float--6 { left: 85%; background: var(--magenta); animation-duration: 10s; animation-delay: 4s; }
+    /* Hide some particles on small screens to reduce visual noise */
+    @media (max-width: 480px) {
+      .pixel-float--2, .pixel-float--4, .pixel-float--6 { display: none; }
+    }
 
     .stats-bar {
       display: flex;
       justify-content: center;
-      gap: 40px;
+      gap: clamp(16px, 5vw, 40px);
       flex-wrap: wrap;
       margin-top: 20px;
       padding: 20px;
@@ -95,7 +108,7 @@
       gap: 6px;
     }
     .stat-item__value {
-      font-size: 20px;
+      font-size: clamp(16px, 4vw, 20px);
       color: var(--cyan);
       text-shadow: 0 0 12px var(--cyan);
     }
@@ -109,7 +122,7 @@
 
     /* Card title in Vietnamese uses Merriweather */
     .app-card__title.font-vi-h {
-      font-size: 18px;
+      font-size: clamp(15px, 3vw, 18px);
       letter-spacing: 0;
     }
 
@@ -230,9 +243,11 @@
       <li><a href="index.html" class="active">HOME</a></li>
       <li>
         <button class="navbar__grid-btn" id="gamesBtn" title="Games">
-          <span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span>
-          <span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span>
-          <span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span>
+          <span class="navbar__grid-btn__dots">
+            <span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span>
+            <span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span>
+            <span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span>
+          </span>
         </button>
       </li>
       <li><button class="navbar__admin-btn" id="adminBtn">🔒 ADMIN</button></li>
@@ -285,7 +300,7 @@
             <span class="admin-game-icon">🎯</span>
             <div>
               <div class="admin-game-name">Đoán Ưu/Nhược</div>
-              <div class="admin-game-tag">GAME · LIVE</div>
+              <div class="admin-game-tag">LIVE</div>
             </div>
           </div>
           <a href="apps/pros-cons/index.html?admin=open" class="admin-game-edit-btn">✏ EDIT</a>
@@ -297,7 +312,7 @@
             <span class="admin-game-icon">🎨</span>
             <div>
               <div class="admin-game-name">Pixel Painter</div>
-              <div class="admin-game-tag">GAME · COMING SOON</div>
+              <div class="admin-game-tag">COMING SOON</div>
             </div>
           </div>
           <span class="admin-game-soon-tag">⏳ SOON</span>
@@ -309,7 +324,7 @@
             <span class="admin-game-icon">🧮</span>
             <div>
               <div class="admin-game-name">Math Blaster</div>
-              <div class="admin-game-tag">GAME · COMING SOON</div>
+              <div class="admin-game-tag">COMING SOON</div>
             </div>
           </div>
           <span class="admin-game-soon-tag">⏳ SOON</span>
@@ -326,12 +341,12 @@
     <div class="hero-space"></div>
     <div class="hero-grid"></div>
 
-    <div class="pixel-float" style="left:8%;  bottom:0; background:var(--cyan);    animation-duration:7s;  animation-delay:0s;"></div>
-    <div class="pixel-float" style="left:20%; bottom:0; background:var(--magenta); animation-duration:9s;  animation-delay:2s;"></div>
-    <div class="pixel-float" style="left:35%; bottom:0; background:var(--yellow);  animation-duration:6s;  animation-delay:1s;"></div>
-    <div class="pixel-float" style="left:55%; bottom:0; background:var(--green);   animation-duration:11s; animation-delay:3s;"></div>
-    <div class="pixel-float" style="left:70%; bottom:0; background:var(--cyan);    animation-duration:8s;  animation-delay:0.5s;"></div>
-    <div class="pixel-float" style="left:85%; bottom:0; background:var(--magenta); animation-duration:10s; animation-delay:4s;"></div>
+    <div class="pixel-float pixel-float--1"></div>
+    <div class="pixel-float pixel-float--2"></div>
+    <div class="pixel-float pixel-float--3"></div>
+    <div class="pixel-float pixel-float--4"></div>
+    <div class="pixel-float pixel-float--5"></div>
+    <div class="pixel-float pixel-float--6"></div>
 
     <div class="hero__badge">◀ PIXEL UNIVERSE ▶</div>
     <h1 class="hero__title">Welcome to universe of pixel</h1>
@@ -368,7 +383,7 @@
       <!-- Card 1: Đoán Ưu/Nhược (LIVE) -->
       <article class="app-card pixel-box app-card--cyan" onclick="SFX.navigate();location.href='apps/pros-cons/index.html'">
         <div class="app-card__icon">🎯</div>
-        <div class="app-card__tag">GAME</div>
+        <div class="app-card__tag">QUIZ</div>
         <h3 class="app-card__title font-vi-h">Đoán Ưu/Nhược</h3>
         <p class="app-card__desc font-vi">
           Kéo thả thẻ ưu điểm và nhược điểm vào đúng chủ đề tương ứng.
@@ -380,7 +395,7 @@
       <!-- Card 2: Coming Soon -->
       <article class="app-card pixel-box app-card--magenta app-card--soon">
         <div class="app-card__icon">🎨</div>
-        <div class="app-card__tag">GAME</div>
+        <div class="app-card__tag">ART</div>
         <h3 class="app-card__title font-vi-h">Pixel Painter</h3>
         <p class="app-card__desc font-vi">
           Vẽ tranh pixel art ngay trên trình duyệt.
@@ -392,7 +407,7 @@
       <!-- Card 3: Coming Soon -->
       <article class="app-card pixel-box app-card--yellow app-card--soon">
         <div class="app-card__icon">🧮</div>
-        <div class="app-card__tag">GAME</div>
+        <div class="app-card__tag">MATH</div>
         <h3 class="app-card__title font-vi-h">Math Blaster</h3>
         <p class="app-card__desc font-vi">
           Thử thách toán học nhanh tay lẹ mắt.
@@ -410,82 +425,20 @@
   </footer>
 
   <script>
-    // ===== SOUND EFFECTS =====
-    const SFX = {
-      _ctx: null,
-      ctx() { if (!this._ctx) this._ctx = new (window.AudioContext||window.webkitAudioContext)(); return this._ctx; },
-      _beep(freq, type, dur, vol) {
-        try { const c=this.ctx(),o=c.createOscillator(),g=c.createGain(); o.connect(g); g.connect(c.destination);
-          o.type=type; o.frequency.value=freq; g.gain.setValueAtTime(vol||0.08,c.currentTime);
-          g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+dur); o.start(c.currentTime); o.stop(c.currentTime+dur);
-        } catch(e) {} },
-      click()    { this._beep(440,'square',0.08,0.07); },
-      navigate() {
-        try { const c=this.ctx(),t=c.currentTime;
-          [330,440,550].forEach((f,i)=>{ const o=c.createOscillator(),g=c.createGain(); o.connect(g); g.connect(c.destination);
-            o.type='square'; o.frequency.value=f; g.gain.setValueAtTime(0.07,t+i*0.06);
-            g.gain.exponentialRampToValueAtTime(0.001,t+i*0.06+0.08); o.start(t+i*0.06); o.stop(t+i*0.06+0.08); });
-        } catch(e) {} },
-    };
-
     // ===== GAMES POPUP =====
     const gamesBtn   = document.getElementById('gamesBtn');
     const gamesPopup = document.getElementById('gamesPopup');
     gamesBtn.addEventListener('click', e => { e.stopPropagation(); SFX.click(); gamesPopup.classList.toggle('open'); });
     document.addEventListener('click', () => gamesPopup.classList.remove('open'));
 
-    // ===== ADMIN LOGIN (shared) =====
-    const ADMIN_PW = 'admin123';
-    const adminBtn     = document.getElementById('adminBtn');
-    const adminModal   = document.getElementById('adminModal');
-    const adminPw      = document.getElementById('adminPw');
-    const adminError   = document.getElementById('adminError');
-    const adminLoginBtn  = document.getElementById('adminLoginBtn');
-    const adminCancelBtn = document.getElementById('adminCancelBtn');
-
+    // ===== ADMIN LOGIN =====
     const adminSettingsPanel = document.getElementById('adminSettingsPanel');
     const adminSettingsClose = document.getElementById('adminSettingsClose');
 
-    function checkAdminSession() {
-      if (sessionStorage.getItem('adminLoggedIn') === '1') {
-        adminBtn.textContent = '⚙ SETTINGS';
-        adminBtn.classList.add('logged-in');
-      }
-    }
-    checkAdminSession();
-
-    adminBtn.addEventListener('click', () => {
-      if (sessionStorage.getItem('adminLoggedIn') === '1') {
-        adminSettingsPanel.classList.remove('hidden');
-        return;
-      }
-      adminModal.classList.remove('hidden');
-      adminPw.value = '';
-      adminError.textContent = '';
-      setTimeout(() => adminPw.focus(), 50);
+    initAdminAuth({
+      onLogin() { adminSettingsPanel.classList.remove('hidden'); }
     });
-
     adminSettingsClose.addEventListener('click', () => adminSettingsPanel.classList.add('hidden'));
-    adminCancelBtn.addEventListener('click', () => {
-      adminModal.classList.add('hidden');
-    });
-
-    function doLogin() {
-      if (adminPw.value === ADMIN_PW) {
-        sessionStorage.setItem('adminLoggedIn', '1');
-        adminModal.classList.add('hidden');
-        adminBtn.textContent = '⚙ SETTINGS';
-        adminBtn.classList.add('logged-in');
-      } else {
-        adminError.textContent = '✕ Sai mật khẩu!';
-        adminPw.value = '';
-        adminPw.focus();
-      }
-    }
-
-    adminLoginBtn.addEventListener('click', doLogin);
-    adminPw.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
-    adminModal.addEventListener('click', e => { if (e.target === adminModal) adminModal.classList.add('hidden'); });
 
     // ===== QUOTE ROTATOR =====
     const QUOTES = [

@@ -6,6 +6,8 @@
   <title>Đoán Ưu/Nhược — PIXELVERSE</title>
   <link rel="stylesheet" href="../../css/style.css" />
   <script src="../../data/pros-cons.js"></script>
+  <script src="../../js/sfx.js"></script>
+  <script src="../../js/admin-auth.js"></script>
   <style>
     /* ===== PAGE LAYOUT ===== */
     .game-page {
@@ -87,7 +89,24 @@
       }
       .card-pool-section {
         order: -1;
+        position: static; /* disable sticky on mobile */
       }
+    }
+
+    @media (max-width: 480px) {
+      .game-page { padding: 20px 1rem 40px; }
+      .page-header { margin-bottom: 20px; }
+      .score-bar { gap: 10px; }
+      .topic-card { padding: 14px; }
+      .drop-zone { min-height: 60px; }
+      .action-bar { gap: 8px; }
+      .admin-panel { padding: 20px 0.5rem; }
+      .admin-panel__inner { padding: 20px 16px; }
+      .admin-panel__title { font-size: clamp(14px, 4vw, 20px); }
+      .admin-bar { gap: 6px; }
+      .admin-bar-btn { padding: 10px 10px; font-size: 6px; }
+      .admin-bar-btn--close { margin-left: 0; }
+      .admin-input, .admin-textarea { padding: 10px; font-size: 12px; }
     }
 
     /* ===== TOPICS COLUMN ===== */
@@ -130,7 +149,7 @@
       color: rgba(232,232,255,0.65);
       line-height: 1.7;
       margin-bottom: 16px;
-      padding-left: 40px;
+      padding-left: clamp(0px, 5vw, 40px);
     }
 
     /* Drop zones */
@@ -138,7 +157,7 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
-      padding-left: 40px;
+      padding-left: clamp(0px, 5vw, 40px);
     }
 
     .drop-zone {
@@ -272,7 +291,8 @@
     .action-btn {
       font-family: var(--font-pixel);
       font-size: 9px;
-      padding: 12px 22px;
+      padding: 16px 22px;
+      min-height: 44px;
       border: 2px solid;
       background: transparent;
       cursor: pointer;
@@ -545,9 +565,11 @@
       <li><a href="../../index.html">HOME</a></li>
       <li>
         <button class="navbar__grid-btn" id="gamesBtn" title="Games">
-          <span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span>
-          <span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span>
-          <span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span>
+          <span class="navbar__grid-btn__dots">
+            <span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span>
+            <span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span>
+            <span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span>
+          </span>
         </button>
       </li>
       <li><button class="navbar__admin-btn" id="adminBtn">🔒 ADMIN</button></li>
@@ -665,32 +687,7 @@
 
   <!-- ===== FOOTER ===== -->
   <script>
-    // ================================================================
-    //  SOUND EFFECTS
-    // ================================================================
-    const SFX = {
-      _ctx: null,
-      ctx() { if (!this._ctx) this._ctx = new (window.AudioContext||window.webkitAudioContext)(); return this._ctx; },
-      _beep(freq, type, dur, vol) {
-        try { const c=this.ctx(),o=c.createOscillator(),g=c.createGain(); o.connect(g); g.connect(c.destination);
-          o.type=type; o.frequency.value=freq; g.gain.setValueAtTime(vol||0.08,c.currentTime);
-          g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+dur); o.start(c.currentTime); o.stop(c.currentTime+dur);
-        } catch(e) {} },
-      click()  { this._beep(440,'square',0.08,0.07); },
-      select() { this._beep(660,'sine',0.06,0.06); },
-      place()  { this._beep(880,'sine',0.08,0.07); },
-      correct() {
-        try { const c=this.ctx(),t=c.currentTime;
-          [523,659,784].forEach((f,i)=>{ const o=c.createOscillator(),g=c.createGain(); o.connect(g); g.connect(c.destination);
-            o.type='sine'; o.frequency.value=f; g.gain.setValueAtTime(0.1,t+i*0.1);
-            g.gain.exponentialRampToValueAtTime(0.001,t+i*0.1+0.15); o.start(t+i*0.1); o.stop(t+i*0.1+0.15); });
-        } catch(e) {} },
-      wrong() {
-        try { const c=this.ctx(),t=c.currentTime,o=c.createOscillator(),g=c.createGain(); o.connect(g); g.connect(c.destination);
-          o.type='sawtooth'; o.frequency.setValueAtTime(220,t); o.frequency.exponentialRampToValueAtTime(80,t+0.3);
-          g.gain.setValueAtTime(0.09,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.3); o.start(t); o.stop(t+0.3);
-        } catch(e) {} },
-    };
+    // SFX and ADMIN_PW loaded from js/sfx.js and js/admin-auth.js
 
     // ================================================================
     //  GAMES POPUP
@@ -703,52 +700,11 @@
     // ================================================================
     //  ADMIN SYSTEM
     // ================================================================
-    const ADMIN_PW = 'admin123';
-    const adminBtn     = document.getElementById('adminBtn');
-    const adminModal   = document.getElementById('adminModal');
-    const adminPw      = document.getElementById('adminPw');
-    const adminError   = document.getElementById('adminError');
-    const adminLoginBtn  = document.getElementById('adminLoginBtn');
-    const adminCancelBtn = document.getElementById('adminCancelBtn');
-    const adminPanel   = document.getElementById('adminPanel');
+    const adminPanel = document.getElementById('adminPanel');
 
-    function isLoggedIn() { return sessionStorage.getItem('adminLoggedIn') === '1'; }
+    function isLoggedIn() { return isAdminLoggedIn(); }
 
-    function refreshAdminBtn() {
-      if (isLoggedIn()) {
-        adminBtn.textContent = '⚙ SETTINGS';
-        adminBtn.classList.add('logged-in');
-      } else {
-        adminBtn.textContent = '🔒 ADMIN';
-        adminBtn.classList.remove('logged-in');
-      }
-    }
-    refreshAdminBtn();
-
-    adminBtn.addEventListener('click', () => {
-      if (isLoggedIn()) { openAdminPanel(); return; }
-      adminModal.classList.remove('hidden');
-      adminPw.value = '';
-      adminError.textContent = '';
-      setTimeout(() => adminPw.focus(), 50);
-    });
-    adminCancelBtn.addEventListener('click', () => adminModal.classList.add('hidden'));
-    adminModal.addEventListener('click', e => { if (e.target === adminModal) adminModal.classList.add('hidden'); });
-
-    function doLogin() {
-      if (adminPw.value === ADMIN_PW) {
-        sessionStorage.setItem('adminLoggedIn', '1');
-        adminModal.classList.add('hidden');
-        refreshAdminBtn();
-        openAdminPanel();
-      } else {
-        adminError.textContent = '✕ Sai mật khẩu!';
-        adminPw.value = '';
-        adminPw.focus();
-      }
-    }
-    adminLoginBtn.addEventListener('click', doLogin);
-    adminPw.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+    initAdminAuth({ onLogin: openAdminPanel });
 
     // ---- Admin Panel ----
     let adminData = [];  // working copy while editing
