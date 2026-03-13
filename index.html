@@ -272,16 +272,16 @@
 
     <div class="stats-bar">
       <div class="stat-item">
-        <span class="stat-item__value">01</span>
+        <span class="stat-item__value">1+</span>
         <span class="stat-item__label">APPS &amp; GAMES</span>
       </div>
       <div class="stat-item">
         <span class="stat-item__value">∞</span>
-        <span class="stat-item__label">GIỜ CHƠI</span>
+        <span class="stat-item__label">DEVELOPMENT</span>
       </div>
       <div class="stat-item">
-        <span class="stat-item__value">100%</span>
-        <span class="stat-item__label">PIXEL PERFECT</span>
+        <span class="stat-item__value" id="sessionTimer">0+</span>
+        <span class="stat-item__label">MINUTES PLAYED</span>
       </div>
     </div>
   </section>
@@ -394,6 +394,19 @@
     adminLoginBtn.addEventListener('click', doLogin);
     adminPw.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
     adminModal.addEventListener('click', e => { if (e.target === adminModal) adminModal.classList.add('hidden'); });
+
+    // ===== SESSION TIMER =====
+    const SESSION_KEY = 'pixelverse_session_start';
+    if (!sessionStorage.getItem(SESSION_KEY)) {
+      sessionStorage.setItem(SESSION_KEY, Date.now());
+    }
+    const timerEl = document.getElementById('sessionTimer');
+    function updateTimer() {
+      const elapsed = Math.floor((Date.now() - parseInt(sessionStorage.getItem(SESSION_KEY))) / 60000);
+      timerEl.textContent = elapsed + '+';
+    }
+    updateTimer();
+    setInterval(updateTimer, 10000);
   </script>
 </body>
 </html>
