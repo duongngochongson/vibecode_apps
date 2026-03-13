@@ -228,10 +228,32 @@
     <a href="index.html" class="navbar__logo">◈ PIXELVERSE</a>
     <ul class="navbar__links">
       <li><a href="index.html" class="active">HOME</a></li>
-      <li><a href="apps/pros-cons/index.html">PROS &amp; CONS</a></li>
+      <li>
+        <button class="navbar__grid-btn" id="gamesBtn" title="Games">
+          <span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span>
+          <span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span>
+          <span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span>
+        </button>
+      </li>
       <li><button class="navbar__admin-btn" id="adminBtn">🔒 ADMIN</button></li>
     </ul>
   </nav>
+
+  <!-- ===== GAMES POPUP ===== -->
+  <div class="navbar__games-popup" id="gamesPopup">
+    <div class="navbar__games-popup-title">◈ GAMES</div>
+    <div class="navbar__games-list">
+      <a href="apps/pros-cons/index.html" class="navbar__game-item">
+        <span class="navbar__game-item__icon">🎯</span><span>Đoán Ưu/Nhược</span>
+      </a>
+      <div class="navbar__game-item navbar__game-item--soon">
+        <span class="navbar__game-item__icon">🎨</span><span>Pixel Painter</span>
+      </div>
+      <div class="navbar__game-item navbar__game-item--soon">
+        <span class="navbar__game-item__icon">🧮</span><span>Math Blaster</span>
+      </div>
+    </div>
+  </div>
 
   <!-- ===== ADMIN LOGIN MODAL ===== -->
   <div class="admin-modal-overlay hidden" id="adminModal">
@@ -275,7 +297,7 @@
             <span class="admin-game-icon">🎨</span>
             <div>
               <div class="admin-game-name">Pixel Painter</div>
-              <div class="admin-game-tag">APP · COMING SOON</div>
+              <div class="admin-game-tag">GAME · COMING SOON</div>
             </div>
           </div>
           <span class="admin-game-soon-tag">⏳ SOON</span>
@@ -313,7 +335,7 @@
 
     <div class="hero__badge">◀ PIXEL UNIVERSE ▶</div>
     <h1 class="hero__title">Welcome to universe of pixel</h1>
-    <a href="#apps" class="hero__cta">▶ EXPLORE</a>
+    <a href="#apps" class="hero__cta" onclick="SFX.navigate()">▶ EXPLORE</a>
 
     <div class="stats-bar">
       <div class="stat-item">
@@ -338,13 +360,13 @@
 
   <!-- ===== APPS SECTION ===== -->
   <section class="apps-section" id="apps">
-    <h2 class="section-title">▦ ALL APPS &amp; GAMES</h2>
+    <h2 class="section-title">▦ ALL GAMES</h2>
     <div class="section-divider"><span></span></div>
 
     <div class="apps-grid">
 
       <!-- Card 1: Đoán Ưu/Nhược (LIVE) -->
-      <article class="app-card pixel-box app-card--cyan" onclick="location.href='apps/pros-cons/index.html'">
+      <article class="app-card pixel-box app-card--cyan" onclick="SFX.navigate();location.href='apps/pros-cons/index.html'">
         <div class="app-card__icon">🎯</div>
         <div class="app-card__tag">GAME</div>
         <h3 class="app-card__title font-vi-h">Đoán Ưu/Nhược</h3>
@@ -358,7 +380,7 @@
       <!-- Card 2: Coming Soon -->
       <article class="app-card pixel-box app-card--magenta app-card--soon">
         <div class="app-card__icon">🎨</div>
-        <div class="app-card__tag">APP</div>
+        <div class="app-card__tag">GAME</div>
         <h3 class="app-card__title font-vi-h">Pixel Painter</h3>
         <p class="app-card__desc font-vi">
           Vẽ tranh pixel art ngay trên trình duyệt.
@@ -388,6 +410,30 @@
   </footer>
 
   <script>
+    // ===== SOUND EFFECTS =====
+    const SFX = {
+      _ctx: null,
+      ctx() { if (!this._ctx) this._ctx = new (window.AudioContext||window.webkitAudioContext)(); return this._ctx; },
+      _beep(freq, type, dur, vol) {
+        try { const c=this.ctx(),o=c.createOscillator(),g=c.createGain(); o.connect(g); g.connect(c.destination);
+          o.type=type; o.frequency.value=freq; g.gain.setValueAtTime(vol||0.08,c.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+dur); o.start(c.currentTime); o.stop(c.currentTime+dur);
+        } catch(e) {} },
+      click()    { this._beep(440,'square',0.08,0.07); },
+      navigate() {
+        try { const c=this.ctx(),t=c.currentTime;
+          [330,440,550].forEach((f,i)=>{ const o=c.createOscillator(),g=c.createGain(); o.connect(g); g.connect(c.destination);
+            o.type='square'; o.frequency.value=f; g.gain.setValueAtTime(0.07,t+i*0.06);
+            g.gain.exponentialRampToValueAtTime(0.001,t+i*0.06+0.08); o.start(t+i*0.06); o.stop(t+i*0.06+0.08); });
+        } catch(e) {} },
+    };
+
+    // ===== GAMES POPUP =====
+    const gamesBtn   = document.getElementById('gamesBtn');
+    const gamesPopup = document.getElementById('gamesPopup');
+    gamesBtn.addEventListener('click', e => { e.stopPropagation(); SFX.click(); gamesPopup.classList.toggle('open'); });
+    document.addEventListener('click', () => gamesPopup.classList.remove('open'));
+
     // ===== ADMIN LOGIN (shared) =====
     const ADMIN_PW = 'admin123';
     const adminBtn     = document.getElementById('adminBtn');

@@ -211,6 +211,22 @@
     .drop-zone.correct .drag-card { border-color: var(--green); color: var(--green); }
     .drop-zone.wrong   .drag-card { border-color: var(--orange); color: var(--orange); }
 
+    /* Selected card (click-to-place) */
+    .drag-card.selected {
+      border-color: var(--yellow);
+      box-shadow: 0 0 10px rgba(255,230,0,0.45);
+      background: rgba(255,230,0,0.04);
+    }
+    .drop-zone.accepting {
+      border-color: rgba(255,230,0,0.5);
+      border-style: solid;
+    }
+    .drop-zone.accepting:hover {
+      border-color: var(--yellow);
+      box-shadow: 0 0 8px rgba(255,230,0,0.35);
+      cursor: pointer;
+    }
+
     /* ===== CARD POOL ===== */
     .card-pool-section {
       position: sticky;
@@ -527,10 +543,32 @@
     <a href="../../index.html" class="navbar__logo">◈ PIXELVERSE</a>
     <ul class="navbar__links">
       <li><a href="../../index.html">HOME</a></li>
-      <li><a href="index.html" class="active">PROS &amp; CONS</a></li>
+      <li>
+        <button class="navbar__grid-btn" id="gamesBtn" title="Games">
+          <span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span>
+          <span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span>
+          <span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span>
+        </button>
+      </li>
       <li><button class="navbar__admin-btn" id="adminBtn">🔒 ADMIN</button></li>
     </ul>
   </nav>
+
+  <!-- ===== GAMES POPUP ===== -->
+  <div class="navbar__games-popup" id="gamesPopup">
+    <div class="navbar__games-popup-title">◈ GAMES</div>
+    <div class="navbar__games-list">
+      <div class="navbar__game-item navbar__game-item--active">
+        <span class="navbar__game-item__icon">🎯</span><span>Đoán Ưu/Nhược</span>
+      </div>
+      <div class="navbar__game-item navbar__game-item--soon">
+        <span class="navbar__game-item__icon">🎨</span><span>Pixel Painter</span>
+      </div>
+      <div class="navbar__game-item navbar__game-item--soon">
+        <span class="navbar__game-item__icon">🧮</span><span>Math Blaster</span>
+      </div>
+    </div>
+  </div>
 
   <!-- ===== ADMIN LOGIN MODAL ===== -->
   <div class="admin-modal-overlay hidden" id="adminModal">
@@ -627,6 +665,41 @@
 
   <!-- ===== FOOTER ===== -->
   <script>
+    // ================================================================
+    //  SOUND EFFECTS
+    // ================================================================
+    const SFX = {
+      _ctx: null,
+      ctx() { if (!this._ctx) this._ctx = new (window.AudioContext||window.webkitAudioContext)(); return this._ctx; },
+      _beep(freq, type, dur, vol) {
+        try { const c=this.ctx(),o=c.createOscillator(),g=c.createGain(); o.connect(g); g.connect(c.destination);
+          o.type=type; o.frequency.value=freq; g.gain.setValueAtTime(vol||0.08,c.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+dur); o.start(c.currentTime); o.stop(c.currentTime+dur);
+        } catch(e) {} },
+      click()  { this._beep(440,'square',0.08,0.07); },
+      select() { this._beep(660,'sine',0.06,0.06); },
+      place()  { this._beep(880,'sine',0.08,0.07); },
+      correct() {
+        try { const c=this.ctx(),t=c.currentTime;
+          [523,659,784].forEach((f,i)=>{ const o=c.createOscillator(),g=c.createGain(); o.connect(g); g.connect(c.destination);
+            o.type='sine'; o.frequency.value=f; g.gain.setValueAtTime(0.1,t+i*0.1);
+            g.gain.exponentialRampToValueAtTime(0.001,t+i*0.1+0.15); o.start(t+i*0.1); o.stop(t+i*0.1+0.15); });
+        } catch(e) {} },
+      wrong() {
+        try { const c=this.ctx(),t=c.currentTime,o=c.createOscillator(),g=c.createGain(); o.connect(g); g.connect(c.destination);
+          o.type='sawtooth'; o.frequency.setValueAtTime(220,t); o.frequency.exponentialRampToValueAtTime(80,t+0.3);
+          g.gain.setValueAtTime(0.09,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.3); o.start(t); o.stop(t+0.3);
+        } catch(e) {} },
+    };
+
+    // ================================================================
+    //  GAMES POPUP
+    // ================================================================
+    const gamesBtn   = document.getElementById('gamesBtn');
+    const gamesPopup = document.getElementById('gamesPopup');
+    gamesBtn.addEventListener('click', e => { e.stopPropagation(); SFX.click(); gamesPopup.classList.toggle('open'); });
+    document.addEventListener('click', () => gamesPopup.classList.remove('open'));
+
     // ================================================================
     //  ADMIN SYSTEM
     // ================================================================
@@ -853,9 +926,16 @@
     }
 
     // dragging state
-    let dragCardId  = null;   // ID of card being dragged
-    let dragFromPool = false; // true if from pool
-    let dragFromZone = null;  // { topicId, type:'pro'|'con' } if from a drop zone
+    let dragCardId   = null;   // ID of card being dragged
+    let dragFromPool = false;  // true if from pool
+    let dragFromZone = null;   // { topicId, type:'pro'|'con' } if from a drop zone
+    let selectedCardId = null; // click-to-place selection
+
+    function clearCardSelection() {
+      selectedCardId = null;
+      document.querySelectorAll('.drag-card.selected').forEach(c => c.classList.remove('selected'));
+      document.querySelectorAll('.drop-zone.accepting').forEach(z => z.classList.remove('accepting'));
+    }
 
     // Game state: map of { topicId -> { pro: cardId|null, con: cardId|null } }
     let dropState = {};
@@ -902,7 +982,7 @@
                  ondrop="handleDropToZone(event,'${topic.id}','pro')"
                  ondragleave="handleDragLeave(event)">
               <span class="drop-zone__label">ƯU ▸</span>
-              <span class="drop-zone__empty">Kéo thả vào đây</span>
+              <span class="drop-zone__empty">Kéo / nhấn thẻ</span>
             </div>
             <div class="drop-zone drop-zone--con"
                  id="dz-${topic.id}-con"
@@ -910,12 +990,28 @@
                  ondrop="handleDropToZone(event,'${topic.id}','con')"
                  ondragleave="handleDragLeave(event)">
               <span class="drop-zone__label">NHƯỢC ▸</span>
-              <span class="drop-zone__empty">Kéo thả vào đây</span>
+              <span class="drop-zone__empty">Kéo / nhấn thẻ</span>
             </div>
           </div>
         `;
         col.appendChild(article);
+
+        // Click-to-place: add click listeners to drop zones
+        article.querySelectorAll('.drop-zone').forEach(zone => {
+          const [, topicId, type] = zone.id.split('-');
+          zone.addEventListener('click', e => {
+            e.stopPropagation();
+            if (!selectedCardId || checked) return;
+            dragCardId = selectedCardId;
+            clearCardSelection();
+            SFX.place();
+            doDropToZone(topicId, type);
+          });
+        });
       });
+
+      // Deselect when clicking empty space
+      document.addEventListener('click', () => clearCardSelection(), { capture: false });
     }
 
     function renderPool() {
@@ -932,12 +1028,18 @@
         if (s.con) placed.add(s.con);
       });
 
-      // Build all cards (pros + cons), shuffle
+      // Build all cards (pros + cons)
       let allCards = [];
       gameData.forEach(t => {
         allCards.push({ id: t.pro.id, text: t.pro.text, topicId: t.id, type: 'pro' });
         allCards.push({ id: t.con.id, text: t.con.text, topicId: t.id, type: 'con' });
       });
+
+      // Shuffle (Fisher-Yates)
+      for (let i = allCards.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [allCards[i], allCards[j]] = [allCards[j], allCards[i]];
+      }
 
       // Filter only unplaced
       const unplaced = allCards.filter(c => !placed.has(c.id));
@@ -956,7 +1058,22 @@
       div.dataset.cardId = card.id;
       div.textContent = card.text;
 
+      div.addEventListener('click', e => {
+        e.stopPropagation();
+        if (checked) return;
+        if (selectedCardId === card.id) {
+          clearCardSelection();
+        } else {
+          clearCardSelection();
+          selectedCardId = card.id;
+          div.classList.add('selected');
+          SFX.select();
+          document.querySelectorAll('.drop-zone').forEach(z => z.classList.add('accepting'));
+        }
+      });
+
       div.addEventListener('dragstart', e => {
+        clearCardSelection();
         dragCardId   = card.id;
         dragFromPool = true;
         dragFromZone = null;
@@ -1035,6 +1152,7 @@
 
       dropState[topicId][type] = incomingId;
       dragCardId = null;
+      SFX.place();
 
       refreshZone(topicId, 'pro');
       refreshZone(topicId, 'con');
@@ -1125,6 +1243,7 @@
 
       checked = true;
       const pct = Math.round(correct / total * 100);
+      if (pct === 100) SFX.correct(); else SFX.wrong();
       const msgs = [
         [100, '🏆 Hoàn hảo! Bạn phân tích rất xuất sắc!'],
         [75,  '🎉 Rất tốt! Còn một vài chỗ cần xem lại.'],
