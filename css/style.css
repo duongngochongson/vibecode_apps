@@ -134,7 +134,7 @@ body::after {
 }
 
 .navbar__logo {
-  font-size: 12px;
+  font-size: clamp(9px, 2vw, 12px);
   color: var(--cyan);
   text-decoration: none;
   text-shadow: 0 0 10px var(--cyan), 0 0 20px var(--cyan);
@@ -154,7 +154,11 @@ body::after {
   text-decoration: none;
   font-size: 8px;
   letter-spacing: 1px;
+  /* min 44px touch height; flex centering keeps text visually same */
   padding: 6px 10px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
   border: 2px solid transparent;
   transition: all 0.15s steps(2);
   position: relative;
@@ -471,7 +475,9 @@ section {
   background: transparent;
   border: 2px solid var(--yellow);
   color: var(--yellow);
-  padding: 5px 10px;
+  /* min-height 44px for touch; padding adjusted to keep visual size */
+  padding: 5px 12px;
+  min-height: 44px;
   cursor: pointer;
   letter-spacing: 1px;
   transition: all 0.15s steps(2);
@@ -500,15 +506,23 @@ section {
   border: none;
   color: rgba(232,232,255,0.7);
   cursor: pointer;
-  padding: 8px;
+  /* Padding inflates click area to 44px min without changing dot size */
+  padding: 12px;
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.1s;
+}
+.navbar__grid-btn:hover { color: var(--cyan); }
+/* Inner dot grid */
+.navbar__grid-btn__dots {
   display: grid;
   grid-template-columns: repeat(3, 4px);
   grid-template-rows: repeat(3, 4px);
   gap: 3px;
-  transition: color 0.1s;
-  align-items: center;
 }
-.navbar__grid-btn:hover { color: var(--cyan); }
 .navbar__grid-dot { width: 4px; height: 4px; background: currentColor; }
 
 .navbar__games-popup {
@@ -522,6 +536,7 @@ section {
   padding: 16px;
   display: none;
   min-width: 200px;
+  max-width: min(300px, 90vw);
 }
 .navbar__games-popup.open { display: block; }
 .navbar__games-popup-title {
@@ -648,10 +663,40 @@ section {
 }
 
 /* ===== RESPONSIVE ===== */
+
+/* Medium phones and up */
 @media (max-width: 640px) {
+  .navbar { padding: 0 1rem; }
   .navbar__logo { font-size: 9px; }
+  .navbar__links { gap: 0.5rem; }
   .navbar__links a { font-size: 7px; padding: 5px 7px; }
   .hero { padding: 50px 1rem 40px; min-height: 50vh; }
   .section-title { font-size: 11px; }
   .apps-grid { grid-template-columns: 1fr; }
+  .apps-section { padding: 28px 1rem 60px; }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .navbar__links { gap: 0.25rem; }
+  .navbar__admin-btn { padding: 4px 8px; font-size: 6px; }
+
+  /* Games popup: stretch full width on small phones */
+  .navbar__games-popup {
+    left: 0;
+    right: 0;
+    top: 60px;
+    min-width: unset;
+    max-width: unset;
+    margin: 0;
+    border-left: none;
+    border-right: none;
+  }
+
+  .hero { padding: 36px 1rem 28px; }
+  .apps-section { padding: 20px 1rem 48px; }
+  .apps-grid { gap: 16px; }
+
+  .app-card { padding: 20px 16px; gap: 12px; }
+  .app-card__icon { font-size: 28px; }
 }
