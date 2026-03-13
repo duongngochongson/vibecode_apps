@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PIXELVERSE — Apps &amp; Games</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* ===== HOME-SPECIFIC STYLES ===== */
+
+    /* Animated grid floor */
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,255,245,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,245,0.06) 1px, transparent 1px);
+      background-size: 40px 40px;
+      animation: grid-scroll 8s linear infinite;
+      pointer-events: none;
+    }
+    @keyframes grid-scroll {
+      from { background-position: 0 0; }
+      to   { background-position: 40px 40px; }
+    }
+
+    /* Floating pixel shapes */
+    .pixel-float {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      pointer-events: none;
+      animation: float-up linear infinite;
+      opacity: 0.6;
+    }
+    @keyframes float-up {
+      0%   { transform: translateY(0) rotate(0deg); opacity: 0.6; }
+      100% { transform: translateY(-120vh) rotate(360deg); opacity: 0; }
+    }
+
+    /* Stats bar */
+    .stats-bar {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+      padding: 20px;
+    }
+    .stat-item {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .stat-item__value {
+      font-size: 20px;
+      color: var(--cyan);
+      text-shadow: 0 0 12px var(--cyan);
+      animation: count-up 1s steps(10) forwards;
+    }
+    .stat-item:nth-child(2) .stat-item__value { color: var(--magenta); text-shadow: 0 0 12px var(--magenta); }
+    .stat-item:nth-child(3) .stat-item__value { color: var(--yellow); text-shadow: 0 0 12px var(--yellow); }
+    .stat-item__label {
+      font-size: 7px;
+      color: rgba(232,232,255,0.5);
+      letter-spacing: 2px;
+    }
+
+    /* Ticker */
+    .ticker-wrap {
+      position: relative;
+      z-index: 2;
+      overflow: hidden;
+      background: rgba(0,255,245,0.05);
+      border-top: 1px solid rgba(0,255,245,0.2);
+      border-bottom: 1px solid rgba(0,255,245,0.2);
+      padding: 8px 0;
+      white-space: nowrap;
+    }
+    .ticker {
+      display: inline-block;
+      animation: ticker-move 25s linear infinite;
+      font-size: 7px;
+      color: rgba(0,255,245,0.7);
+      letter-spacing: 3px;
+    }
+    @keyframes ticker-move {
+      from { transform: translateX(100vw); }
+      to   { transform: translateX(-100%); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar">
+    <a href="index.html" class="navbar__logo">◈ PIXELVERSE</a>
+    <ul class="navbar__links">
+      <li><a href="index.html" class="active">HOME</a></li>
+      <li><a href="apps/snake/index.html">SNAKE</a></li>
+    </ul>
+  </nav>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero">
+    <div class="hero-grid"></div>
+
+    <!-- Floating pixels -->
+    <div class="pixel-float" style="left:8%;  bottom:0; background:var(--cyan);    animation-duration:7s;  animation-delay:0s;"></div>
+    <div class="pixel-float" style="left:20%; bottom:0; background:var(--magenta); animation-duration:9s;  animation-delay:2s;"></div>
+    <div class="pixel-float" style="left:35%; bottom:0; background:var(--yellow);  animation-duration:6s;  animation-delay:1s;"></div>
+    <div class="pixel-float" style="left:55%; bottom:0; background:var(--green);   animation-duration:11s; animation-delay:3s;"></div>
+    <div class="pixel-float" style="left:70%; bottom:0; background:var(--cyan);    animation-duration:8s;  animation-delay:0.5s;"></div>
+    <div class="pixel-float" style="left:85%; bottom:0; background:var(--magenta); animation-duration:10s; animation-delay:4s;"></div>
+
+    <div class="hero__badge">◀ PIXEL UNIVERSE ▶</div>
+    <h1 class="hero__title">CHÀO MỪNG ĐẾN<br />PIXELVERSE!</h1>
+    <p class="hero__subtitle">
+      Nơi tập hợp các mini-apps &amp; games<br />
+      được xây dựng với phong cách pixel futuristic.<br />
+      Khám phá, chơi và vui vẻ!
+    </p>
+    <a href="#apps" class="hero__cta">▶ KHÁM PHÁ NGAY</a>
+
+    <!-- Stats -->
+    <div class="stats-bar">
+      <div class="stat-item">
+        <span class="stat-item__value">01</span>
+        <span class="stat-item__label">APPS &amp; GAMES</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-item__value">∞</span>
+        <span class="stat-item__label">GIỜ CHƠI</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-item__value">100%</span>
+        <span class="stat-item__label">PIXEL PERFECT</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== TICKER ===== -->
+  <div class="ticker-wrap">
+    <span class="ticker">
+      ★ PIXELVERSE &nbsp;&nbsp;&nbsp; ◈ EXPLORE APPS &nbsp;&nbsp;&nbsp; ▶ PLAY GAMES &nbsp;&nbsp;&nbsp;
+      ★ MORE COMING SOON &nbsp;&nbsp;&nbsp; ◈ PIXEL &amp; FUTURISTIC &nbsp;&nbsp;&nbsp; ▶ HAVE FUN &nbsp;&nbsp;&nbsp;
+      ★ PIXELVERSE &nbsp;&nbsp;&nbsp; ◈ EXPLORE APPS &nbsp;&nbsp;&nbsp; ▶ PLAY GAMES &nbsp;&nbsp;&nbsp;
+    </span>
+  </div>
+
+  <!-- ===== APPS SECTION ===== -->
+  <section class="apps-section" id="apps">
+    <h2 class="section-title">▦ ALL APPS &amp; GAMES</h2>
+    <div class="section-divider"><span></span></div>
+
+    <div class="apps-grid">
+
+      <!-- Card 1: Snake Game (LIVE) -->
+      <article class="app-card pixel-box app-card--green">
+        <div class="app-card__icon">🐍</div>
+        <div class="app-card__tag">GAME</div>
+        <h3 class="app-card__title">SNAKE<br />CLASSIC</h3>
+        <p class="app-card__desc">
+          Game rắn săn mồi cổ điển với<br />
+          phong cách pixel futuristic.<br />
+          Ăn càng nhiều, rắn càng dài!
+        </p>
+        <a href="apps/snake/index.html" class="app-card__btn">▶ CHƠI NGAY</a>
+      </article>
+
+      <!-- Card 2: Coming Soon -->
+      <article class="app-card pixel-box app-card--magenta app-card--soon">
+        <div class="app-card__icon">🎨</div>
+        <div class="app-card__tag">APP</div>
+        <h3 class="app-card__title">PIXEL<br />PAINTER</h3>
+        <p class="app-card__desc">
+          Vẽ tranh pixel art ngay trên<br />
+          trình duyệt. Tạo ra các tác<br />
+          phẩm 8-bit độc đáo!
+        </p>
+        <a href="#" class="app-card__btn">⏳ COMING SOON</a>
+      </article>
+
+      <!-- Card 3: Coming Soon -->
+      <article class="app-card pixel-box app-card--yellow app-card--soon">
+        <div class="app-card__icon">🧮</div>
+        <div class="app-card__tag">GAME</div>
+        <h3 class="app-card__title">MATH<br />BLASTER</h3>
+        <p class="app-card__desc">
+          Thử thách toán học nhanh tay<br />
+          lẹ mắt. Giải phương trình<br />
+          trước khi hết thời gian!
+        </p>
+        <a href="#" class="app-card__btn">⏳ COMING SOON</a>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <p>PIXELVERSE © 2025 — MADE WITH <span>♥</span> &amp; PIXELS</p>
+  </footer>
+
+</body>
+</html>
