@@ -41,8 +41,8 @@ html { scroll-behavior: smooth; }
 body {
   background-color: var(--bg-dark);
   color: var(--white);
-  font-family: var(--font-pixel);
-  font-size: 10px;
+  font-family: var(--font-vi-body);
+  font-size: 16px;
   line-height: 1.8;
   min-height: 100vh;
   overflow-x: hidden;
@@ -514,8 +514,8 @@ section {
 }
 
 .admin-modal__title {
-  font-family: var(--font-pixel);
-  font-size: 11px;
+  font-family: var(--font-vi-heading);
+  font-size: 18px;
   color: var(--yellow);
   text-shadow: 0 0 10px var(--yellow);
   letter-spacing: 2px;
@@ -523,17 +523,16 @@ section {
 }
 
 .admin-modal__label {
-  font-family: var(--font-pixel);
-  font-size: 7px;
+  font-size: 11px;
   color: var(--grey);
-  letter-spacing: 2px;
+  letter-spacing: 1px;
   margin-bottom: 6px;
   display: block;
 }
 
 .admin-modal__input {
-  font-family: var(--font-pixel);
-  font-size: 10px;
+  font-family: var(--font-vi-body);
+  font-size: 14px;
   background: var(--bg-card2);
   border: 2px solid var(--grey);
   color: var(--white);
@@ -549,8 +548,7 @@ section {
 }
 
 .admin-modal__error {
-  font-family: var(--font-pixel);
-  font-size: 7px;
+  font-size: 12px;
   color: var(--orange);
   text-shadow: 0 0 6px var(--orange);
   letter-spacing: 1px;
