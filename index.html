@@ -256,17 +256,10 @@
 
   <!-- ===== GAMES POPUP ===== -->
   <div class="navbar__games-popup" id="gamesPopup">
-    <div class="navbar__games-popup-title">◈ GAMES</div>
     <div class="navbar__games-list">
-      <a href="apps/pros-cons/index.html" class="navbar__game-item">
-        <span class="navbar__game-item__icon">🎯</span><span>Đoán Ưu/Nhược</span>
-      </a>
-      <div class="navbar__game-item navbar__game-item--soon">
-        <span class="navbar__game-item__icon">🎨</span><span>Pixel Painter</span>
-      </div>
-      <div class="navbar__game-item navbar__game-item--soon">
-        <span class="navbar__game-item__icon">🧮</span><span>Math Blaster</span>
-      </div>
+      <a href="apps/pros-cons/index.html" class="navbar__game-item">Đoán Ưu/Nhược</a>
+      <div class="navbar__game-item navbar__game-item--soon">?</div>
+      <div class="navbar__game-item navbar__game-item--soon">?</div>
     </div>
   </div>
 
@@ -290,46 +283,15 @@
   <div class="admin-settings-overlay hidden" id="adminSettingsPanel">
     <div class="admin-settings-inner">
       <div class="admin-settings-title">⚙ ADMIN SETTINGS</div>
-      <p class="admin-settings-sub">Chọn trò chơi để chỉnh sửa nội dung:</p>
 
       <div class="admin-game-list">
-
-        <!-- Đoán Ưu/Nhược — LIVE -->
         <div class="admin-game-item">
           <div class="admin-game-info">
             <span class="admin-game-icon">🎯</span>
-            <div>
-              <div class="admin-game-name">Đoán Ưu/Nhược</div>
-              <div class="admin-game-tag">LIVE</div>
-            </div>
+            <div class="admin-game-name">Đoán Ưu/Nhược</div>
           </div>
           <a href="apps/pros-cons/index.html?admin=open" class="admin-game-edit-btn">✏ EDIT</a>
         </div>
-
-        <!-- Pixel Painter — Soon -->
-        <div class="admin-game-item admin-game-item--soon">
-          <div class="admin-game-info">
-            <span class="admin-game-icon">🎨</span>
-            <div>
-              <div class="admin-game-name">Pixel Painter</div>
-              <div class="admin-game-tag">COMING SOON</div>
-            </div>
-          </div>
-          <span class="admin-game-soon-tag">⏳ SOON</span>
-        </div>
-
-        <!-- Math Blaster — Soon -->
-        <div class="admin-game-item admin-game-item--soon">
-          <div class="admin-game-info">
-            <span class="admin-game-icon">🧮</span>
-            <div>
-              <div class="admin-game-name">Math Blaster</div>
-              <div class="admin-game-tag">COMING SOON</div>
-            </div>
-          </div>
-          <span class="admin-game-soon-tag">⏳ SOON</span>
-        </div>
-
       </div>
 
       <button class="admin-settings-close" id="adminSettingsClose">✕ CLOSE</button>
@@ -383,7 +345,6 @@
       <!-- Card 1: Đoán Ưu/Nhược (LIVE) -->
       <article class="app-card pixel-box app-card--cyan" onclick="SFX.navigate();location.href='apps/pros-cons/index.html'">
         <div class="app-card__icon">🎯</div>
-        <div class="app-card__tag">QUIZ</div>
         <h3 class="app-card__title font-vi-h">Đoán Ưu/Nhược</h3>
         <p class="app-card__desc font-vi">
           Kéo thả thẻ ưu điểm và nhược điểm vào đúng chủ đề tương ứng.
@@ -394,25 +355,13 @@
 
       <!-- Card 2: Coming Soon -->
       <article class="app-card pixel-box app-card--magenta app-card--soon">
-        <div class="app-card__icon">🎨</div>
-        <div class="app-card__tag">ART</div>
-        <h3 class="app-card__title font-vi-h">Pixel Painter</h3>
-        <p class="app-card__desc font-vi">
-          Vẽ tranh pixel art ngay trên trình duyệt.
-          Tạo ra các tác phẩm 8-bit độc đáo của riêng bạn!
-        </p>
+        <h3 class="app-card__title font-vi-h">?</h3>
         <a href="#" class="app-card__btn">⏳ SOON</a>
       </article>
 
       <!-- Card 3: Coming Soon -->
       <article class="app-card pixel-box app-card--yellow app-card--soon">
-        <div class="app-card__icon">🧮</div>
-        <div class="app-card__tag">MATH</div>
-        <h3 class="app-card__title font-vi-h">Math Blaster</h3>
-        <p class="app-card__desc font-vi">
-          Thử thách toán học nhanh tay lẹ mắt.
-          Giải phương trình trước khi hết thời gian!
-        </p>
+        <h3 class="app-card__title font-vi-h">?</h3>
         <a href="#" class="app-card__btn">⏳ SOON</a>
       </article>
 
