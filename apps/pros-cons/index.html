@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Đoán Ưu/Nhược — PIXELVERSE</title>
+  <link rel="stylesheet" href="../../css/style.css" />
+  <script src="../../data/pros-cons.js"></script>
+  <style>
+    /* ===== PAGE LAYOUT ===== */
+    .game-page {
+      position: relative;
+      z-index: 2;
+      padding: 32px 1.5rem 60px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .page-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .page-header__back {
+      display: inline-block;
+      font-family: var(--font-pixel);
+      font-size: 7px;
+      color: var(--grey);
+      text-decoration: none;
+      letter-spacing: 1px;
+      margin-bottom: 14px;
+      transition: color 0.1s;
+    }
+    .page-header__back:hover { color: var(--cyan); text-shadow: 0 0 8px var(--cyan); }
+
+    .page-header h1 {
+      font-family: var(--font-vi-heading);
+      font-size: clamp(22px, 4vw, 34px);
+      font-weight: 900;
+      color: var(--cyan);
+      text-shadow: 0 0 14px var(--cyan), 0 0 30px rgba(0,255,245,0.3);
+      margin-bottom: 8px;
+    }
+    .page-header__sub {
+      font-family: var(--font-vi-body);
+      font-size: 13px;
+      color: rgba(232,232,255,0.55);
+    }
+
+    /* ===== SCORE BAR ===== */
+    .score-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+    .score-chip {
+      font-family: var(--font-pixel);
+      font-size: 8px;
+      padding: 6px 14px;
+      letter-spacing: 1px;
+    }
+    #scoreDisplay {
+      color: var(--yellow);
+      border-color: var(--yellow);
+      text-shadow: 0 0 8px var(--yellow);
+      box-shadow: 0 0 10px rgba(255,230,0,0.3);
+    }
+    #progressDisplay {
+      color: var(--cyan);
+      border-color: var(--cyan);
+      text-shadow: 0 0 8px var(--cyan);
+      box-shadow: 0 0 10px rgba(0,255,245,0.3);
+    }
+
+    /* ===== GAME AREA ===== */
+    .game-area {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    @media (max-width: 768px) {
+      .game-area {
+        grid-template-columns: 1fr;
+      }
+      .card-pool-section {
+        order: -1;
+      }
+    }
+
+    /* ===== TOPICS COLUMN ===== */
+    .topics-column {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .topic-card {
+      background: var(--bg-card);
+      border: 2px solid var(--grey);
+      padding: 20px;
+      transition: border-color 0.2s;
+    }
+    .topic-card.highlight { border-color: var(--cyan); box-shadow: 0 0 10px rgba(0,255,245,0.2); }
+
+    .topic-card__header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .topic-card__num {
+      font-family: var(--font-pixel);
+      font-size: 9px;
+      color: var(--magenta);
+      text-shadow: 0 0 6px var(--magenta);
+      min-width: 28px;
+    }
+    .topic-card__title {
+      font-family: var(--font-vi-heading);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--white);
+    }
+    .topic-card__passage {
+      font-family: var(--font-vi-body);
+      font-size: 13px;
+      color: rgba(232,232,255,0.65);
+      line-height: 1.7;
+      margin-bottom: 16px;
+      padding-left: 40px;
+    }
+
+    /* Drop zones */
+    .drop-zones {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding-left: 40px;
+    }
+
+    .drop-zone {
+      min-height: 72px;
+      border: 2px dashed;
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: background 0.15s, box-shadow 0.15s;
+    }
+    .drop-zone--pro   { border-color: rgba(0,255,245,0.4);  }
+    .drop-zone--con   { border-color: rgba(255,0,204,0.4); }
+    .drop-zone.drag-over { background: rgba(255,255,255,0.06); }
+    .drop-zone--pro.drag-over { box-shadow: 0 0 12px rgba(0,255,245,0.4); border-color: var(--cyan); }
+    .drop-zone--con.drag-over { box-shadow: 0 0 12px rgba(255,0,204,0.4); border-color: var(--magenta); }
+
+    .drop-zone__label {
+      font-family: var(--font-pixel);
+      font-size: 7px;
+      position: absolute;
+      top: 5px;
+      left: 7px;
+      letter-spacing: 1px;
+      opacity: 0.5;
+    }
+    .drop-zone--pro .drop-zone__label { color: var(--cyan); }
+    .drop-zone--con .drop-zone__label { color: var(--magenta); }
+
+    .drop-zone__empty {
+      font-family: var(--font-vi-body);
+      font-size: 11px;
+      color: rgba(232,232,255,0.25);
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    /* Result state */
+    .drop-zone.correct { border-style: solid; border-color: var(--green); box-shadow: 0 0 12px rgba(57,255,20,0.4); background: rgba(57,255,20,0.05); }
+    .drop-zone.wrong   { border-style: solid; border-color: var(--orange); box-shadow: 0 0 12px rgba(255,107,0,0.4); background: rgba(255,107,0,0.05); }
+
+    /* ===== DRAGGABLE CARDS ===== */
+    .drag-card {
+      background: var(--bg-card2);
+      border: 2px solid var(--grey);
+      padding: 10px 12px;
+      font-family: var(--font-vi-body);
+      font-size: 12px;
+      color: var(--white);
+      line-height: 1.5;
+      cursor: grab;
+      transition: border-color 0.15s, box-shadow 0.15s, opacity 0.15s;
+      width: 100%;
+      position: relative;
+    }
+    .drag-card:active { cursor: grabbing; opacity: 0.7; }
+    .drag-card:hover  { border-color: var(--white); box-shadow: 0 0 8px rgba(232,232,255,0.2); }
+    .drag-card.dragging { opacity: 0.35; }
+
+    /* Card inside drop zone */
+    .drop-zone .drag-card {
+      font-size: 11px;
+      margin-top: 14px;
+    }
+    .drop-zone--pro .drag-card { border-color: rgba(0,255,245,0.5); }
+    .drop-zone--con .drag-card { border-color: rgba(255,0,204,0.5); }
+
+    /* correct/wrong card tint */
+    .drop-zone.correct .drag-card { border-color: var(--green); color: var(--green); }
+    .drop-zone.wrong   .drag-card { border-color: var(--orange); color: var(--orange); }
+
+    /* ===== CARD POOL ===== */
+    .card-pool-section {
+      position: sticky;
+      top: 80px;
+    }
+    .card-pool-header {
+      font-family: var(--font-pixel);
+      font-size: 8px;
+      color: var(--yellow);
+      letter-spacing: 2px;
+      text-shadow: 0 0 8px var(--yellow);
+      margin-bottom: 12px;
+    }
+    .card-pool {
+      background: var(--bg-card);
+      border: 2px solid var(--grey);
+      padding: 12px;
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .card-pool.drag-over {
+      border-color: var(--yellow);
+      box-shadow: 0 0 10px rgba(255,230,0,0.3);
+    }
+    .card-pool__empty {
+      font-family: var(--font-vi-body);
+      font-size: 12px;
+      color: rgba(232,232,255,0.3);
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    /* ===== ACTION BUTTONS ===== */
+    .action-bar {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 32px;
+    }
+    .action-btn {
+      font-family: var(--font-pixel);
+      font-size: 9px;
+      padding: 12px 22px;
+      border: 2px solid;
+      background: transparent;
+      cursor: pointer;
+      letter-spacing: 1px;
+      transition: all 0.1s steps(1);
+    }
+    .action-btn--check {
+      color: var(--green);
+      border-color: var(--green);
+      box-shadow: 0 0 6px rgba(57,255,20,0.3);
+    }
+    .action-btn--check:hover {
+      background: var(--green);
+      color: var(--bg-dark);
+      box-shadow: 4px 4px 0 var(--cyan), 0 0 16px rgba(57,255,20,0.5);
+    }
+    .action-btn--reset {
+      color: var(--grey);
+      border-color: var(--grey);
+    }
+    .action-btn--reset:hover {
+      color: var(--white);
+      border-color: var(--white);
+    }
+    .action-btn--play-again {
+      color: var(--cyan);
+      border-color: var(--cyan);
+      display: none;
+    }
+    .action-btn--play-again:hover {
+      background: var(--cyan);
+      color: var(--bg-dark);
+      box-shadow: 4px 4px 0 var(--magenta);
+    }
+
+    /* ===== RESULT BANNER ===== */
+    .result-banner {
+      display: none;
+      background: var(--bg-card);
+      border: 3px solid var(--green);
+      box-shadow: 0 0 20px rgba(57,255,20,0.4);
+      padding: 24px 28px;
+      text-align: center;
+      margin-top: 28px;
+    }
+    .result-banner__score {
+      font-family: var(--font-pixel);
+      font-size: 22px;
+      color: var(--green);
+      text-shadow: 0 0 14px var(--green);
+      margin-bottom: 8px;
+    }
+    .result-banner__msg {
+      font-family: var(--font-vi-body);
+      font-size: 16px;
+      color: rgba(232,232,255,0.8);
+    }
+
+    /* ===== ADMIN SETTINGS PANEL ===== */
+    .admin-panel {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 300;
+      overflow-y: auto;
+      background: rgba(5,5,15,0.92);
+      backdrop-filter: blur(4px);
+      padding: 40px 1rem;
+    }
+    .admin-panel.open { display: block; }
+
+    .admin-panel__inner {
+      background: var(--bg-card);
+      border: 3px solid var(--yellow);
+      box-shadow: 0 0 30px rgba(255,230,0,0.3);
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 28px 24px;
+    }
+
+    .admin-panel__title {
+      font-family: var(--font-pixel);
+      font-size: 11px;
+      color: var(--yellow);
+      text-shadow: 0 0 10px var(--yellow);
+      letter-spacing: 2px;
+      margin-bottom: 20px;
+    }
+
+    .admin-topic-entry {
+      background: var(--bg-card2);
+      border: 1px solid var(--grey);
+      padding: 16px;
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+    }
+    .admin-topic-entry__num {
+      font-family: var(--font-pixel);
+      font-size: 7px;
+      color: var(--magenta);
+      letter-spacing: 2px;
+    }
+
+    .admin-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .admin-field label {
+      font-family: var(--font-pixel);
+      font-size: 7px;
+      color: var(--grey);
+      letter-spacing: 1px;
+    }
+    .admin-input,
+    .admin-textarea {
+      font-family: var(--font-vi-body);
+      font-size: 13px;
+      background: var(--bg-dark);
+      border: 2px solid var(--grey);
+      color: var(--white);
+      padding: 8px 10px;
+      outline: none;
+      transition: border-color 0.15s;
+      width: 100%;
+    }
+    .admin-input:focus, .admin-textarea:focus {
+      border-color: var(--yellow);
+      box-shadow: 0 0 6px rgba(255,230,0,0.25);
+    }
+    .admin-textarea { resize: vertical; min-height: 60px; }
+
+    .admin-remove-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-family: var(--font-pixel);
+      font-size: 7px;
+      background: transparent;
+      border: 1px solid var(--orange);
+      color: var(--orange);
+      padding: 4px 8px;
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+    .admin-remove-btn:hover { background: var(--orange); color: var(--bg-dark); }
+
+    .admin-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .admin-bar-btn {
+      font-family: var(--font-pixel);
+      font-size: 7px;
+      padding: 9px 14px;
+      border: 2px solid;
+      background: transparent;
+      cursor: pointer;
+      letter-spacing: 1px;
+      transition: all 0.1s steps(1);
+    }
+    .admin-bar-btn--add    { color: var(--green);   border-color: var(--green); }
+    .admin-bar-btn--add:hover { background: var(--green); color: var(--bg-dark); }
+    .admin-bar-btn--save   { color: var(--cyan);    border-color: var(--cyan); }
+    .admin-bar-btn--save:hover { background: var(--cyan); color: var(--bg-dark); }
+    .admin-bar-btn--export { color: var(--yellow);  border-color: var(--yellow); }
+    .admin-bar-btn--export:hover { background: var(--yellow); color: var(--bg-dark); }
+    .admin-bar-btn--import { color: var(--magenta); border-color: var(--magenta); }
+    .admin-bar-btn--import:hover { background: var(--magenta); color: var(--bg-dark); }
+    .admin-bar-btn--close  { color: var(--grey);    border-color: var(--grey); margin-left: auto; }
+    .admin-bar-btn--close:hover { color: var(--white); border-color: var(--white); }
+
+    .admin-export-box {
+      display: none;
+      margin-top: 16px;
+    }
+    .admin-export-box label {
+      font-family: var(--font-pixel);
+      font-size: 7px;
+      color: var(--yellow);
+      letter-spacing: 1px;
+      display: block;
+      margin-bottom: 6px;
+    }
+    .admin-export-ta {
+      font-family: monospace;
+      font-size: 11px;
+      background: var(--bg-dark);
+      border: 2px solid var(--yellow);
+      color: var(--white);
+      padding: 10px;
+      width: 100%;
+      min-height: 120px;
+      resize: vertical;
+    }
+    .admin-copy-btn {
+      font-family: var(--font-pixel);
+      font-size: 7px;
+      margin-top: 6px;
+      padding: 7px 12px;
+      border: 2px solid var(--yellow);
+      background: transparent;
+      color: var(--yellow);
+      cursor: pointer;
+    }
+    .admin-copy-btn:hover { background: var(--yellow); color: var(--bg-dark); }
+
+    .admin-import-box {
+      display: none;
+      margin-top: 16px;
+    }
+    .admin-import-box label {
+      font-family: var(--font-pixel);
+      font-size: 7px;
+      color: var(--magenta);
+      letter-spacing: 1px;
+      display: block;
+      margin-bottom: 6px;
+    }
+    .admin-import-ta {
+      font-family: monospace;
+      font-size: 11px;
+      background: var(--bg-dark);
+      border: 2px solid var(--magenta);
+      color: var(--white);
+      padding: 10px;
+      width: 100%;
+      min-height: 80px;
+      resize: vertical;
+    }
+    .admin-import-apply {
+      font-family: var(--font-pixel);
+      font-size: 7px;
+      margin-top: 6px;
+      padding: 7px 12px;
+      border: 2px solid var(--magenta);
+      background: transparent;
+      color: var(--magenta);
+      cursor: pointer;
+    }
+    .admin-import-apply:hover { background: var(--magenta); color: var(--bg-dark); }
+
+    .admin-status {
+      font-family: var(--font-pixel);
+      font-size: 7px;
+      color: var(--green);
+      text-shadow: 0 0 6px var(--green);
+      min-height: 18px;
+      margin-top: 6px;
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar">
+    <a href="../../index.html" class="navbar__logo">◈ PIXELVERSE</a>
+    <ul class="navbar__links">
+      <li><a href="../../index.html">HOME</a></li>
+      <li><a href="index.html" class="active">PROS &amp; CONS</a></li>
+      <li><button class="navbar__admin-btn" id="adminBtn">🔒 ADMIN</button></li>
+    </ul>
+  </nav>
+
+  <!-- ===== ADMIN LOGIN MODAL ===== -->
+  <div class="admin-modal-overlay hidden" id="adminModal">
+    <div class="admin-modal pixel-box pixel-box--yellow">
+      <div class="admin-modal__title">🔐 ADMIN LOGIN</div>
+      <div>
+        <label class="admin-modal__label" for="adminPw">PASSWORD</label>
+        <input class="admin-modal__input" type="password" id="adminPw" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+      <div class="admin-modal__error" id="adminError"></div>
+      <div class="admin-modal__btns">
+        <button class="admin-modal__btn" id="adminLoginBtn">▶ LOGIN</button>
+        <button class="admin-modal__btn admin-modal__btn--cancel" id="adminCancelBtn">✕ CANCEL</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ADMIN SETTINGS PANEL ===== -->
+  <div class="admin-panel" id="adminPanel">
+    <div class="admin-panel__inner">
+      <div class="admin-panel__title">⚙ ADMIN — ĐoÁN ƯU/NHƯỢC</div>
+
+      <div id="adminTopicsList"></div>
+
+      <div class="admin-bar">
+        <button class="admin-bar-btn admin-bar-btn--add"    id="adminAddBtn">+ THÊM CHỦ ĐỀ</button>
+        <button class="admin-bar-btn admin-bar-btn--save"   id="adminSaveBtn">💾 LƯU</button>
+        <button class="admin-bar-btn admin-bar-btn--export" id="adminExportBtn">⬇ EXPORT JSON</button>
+        <button class="admin-bar-btn admin-bar-btn--import" id="adminImportBtn">⬆ IMPORT JSON</button>
+        <button class="admin-bar-btn admin-bar-btn--close"  id="adminCloseBtn">✕ ĐÓNG</button>
+      </div>
+
+      <div class="admin-status" id="adminStatus"></div>
+
+      <div class="admin-export-box" id="adminExportBox">
+        <label>Sao chép JSON rồi paste vào file data/pros-cons.js:</label>
+        <textarea class="admin-export-ta" id="adminExportTa" readonly></textarea>
+        <button class="admin-copy-btn" id="adminCopyBtn">📋 COPY</button>
+      </div>
+
+      <div class="admin-import-box" id="adminImportBox">
+        <label>Paste JSON vào đây để load:</label>
+        <textarea class="admin-import-ta" id="adminImportTa" placeholder='[{"id":1,"topic":"...","passage":"...","pro":{"id":"p1","text":"..."},"con":{"id":"c1","text":"..."}}]'></textarea>
+        <button class="admin-import-apply" id="adminImportApply">▶ ÁP DỤNG</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== GAME PAGE ===== -->
+  <main class="game-page">
+
+    <div class="page-header">
+      <a href="../../index.html" class="page-header__back">◀ BACK TO HOME</a>
+      <h1>🎯 Đoán Ưu / Nhược</h1>
+      <p class="page-header__sub">Kéo thả thẻ vào đúng ô tương ứng với từng chủ đề</p>
+    </div>
+
+    <div class="score-bar">
+      <div class="score-chip pixel-box" id="progressDisplay">0 / 0 ĐÃ ĐIỀ N</div>
+      <div class="score-chip pixel-box pixel-box--yellow" id="scoreDisplay">ĐIỂM: —</div>
+    </div>
+
+    <div class="game-area">
+
+      <!-- LEFT: Topics -->
+      <div class="topics-column" id="topicsColumn"></div>
+
+      <!-- RIGHT: Card Pool -->
+      <div class="card-pool-section">
+        <div class="card-pool-header">▸ THẺ CÒN LẠI</div>
+        <div class="card-pool pixel-box pixel-box--yellow" id="cardPool"
+             ondragover="handleDragOver(event)" ondrop="handleDropToPool(event)">
+          <div class="card-pool__empty" id="poolEmpty">Tất cả thẻ đã được đặt!</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="action-bar">
+      <button class="action-btn action-btn--check"      id="checkBtn"    onclick="checkAnswers()">✓ KIỂM TRA</button>
+      <button class="action-btn action-btn--reset"      id="resetBtn"    onclick="resetGame()">↺ RESET</button>
+      <button class="action-btn action-btn--play-again" id="playAgainBtn" onclick="playAgain()">▶ PLAY AGAIN</button>
+    </div>
+
+    <div class="result-banner" id="resultBanner">
+      <div class="result-banner__score" id="resultScore"></div>
+      <div class="result-banner__msg"   id="resultMsg"></div>
+    </div>
+
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <p>PIXELVERSE © 2025 — MADE WITH <span>♥</span> &amp; PIXELS</p>
+  </footer>
+
+  <script>
+    // ================================================================
+    //  ADMIN SYSTEM
+    // ================================================================
+    const ADMIN_PW = 'admin123';
+    const adminBtn     = document.getElementById('adminBtn');
+    const adminModal   = document.getElementById('adminModal');
+    const adminPw      = document.getElementById('adminPw');
+    const adminError   = document.getElementById('adminError');
+    const adminLoginBtn  = document.getElementById('adminLoginBtn');
+    const adminCancelBtn = document.getElementById('adminCancelBtn');
+    const adminPanel   = document.getElementById('adminPanel');
+
+    function isLoggedIn() { return sessionStorage.getItem('adminLoggedIn') === '1'; }
+
+    function refreshAdminBtn() {
+      if (isLoggedIn()) {
+        adminBtn.textContent = '⚙ SETTINGS';
+        adminBtn.classList.add('logged-in');
+      } else {
+        adminBtn.textContent = '🔒 ADMIN';
+        adminBtn.classList.remove('logged-in');
+      }
+    }
+    refreshAdminBtn();
+
+    adminBtn.addEventListener('click', () => {
+      if (isLoggedIn()) { openAdminPanel(); return; }
+      adminModal.classList.remove('hidden');
+      adminPw.value = '';
+      adminError.textContent = '';
+      setTimeout(() => adminPw.focus(), 50);
+    });
+    adminCancelBtn.addEventListener('click', () => adminModal.classList.add('hidden'));
+    adminModal.addEventListener('click', e => { if (e.target === adminModal) adminModal.classList.add('hidden'); });
+
+    function doLogin() {
+      if (adminPw.value === ADMIN_PW) {
+        sessionStorage.setItem('adminLoggedIn', '1');
+        adminModal.classList.add('hidden');
+        refreshAdminBtn();
+        openAdminPanel();
+      } else {
+        adminError.textContent = '✕ Sai mật khẩu!';
+        adminPw.value = '';
+        adminPw.focus();
+      }
+    }
+    adminLoginBtn.addEventListener('click', doLogin);
+    adminPw.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+    // ---- Admin Panel ----
+    let adminData = [];  // working copy while editing
+
+    function openAdminPanel() {
+      adminData = JSON.parse(JSON.stringify(gameData)); // deep copy
+      renderAdminForm();
+      adminPanel.classList.add('open');
+      document.getElementById('adminExportBox').style.display = 'none';
+      document.getElementById('adminImportBox').style.display = 'none';
+      document.getElementById('adminStatus').textContent = '';
+    }
+
+    document.getElementById('adminCloseBtn').addEventListener('click', () => {
+      adminPanel.classList.remove('open');
+    });
+
+    function renderAdminForm() {
+      const list = document.getElementById('adminTopicsList');
+      list.innerHTML = '';
+      adminData.forEach((item, idx) => {
+        const div = document.createElement('div');
+        div.className = 'admin-topic-entry';
+        div.innerHTML = `
+          <div class="admin-topic-entry__num">CHỦ ĐỀ ${idx + 1}</div>
+          <button class="admin-remove-btn" onclick="adminRemove(${idx})">✕ XÓA</button>
+          <div class="admin-field">
+            <label>Tên chủ đề</label>
+            <input class="admin-input" data-idx="${idx}" data-field="topic" value="${escHtml(item.topic)}" />
+          </div>
+          <div class="admin-field">
+            <label>Đoạn văn mô tả</label>
+            <textarea class="admin-textarea" data-idx="${idx}" data-field="passage">${escHtml(item.passage)}</textarea>
+          </div>
+          <div class="admin-field">
+            <label>Ưu điểm</label>
+            <input class="admin-input" data-idx="${idx}" data-field="pro" value="${escHtml(item.pro.text)}" />
+          </div>
+          <div class="admin-field">
+            <label>Nhược điểm</label>
+            <input class="admin-input" data-idx="${idx}" data-field="con" value="${escHtml(item.con.text)}" />
+          </div>
+        `;
+        list.appendChild(div);
+      });
+
+      // Live-update adminData on input
+      list.querySelectorAll('[data-field]').forEach(el => {
+        el.addEventListener('input', () => {
+          const idx   = parseInt(el.dataset.idx);
+          const field = el.dataset.field;
+          if (field === 'topic')   adminData[idx].topic = el.value;
+          if (field === 'passage') adminData[idx].passage = el.value;
+          if (field === 'pro')     adminData[idx].pro.text = el.value;
+          if (field === 'con')     adminData[idx].con.text = el.value;
+        });
+      });
+    }
+
+    function adminRemove(idx) {
+      adminData.splice(idx, 1);
+      renderAdminForm();
+    }
+
+    document.getElementById('adminAddBtn').addEventListener('click', () => {
+      const newId = Date.now();
+      adminData.push({
+        id: newId,
+        topic: '',
+        passage: '',
+        pro: { id: 'p' + newId, text: '' },
+        con: { id: 'c' + newId, text: '' }
+      });
+      renderAdminForm();
+      // Scroll to bottom of panel
+      adminPanel.scrollTop = adminPanel.scrollHeight;
+    });
+
+    document.getElementById('adminSaveBtn').addEventListener('click', () => {
+      // Validate
+      for (const item of adminData) {
+        if (!item.topic.trim() || !item.pro.text.trim() || !item.con.text.trim()) {
+          document.getElementById('adminStatus').textContent = '⚠ Vui lòng điền đầy đủ tên, ưu và nhược!';
+          document.getElementById('adminStatus').style.color = 'var(--orange)';
+          return;
+        }
+      }
+      localStorage.setItem('prosCons', JSON.stringify(adminData));
+      gameData = JSON.parse(JSON.stringify(adminData));
+      const st = document.getElementById('adminStatus');
+      st.textContent = '✓ ĐÃ LƯU! Reload game để áp dụng.';
+      st.style.color = 'var(--green)';
+    });
+
+    document.getElementById('adminExportBtn').addEventListener('click', () => {
+      const box = document.getElementById('adminExportBox');
+      const ta  = document.getElementById('adminExportTa');
+      box.style.display = box.style.display === 'none' ? 'block' : 'none';
+      if (box.style.display === 'block') {
+        ta.value = JSON.stringify(adminData, null, 2);
+      }
+    });
+
+    document.getElementById('adminCopyBtn').addEventListener('click', () => {
+      const ta = document.getElementById('adminExportTa');
+      ta.select();
+      document.execCommand('copy');
+      document.getElementById('adminCopyBtn').textContent = '✓ COPIED!';
+      setTimeout(() => document.getElementById('adminCopyBtn').textContent = '📋 COPY', 2000);
+    });
+
+    document.getElementById('adminImportBtn').addEventListener('click', () => {
+      const box = document.getElementById('adminImportBox');
+      box.style.display = box.style.display === 'none' ? 'block' : 'none';
+    });
+
+    document.getElementById('adminImportApply').addEventListener('click', () => {
+      try {
+        const parsed = JSON.parse(document.getElementById('adminImportTa').value);
+        if (!Array.isArray(parsed)) throw new Error('Not an array');
+        adminData = parsed;
+        renderAdminForm();
+        const st = document.getElementById('adminStatus');
+        st.textContent = '✓ IMPORT OK! Nhấn LƯU để áp dụng.';
+        st.style.color = 'var(--cyan)';
+      } catch (e) {
+        const st = document.getElementById('adminStatus');
+        st.textContent = '✕ JSON không hợp lệ!';
+        st.style.color = 'var(--orange)';
+      }
+    });
+
+    function escHtml(s) {
+      return (s || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    // ================================================================
+    //  GAME DATA & STATE
+    // ================================================================
+    let gameData = loadGameData();
+
+    function loadGameData() {
+      const saved = localStorage.getItem('prosCons');
+      if (saved) {
+        try { return JSON.parse(saved); } catch(e) {}
+      }
+      return window.PROS_CONS_DATA || [];
+    }
+
+    // dragging state
+    let dragCardId  = null;   // ID of card being dragged
+    let dragFromPool = false; // true if from pool
+    let dragFromZone = null;  // { topicId, type:'pro'|'con' } if from a drop zone
+
+    // Game state: map of { topicId -> { pro: cardId|null, con: cardId|null } }
+    let dropState = {};
+    let checked   = false;
+
+    function initDropState() {
+      dropState = {};
+      gameData.forEach(t => { dropState[t.id] = { pro: null, con: null }; });
+    }
+
+    // ================================================================
+    //  RENDER GAME
+    // ================================================================
+    function buildGame() {
+      checked = false;
+      initDropState();
+      renderTopics();
+      renderPool();
+      updateProgress();
+      document.getElementById('resultBanner').style.display = 'none';
+      document.getElementById('playAgainBtn').style.display = 'none';
+      document.getElementById('checkBtn').style.display = '';
+      document.getElementById('resetBtn').style.display = '';
+    }
+
+    function renderTopics() {
+      const col = document.getElementById('topicsColumn');
+      col.innerHTML = '';
+
+      gameData.forEach((topic, idx) => {
+        const article = document.createElement('article');
+        article.className = 'topic-card';
+        article.id = 'topic-' + topic.id;
+        article.innerHTML = `
+          <div class="topic-card__header">
+            <span class="topic-card__num">${String(idx + 1).padStart(2,'0')}.</span>
+            <span class="topic-card__title font-vi-h">${escHtml(topic.topic)}</span>
+          </div>
+          <p class="topic-card__passage font-vi">${escHtml(topic.passage)}</p>
+          <div class="drop-zones">
+            <div class="drop-zone drop-zone--pro"
+                 id="dz-${topic.id}-pro"
+                 ondragover="handleDragOver(event)"
+                 ondrop="handleDropToZone(event,'${topic.id}','pro')"
+                 ondragleave="handleDragLeave(event)">
+              <span class="drop-zone__label">ƯU ▸</span>
+              <span class="drop-zone__empty">Kéo thả vào đây</span>
+            </div>
+            <div class="drop-zone drop-zone--con"
+                 id="dz-${topic.id}-con"
+                 ondragover="handleDragOver(event)"
+                 ondrop="handleDropToZone(event,'${topic.id}','con')"
+                 ondragleave="handleDragLeave(event)">
+              <span class="drop-zone__label">NHƯỢC ▸</span>
+              <span class="drop-zone__empty">Kéo thả vào đây</span>
+            </div>
+          </div>
+        `;
+        col.appendChild(article);
+      });
+    }
+
+    function renderPool() {
+      const pool    = document.getElementById('cardPool');
+      const empMsg  = document.getElementById('poolEmpty');
+
+      // Remove old cards (keep empMsg)
+      pool.querySelectorAll('.drag-card').forEach(c => c.remove());
+
+      // Collect all card IDs not yet placed
+      const placed = new Set();
+      Object.values(dropState).forEach(s => {
+        if (s.pro) placed.add(s.pro);
+        if (s.con) placed.add(s.con);
+      });
+
+      // Build all cards (pros + cons), shuffle
+      let allCards = [];
+      gameData.forEach(t => {
+        allCards.push({ id: t.pro.id, text: t.pro.text, topicId: t.id, type: 'pro' });
+        allCards.push({ id: t.con.id, text: t.con.text, topicId: t.id, type: 'con' });
+      });
+
+      // Filter only unplaced
+      const unplaced = allCards.filter(c => !placed.has(c.id));
+
+      empMsg.style.display = unplaced.length === 0 ? 'block' : 'none';
+
+      unplaced.forEach(card => {
+        pool.appendChild(makeCardEl(card));
+      });
+    }
+
+    function makeCardEl(card) {
+      const div = document.createElement('div');
+      div.className = 'drag-card';
+      div.draggable = true;
+      div.dataset.cardId = card.id;
+      div.textContent = card.text;
+
+      div.addEventListener('dragstart', e => {
+        dragCardId   = card.id;
+        dragFromPool = true;
+        dragFromZone = null;
+        div.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', card.id);
+      });
+      div.addEventListener('dragend', () => div.classList.remove('dragging'));
+
+      // Touch support (basic)
+      let touchStartX, touchStartY;
+      div.addEventListener('touchstart', e => {
+        const t = e.touches[0];
+        touchStartX = t.clientX; touchStartY = t.clientY;
+        dragCardId = card.id;
+      }, { passive: true });
+      div.addEventListener('touchend', e => {
+        const touch = e.changedTouches[0];
+        const el = document.elementFromPoint(touch.clientX, touch.clientY);
+        const zone = el ? el.closest('.drop-zone') : null;
+        if (zone) {
+          const [, topicId, type] = zone.id.split('-');
+          doDropToZone(topicId, type);
+        }
+        dragCardId = null;
+      });
+
+      return div;
+    }
+
+    function getCardById(cardId) {
+      for (const t of gameData) {
+        if (t.pro.id === cardId) return { id: t.pro.id, text: t.pro.text, topicId: t.id, type: 'pro' };
+        if (t.con.id === cardId) return { id: t.con.id, text: t.con.text, topicId: t.id, type: 'con' };
+      }
+      return null;
+    }
+
+    // ================================================================
+    //  DRAG AND DROP HANDLERS
+    // ================================================================
+    function handleDragOver(e) {
+      e.preventDefault();
+      e.currentTarget.classList.add('drag-over');
+    }
+    function handleDragLeave(e) {
+      e.currentTarget.classList.remove('drag-over');
+    }
+
+    function handleDropToZone(e, topicId, type) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('drag-over');
+      if (!dragCardId) return;
+      doDropToZone(topicId, type);
+    }
+
+    function doDropToZone(topicId, type) {
+      if (!dragCardId || checked) return;
+
+      const incomingId = dragCardId;
+
+      // If zone already has a card, swap it back to pool
+      const existing = dropState[topicId][type];
+      if (existing) {
+        // Return existing card to pool — it will show up in renderPool
+        dropState[topicId][type] = null;
+      }
+
+      // If card came from another zone, clear that zone
+      // (dragFromZone is not set for HTML5 drag since we don't track it here,
+      //  but we do track it via dropState scan)
+      for (const tid of Object.keys(dropState)) {
+        if (dropState[tid].pro === incomingId) dropState[tid].pro = null;
+        if (dropState[tid].con === incomingId) dropState[tid].con = null;
+      }
+
+      dropState[topicId][type] = incomingId;
+      dragCardId = null;
+
+      refreshZone(topicId, 'pro');
+      refreshZone(topicId, 'con');
+      renderPool();
+      updateProgress();
+    }
+
+    function handleDropToPool(e) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('drag-over');
+      if (!dragCardId || checked) return;
+
+      // Clear from any zone
+      for (const tid of Object.keys(dropState)) {
+        if (dropState[tid].pro === dragCardId) { dropState[tid].pro = null; refreshZone(tid, 'pro'); }
+        if (dropState[tid].con === dragCardId) { dropState[tid].con = null; refreshZone(tid, 'con'); }
+      }
+      dragCardId = null;
+      renderPool();
+      updateProgress();
+    }
+
+    function refreshZone(topicId, type) {
+      const zone   = document.getElementById(`dz-${topicId}-${type}`);
+      if (!zone) return;
+      const cardId = dropState[topicId][type];
+
+      // Remove existing card el
+      zone.querySelector('.drag-card')?.remove();
+      const empSpan = zone.querySelector('.drop-zone__empty');
+
+      if (cardId) {
+        const card = getCardById(cardId);
+        if (card) {
+          const el = makeCardEl(card);
+          // Allow dragging back out of zone
+          el.addEventListener('dragstart', ev => {
+            dragCardId = cardId;
+            dragFromPool = false;
+            dragFromZone = { topicId, type };
+            el.classList.add('dragging');
+            ev.dataTransfer.effectAllowed = 'move';
+            ev.dataTransfer.setData('text/plain', cardId);
+          });
+          zone.appendChild(el);
+          if (empSpan) empSpan.style.display = 'none';
+        }
+      } else {
+        if (empSpan) empSpan.style.display = '';
+      }
+    }
+
+    // ================================================================
+    //  PROGRESS & CHECK
+    // ================================================================
+    function updateProgress() {
+      let filled = 0;
+      const total = gameData.length * 2;
+      Object.values(dropState).forEach(s => {
+        if (s.pro) filled++;
+        if (s.con) filled++;
+      });
+      document.getElementById('progressDisplay').textContent = `${filled} / ${total} ĐÃ ĐIỀN`;
+    }
+
+    function checkAnswers() {
+      let correct = 0;
+      const total = gameData.length * 2;
+
+      gameData.forEach(topic => {
+        const state = dropState[topic.id];
+        ['pro', 'con'].forEach(type => {
+          const zone   = document.getElementById(`dz-${topic.id}-${type}`);
+          if (!zone) return;
+          zone.classList.remove('correct', 'wrong');
+
+          const placedId  = state[type];
+          const correctId = type === 'pro' ? topic.pro.id : topic.con.id;
+
+          if (placedId === correctId) {
+            zone.classList.add('correct');
+            correct++;
+          } else {
+            zone.classList.add('wrong');
+          }
+        });
+      });
+
+      checked = true;
+      const pct = Math.round(correct / total * 100);
+      const msgs = [
+        [100, '🏆 Hoàn hảo! Bạn phân tích rất xuất sắc!'],
+        [75,  '🎉 Rất tốt! Còn một vài chỗ cần xem lại.'],
+        [50,  '👍 Khá ổn! Hãy thử lại để cải thiện thêm.'],
+        [0,   '💪 Chưa đạt! Đọc lại và thử lại nhé!'],
+      ];
+      const msg = msgs.find(([min]) => pct >= min)[1];
+
+      document.getElementById('scoreDisplay').textContent = `ĐIỂM: ${correct}/${total}`;
+      document.getElementById('resultScore').textContent  = `${correct} / ${total} ĐÚNG (${pct}%)`;
+      document.getElementById('resultMsg').textContent    = msg;
+      document.getElementById('resultBanner').style.display = 'block';
+      document.getElementById('playAgainBtn').style.display = '';
+    }
+
+    function resetGame() {
+      checked = false;
+      initDropState();
+      // Clear zone result classes
+      document.querySelectorAll('.drop-zone').forEach(z => z.classList.remove('correct','wrong'));
+      renderTopics();
+      renderPool();
+      updateProgress();
+      document.getElementById('resultBanner').style.display = 'none';
+      document.getElementById('playAgainBtn').style.display = 'none';
+      document.getElementById('scoreDisplay').textContent = 'ĐIỂM: —';
+    }
+
+    function playAgain() {
+      // Reload game data (in case admin saved)
+      gameData = loadGameData();
+      buildGame();
+      // Shuffle pool by re-rendering
+      renderPool();
+    }
+
+    // ================================================================
+    //  INIT
+    // ================================================================
+    buildGame();
+  </script>
+
+</body>
+</html>

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Merriweather:wght@700;900&family=Montserrat:wght@400;600&display=swap');
 
 /* ===== RESET & BASE ===== */
 *, *::before, *::after {
@@ -18,8 +18,22 @@
   --orange:      #ff6b00;
   --white:       #e8e8ff;
   --grey:        #3a3a6e;
-  --font-pixel:  'Press Start 2P', monospace;
+  --font-pixel:    'Press Start 2P', monospace;
+  --font-vi-heading: 'Merriweather', serif;
+  --font-vi-body:    'Montserrat', sans-serif;
   --border-px:   3px;
+}
+
+/* ===== FONT UTILITIES ===== */
+.font-vi-h {
+  font-family: var(--font-vi-heading);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.font-vi {
+  font-family: var(--font-vi-body);
+  font-weight: 400;
+  letter-spacing: 0;
 }
 
 html { scroll-behavior: smooth; }
@@ -210,12 +224,13 @@ body::after {
 }
 
 .hero__subtitle {
-  font-size: 9px;
+  font-size: 15px;
+  font-family: var(--font-vi-body);
   color: var(--white);
   opacity: 0.75;
   max-width: 500px;
   margin-bottom: 36px;
-  line-height: 2;
+  line-height: 1.9;
 }
 
 .hero__cta {
@@ -343,9 +358,10 @@ section {
 }
 
 .app-card__desc {
-  font-size: 8px;
+  font-size: 13px;
+  font-family: var(--font-vi-body);
   color: rgba(232,232,255,0.65);
-  line-height: 2;
+  line-height: 1.7;
   flex: 1;
 }
 
@@ -439,6 +455,137 @@ section {
 @keyframes blink {
   0%, 49% { opacity: 1; }
   50%,100% { opacity: 0; }
+}
+
+/* ===== ADMIN BUTTON (navbar) ===== */
+.navbar__admin-btn {
+  font-family: var(--font-pixel);
+  font-size: 7px;
+  background: transparent;
+  border: 2px solid var(--yellow);
+  color: var(--yellow);
+  padding: 5px 10px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: all 0.15s steps(2);
+  text-shadow: 0 0 6px var(--yellow);
+  box-shadow: 0 0 6px rgba(255,230,0,0.3);
+}
+.navbar__admin-btn:hover {
+  background: var(--yellow);
+  color: var(--bg-dark);
+  box-shadow: 0 0 14px rgba(255,230,0,0.6);
+}
+.navbar__admin-btn.logged-in {
+  border-color: var(--green);
+  color: var(--green);
+  text-shadow: 0 0 6px var(--green);
+  box-shadow: 0 0 6px rgba(57,255,20,0.3);
+}
+.navbar__admin-btn.logged-in:hover {
+  background: var(--green);
+  color: var(--bg-dark);
+}
+
+/* ===== ADMIN MODAL ===== */
+.admin-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 5, 15, 0.85);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+.admin-modal-overlay.hidden { display: none; }
+
+.admin-modal {
+  background: var(--bg-card);
+  border: 3px solid var(--yellow);
+  box-shadow: 0 0 20px rgba(255,230,0,0.4), 0 0 60px rgba(255,230,0,0.1);
+  padding: 32px 28px;
+  min-width: 300px;
+  max-width: 480px;
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.admin-modal__title {
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  color: var(--yellow);
+  text-shadow: 0 0 10px var(--yellow);
+  letter-spacing: 2px;
+  margin-bottom: 4px;
+}
+
+.admin-modal__label {
+  font-family: var(--font-pixel);
+  font-size: 7px;
+  color: var(--grey);
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.admin-modal__input {
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  background: var(--bg-card2);
+  border: 2px solid var(--grey);
+  color: var(--white);
+  padding: 10px 12px;
+  width: 100%;
+  outline: none;
+  letter-spacing: 2px;
+  transition: border-color 0.15s;
+}
+.admin-modal__input:focus {
+  border-color: var(--yellow);
+  box-shadow: 0 0 8px rgba(255,230,0,0.3);
+}
+
+.admin-modal__error {
+  font-family: var(--font-pixel);
+  font-size: 7px;
+  color: var(--orange);
+  text-shadow: 0 0 6px var(--orange);
+  letter-spacing: 1px;
+  min-height: 14px;
+}
+
+.admin-modal__btns {
+  display: flex;
+  gap: 10px;
+}
+
+.admin-modal__btn {
+  flex: 1;
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  padding: 10px;
+  border: 2px solid var(--yellow);
+  background: transparent;
+  color: var(--yellow);
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: all 0.1s steps(1);
+}
+.admin-modal__btn:hover {
+  background: var(--yellow);
+  color: var(--bg-dark);
+  box-shadow: 0 0 10px rgba(255,230,0,0.5);
+}
+.admin-modal__btn--cancel {
+  border-color: var(--grey);
+  color: var(--grey);
+}
+.admin-modal__btn--cancel:hover {
+  background: var(--grey);
+  color: var(--bg-dark);
 }
 
 /* ===== RESPONSIVE ===== */

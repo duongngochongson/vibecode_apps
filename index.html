@@ -8,7 +8,6 @@
   <style>
     /* ===== HOME-SPECIFIC STYLES ===== */
 
-    /* Animated grid floor */
     .hero-grid {
       position: absolute;
       inset: 0;
@@ -24,7 +23,6 @@
       to   { background-position: 40px 40px; }
     }
 
-    /* Floating pixel shapes */
     .pixel-float {
       position: absolute;
       width: 8px;
@@ -38,7 +36,6 @@
       100% { transform: translateY(-120vh) rotate(360deg); opacity: 0; }
     }
 
-    /* Stats bar */
     .stats-bar {
       display: flex;
       justify-content: center;
@@ -57,7 +54,6 @@
       font-size: 20px;
       color: var(--cyan);
       text-shadow: 0 0 12px var(--cyan);
-      animation: count-up 1s steps(10) forwards;
     }
     .stat-item:nth-child(2) .stat-item__value { color: var(--magenta); text-shadow: 0 0 12px var(--magenta); }
     .stat-item:nth-child(3) .stat-item__value { color: var(--yellow); text-shadow: 0 0 12px var(--yellow); }
@@ -67,7 +63,6 @@
       letter-spacing: 2px;
     }
 
-    /* Ticker */
     .ticker-wrap {
       position: relative;
       z-index: 2;
@@ -89,6 +84,12 @@
       from { transform: translateX(100vw); }
       to   { transform: translateX(-100%); }
     }
+
+    /* Card title in Vietnamese uses Merriweather */
+    .app-card__title.font-vi-h {
+      font-size: 18px;
+      letter-spacing: 0;
+    }
   </style>
 </head>
 <body>
@@ -98,15 +99,31 @@
     <a href="index.html" class="navbar__logo">◈ PIXELVERSE</a>
     <ul class="navbar__links">
       <li><a href="index.html" class="active">HOME</a></li>
-      <li><a href="apps/snake/index.html">SNAKE</a></li>
+      <li><a href="apps/pros-cons/index.html">PROS &amp; CONS</a></li>
+      <li><button class="navbar__admin-btn" id="adminBtn">🔒 ADMIN</button></li>
     </ul>
   </nav>
+
+  <!-- ===== ADMIN LOGIN MODAL ===== -->
+  <div class="admin-modal-overlay hidden" id="adminModal">
+    <div class="admin-modal pixel-box pixel-box--yellow">
+      <div class="admin-modal__title">🔐 ADMIN LOGIN</div>
+      <div>
+        <label class="admin-modal__label" for="adminPw">PASSWORD</label>
+        <input class="admin-modal__input" type="password" id="adminPw" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+      <div class="admin-modal__error" id="adminError"></div>
+      <div class="admin-modal__btns">
+        <button class="admin-modal__btn" id="adminLoginBtn">▶ LOGIN</button>
+        <button class="admin-modal__btn admin-modal__btn--cancel" id="adminCancelBtn">✕ CANCEL</button>
+      </div>
+    </div>
+  </div>
 
   <!-- ===== HERO ===== -->
   <section class="hero">
     <div class="hero-grid"></div>
 
-    <!-- Floating pixels -->
     <div class="pixel-float" style="left:8%;  bottom:0; background:var(--cyan);    animation-duration:7s;  animation-delay:0s;"></div>
     <div class="pixel-float" style="left:20%; bottom:0; background:var(--magenta); animation-duration:9s;  animation-delay:2s;"></div>
     <div class="pixel-float" style="left:35%; bottom:0; background:var(--yellow);  animation-duration:6s;  animation-delay:1s;"></div>
@@ -115,15 +132,13 @@
     <div class="pixel-float" style="left:85%; bottom:0; background:var(--magenta); animation-duration:10s; animation-delay:4s;"></div>
 
     <div class="hero__badge">◀ PIXEL UNIVERSE ▶</div>
-    <h1 class="hero__title">CHÀO MỪNG ĐẾN<br />PIXELVERSE!</h1>
+    <h1 class="hero__title font-vi-h">Chào mừng đến PIXELVERSE!</h1>
     <p class="hero__subtitle">
-      Nơi tập hợp các mini-apps &amp; games<br />
-      được xây dựng với phong cách pixel futuristic.<br />
+      Nơi tập hợp các mini-apps &amp; games được xây dựng với phong cách pixel futuristic.
       Khám phá, chơi và vui vẻ!
     </p>
-    <a href="#apps" class="hero__cta">▶ KHÁM PHÁ NGAY</a>
+    <a href="#apps" class="hero__cta">▶ EXPLORE</a>
 
-    <!-- Stats -->
     <div class="stats-bar">
       <div class="stat-item">
         <span class="stat-item__value">01</span>
@@ -156,43 +171,40 @@
 
     <div class="apps-grid">
 
-      <!-- Card 1: Snake Game (LIVE) -->
-      <article class="app-card pixel-box app-card--green">
-        <div class="app-card__icon">🐍</div>
+      <!-- Card 1: Đoán Ưu/Nhược (LIVE) -->
+      <article class="app-card pixel-box app-card--cyan">
+        <div class="app-card__icon">🎯</div>
         <div class="app-card__tag">GAME</div>
-        <h3 class="app-card__title">SNAKE<br />CLASSIC</h3>
-        <p class="app-card__desc">
-          Game rắn săn mồi cổ điển với<br />
-          phong cách pixel futuristic.<br />
-          Ăn càng nhiều, rắn càng dài!
+        <h3 class="app-card__title font-vi-h">Đoán Ưu/Nhược</h3>
+        <p class="app-card__desc font-vi">
+          Kéo thả thẻ ưu điểm và nhược điểm vào đúng chủ đề tương ứng.
+          Thử thách khả năng phân tích và tư duy phản biện của bạn!
         </p>
-        <a href="apps/snake/index.html" class="app-card__btn">▶ CHƠI NGAY</a>
+        <a href="apps/pros-cons/index.html" class="app-card__btn">▶ PLAY</a>
       </article>
 
       <!-- Card 2: Coming Soon -->
       <article class="app-card pixel-box app-card--magenta app-card--soon">
         <div class="app-card__icon">🎨</div>
         <div class="app-card__tag">APP</div>
-        <h3 class="app-card__title">PIXEL<br />PAINTER</h3>
-        <p class="app-card__desc">
-          Vẽ tranh pixel art ngay trên<br />
-          trình duyệt. Tạo ra các tác<br />
-          phẩm 8-bit độc đáo!
+        <h3 class="app-card__title font-vi-h">Pixel Painter</h3>
+        <p class="app-card__desc font-vi">
+          Vẽ tranh pixel art ngay trên trình duyệt.
+          Tạo ra các tác phẩm 8-bit độc đáo của riêng bạn!
         </p>
-        <a href="#" class="app-card__btn">⏳ COMING SOON</a>
+        <a href="#" class="app-card__btn">⏳ SOON</a>
       </article>
 
       <!-- Card 3: Coming Soon -->
       <article class="app-card pixel-box app-card--yellow app-card--soon">
         <div class="app-card__icon">🧮</div>
         <div class="app-card__tag">GAME</div>
-        <h3 class="app-card__title">MATH<br />BLASTER</h3>
-        <p class="app-card__desc">
-          Thử thách toán học nhanh tay<br />
-          lẹ mắt. Giải phương trình<br />
-          trước khi hết thời gian!
+        <h3 class="app-card__title font-vi-h">Math Blaster</h3>
+        <p class="app-card__desc font-vi">
+          Thử thách toán học nhanh tay lẹ mắt.
+          Giải phương trình trước khi hết thời gian!
         </p>
-        <a href="#" class="app-card__btn">⏳ COMING SOON</a>
+        <a href="#" class="app-card__btn">⏳ SOON</a>
       </article>
 
     </div>
@@ -203,5 +215,56 @@
     <p>PIXELVERSE © 2025 — MADE WITH <span>♥</span> &amp; PIXELS</p>
   </footer>
 
+  <script>
+    // ===== ADMIN LOGIN (shared) =====
+    const ADMIN_PW = 'admin123';
+    const adminBtn     = document.getElementById('adminBtn');
+    const adminModal   = document.getElementById('adminModal');
+    const adminPw      = document.getElementById('adminPw');
+    const adminError   = document.getElementById('adminError');
+    const adminLoginBtn  = document.getElementById('adminLoginBtn');
+    const adminCancelBtn = document.getElementById('adminCancelBtn');
+
+    function checkAdminSession() {
+      if (sessionStorage.getItem('adminLoggedIn') === '1') {
+        adminBtn.textContent = '🔓 ADMIN';
+        adminBtn.classList.add('logged-in');
+      }
+    }
+    checkAdminSession();
+
+    adminBtn.addEventListener('click', () => {
+      if (sessionStorage.getItem('adminLoggedIn') === '1') {
+        // Already logged in — on home page there's no settings panel, redirect to game
+        window.location.href = 'apps/pros-cons/index.html';
+        return;
+      }
+      adminModal.classList.remove('hidden');
+      adminPw.value = '';
+      adminError.textContent = '';
+      setTimeout(() => adminPw.focus(), 50);
+    });
+
+    adminCancelBtn.addEventListener('click', () => {
+      adminModal.classList.add('hidden');
+    });
+
+    function doLogin() {
+      if (adminPw.value === ADMIN_PW) {
+        sessionStorage.setItem('adminLoggedIn', '1');
+        adminModal.classList.add('hidden');
+        adminBtn.textContent = '🔓 ADMIN';
+        adminBtn.classList.add('logged-in');
+      } else {
+        adminError.textContent = '✕ Sai mật khẩu!';
+        adminPw.value = '';
+        adminPw.focus();
+      }
+    }
+
+    adminLoginBtn.addEventListener('click', doLogin);
+    adminPw.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+    adminModal.addEventListener('click', e => { if (e.target === adminModal) adminModal.classList.add('hidden'); });
+  </script>
 </body>
 </html>
