@@ -90,6 +90,113 @@
       font-size: 18px;
       letter-spacing: 0;
     }
+
+    /* ===== ADMIN SETTINGS PANEL ===== */
+    .admin-settings-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(5,5,15,0.88);
+      backdrop-filter: blur(4px);
+    }
+    .admin-settings-overlay.hidden { display: none; }
+
+    .admin-settings-inner {
+      background: var(--bg-card);
+      border: 3px solid var(--yellow);
+      box-shadow: 0 0 30px rgba(255,230,0,0.3);
+      max-width: 460px;
+      width: 100%;
+      padding: 28px 24px;
+      margin: 1rem;
+    }
+    .admin-settings-title {
+      font-family: var(--font-pixel);
+      font-size: 11px;
+      color: var(--yellow);
+      text-shadow: 0 0 10px var(--yellow);
+      letter-spacing: 2px;
+      margin-bottom: 6px;
+    }
+    .admin-settings-sub {
+      font-family: var(--font-vi-body);
+      font-size: 13px;
+      color: rgba(232,232,255,0.55);
+      margin-bottom: 20px;
+    }
+    .admin-game-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .admin-game-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-card2);
+      border: 1px solid var(--grey);
+      padding: 12px 14px;
+    }
+    .admin-game-item--soon { opacity: 0.4; pointer-events: none; }
+    .admin-game-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .admin-game-icon { font-size: 20px; }
+    .admin-game-name {
+      font-family: var(--font-vi-heading);
+      font-size: 15px;
+      color: var(--white);
+    }
+    .admin-game-tag {
+      font-family: var(--font-pixel);
+      font-size: 6px;
+      color: var(--grey);
+      letter-spacing: 1px;
+    }
+    .admin-game-edit-btn {
+      font-family: var(--font-pixel);
+      font-size: 7px;
+      padding: 7px 12px;
+      border: 2px solid var(--cyan);
+      background: transparent;
+      color: var(--cyan);
+      text-decoration: none;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.1s steps(1);
+      white-space: nowrap;
+    }
+    .admin-game-edit-btn:hover {
+      background: var(--cyan);
+      color: var(--bg-dark);
+    }
+    .admin-game-soon-tag {
+      font-family: var(--font-pixel);
+      font-size: 7px;
+      padding: 7px 12px;
+      border: 2px solid var(--grey);
+      color: var(--grey);
+      letter-spacing: 1px;
+    }
+    .admin-settings-close {
+      font-family: var(--font-pixel);
+      font-size: 7px;
+      padding: 9px 0;
+      border: 2px solid var(--grey);
+      background: transparent;
+      color: var(--grey);
+      cursor: pointer;
+      letter-spacing: 1px;
+      width: 100%;
+      transition: all 0.1s;
+    }
+    .admin-settings-close:hover { border-color: var(--white); color: var(--white); }
   </style>
 </head>
 <body>
@@ -117,6 +224,56 @@
         <button class="admin-modal__btn" id="adminLoginBtn">▶ LOGIN</button>
         <button class="admin-modal__btn admin-modal__btn--cancel" id="adminCancelBtn">✕ CANCEL</button>
       </div>
+    </div>
+  </div>
+
+  <!-- ===== ADMIN SETTINGS PANEL ===== -->
+  <div class="admin-settings-overlay hidden" id="adminSettingsPanel">
+    <div class="admin-settings-inner">
+      <div class="admin-settings-title">⚙ ADMIN SETTINGS</div>
+      <p class="admin-settings-sub">Chọn trò chơi để chỉnh sửa nội dung:</p>
+
+      <div class="admin-game-list">
+
+        <!-- Đoán Ưu/Nhược — LIVE -->
+        <div class="admin-game-item">
+          <div class="admin-game-info">
+            <span class="admin-game-icon">🎯</span>
+            <div>
+              <div class="admin-game-name">Đoán Ưu/Nhược</div>
+              <div class="admin-game-tag">GAME · LIVE</div>
+            </div>
+          </div>
+          <a href="apps/pros-cons/index.html?admin=open" class="admin-game-edit-btn">✏ EDIT</a>
+        </div>
+
+        <!-- Pixel Painter — Soon -->
+        <div class="admin-game-item admin-game-item--soon">
+          <div class="admin-game-info">
+            <span class="admin-game-icon">🎨</span>
+            <div>
+              <div class="admin-game-name">Pixel Painter</div>
+              <div class="admin-game-tag">APP · COMING SOON</div>
+            </div>
+          </div>
+          <span class="admin-game-soon-tag">⏳ SOON</span>
+        </div>
+
+        <!-- Math Blaster — Soon -->
+        <div class="admin-game-item admin-game-item--soon">
+          <div class="admin-game-info">
+            <span class="admin-game-icon">🧮</span>
+            <div>
+              <div class="admin-game-name">Math Blaster</div>
+              <div class="admin-game-tag">GAME · COMING SOON</div>
+            </div>
+          </div>
+          <span class="admin-game-soon-tag">⏳ SOON</span>
+        </div>
+
+      </div>
+
+      <button class="admin-settings-close" id="adminSettingsClose">✕ CLOSE</button>
     </div>
   </div>
 
@@ -225,9 +382,12 @@
     const adminLoginBtn  = document.getElementById('adminLoginBtn');
     const adminCancelBtn = document.getElementById('adminCancelBtn');
 
+    const adminSettingsPanel = document.getElementById('adminSettingsPanel');
+    const adminSettingsClose = document.getElementById('adminSettingsClose');
+
     function checkAdminSession() {
       if (sessionStorage.getItem('adminLoggedIn') === '1') {
-        adminBtn.textContent = '🔓 ADMIN';
+        adminBtn.textContent = '⚙ SETTINGS';
         adminBtn.classList.add('logged-in');
       }
     }
@@ -235,14 +395,18 @@
 
     adminBtn.addEventListener('click', () => {
       if (sessionStorage.getItem('adminLoggedIn') === '1') {
-        // Already logged in — on home page there's no settings panel, redirect to game
-        window.location.href = 'apps/pros-cons/index.html';
+        adminSettingsPanel.classList.remove('hidden');
         return;
       }
       adminModal.classList.remove('hidden');
       adminPw.value = '';
       adminError.textContent = '';
       setTimeout(() => adminPw.focus(), 50);
+    });
+
+    adminSettingsClose.addEventListener('click', () => adminSettingsPanel.classList.add('hidden'));
+    adminSettingsPanel.addEventListener('click', e => {
+      if (e.target === adminSettingsPanel) adminSettingsPanel.classList.add('hidden');
     });
 
     adminCancelBtn.addEventListener('click', () => {
@@ -253,7 +417,7 @@
       if (adminPw.value === ADMIN_PW) {
         sessionStorage.setItem('adminLoggedIn', '1');
         adminModal.classList.add('hidden');
-        adminBtn.textContent = '🔓 ADMIN';
+        adminBtn.textContent = '⚙ SETTINGS';
         adminBtn.classList.add('logged-in');
       } else {
         adminError.textContent = '✕ Sai mật khẩu!';

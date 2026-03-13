@@ -467,6 +467,13 @@
       cursor: pointer;
     }
     .admin-copy-btn:hover { background: var(--yellow); color: var(--bg-dark); }
+    .admin-copy-btn--download {
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+    .admin-copy-btn--download:hover { background: var(--cyan); color: var(--bg-dark); }
+
+    .admin-export-box label strong { color: var(--cyan); }
 
     .admin-import-box {
       display: none;
@@ -551,21 +558,24 @@
       <div class="admin-bar">
         <button class="admin-bar-btn admin-bar-btn--add"    id="adminAddBtn">+ ADD TOPIC</button>
         <button class="admin-bar-btn admin-bar-btn--save"   id="adminSaveBtn">💾 SAVE</button>
-        <button class="admin-bar-btn admin-bar-btn--export" id="adminExportBtn">⬇ EXPORT JSON</button>
-        <button class="admin-bar-btn admin-bar-btn--import" id="adminImportBtn">⬆ IMPORT JSON</button>
+        <button class="admin-bar-btn admin-bar-btn--export" id="adminExportBtn">⬇ EXPORT</button>
+        <button class="admin-bar-btn admin-bar-btn--import" id="adminImportBtn">⬆ IMPORT</button>
         <button class="admin-bar-btn admin-bar-btn--close"  id="adminCloseBtn">✕ CLOSE</button>
       </div>
 
       <div class="admin-status" id="adminStatus"></div>
 
       <div class="admin-export-box" id="adminExportBox">
-        <label>Sao chép JSON rồi paste vào file data/pros-cons.js:</label>
+        <label>Tải file hoặc copy nội dung → paste vào <strong>admin_content.json</strong> trên GitHub:</label>
         <textarea class="admin-export-ta" id="adminExportTa" readonly></textarea>
-        <button class="admin-copy-btn" id="adminCopyBtn">📋 COPY</button>
+        <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;">
+          <button class="admin-copy-btn admin-copy-btn--download" id="adminDownloadBtn">⬇ DOWNLOAD FILE</button>
+          <button class="admin-copy-btn" id="adminCopyBtn">📋 COPY</button>
+        </div>
       </div>
 
       <div class="admin-import-box" id="adminImportBox">
-        <label>Paste JSON vào đây để load:</label>
+        <label>Paste JSON vào đây để load vào editor:</label>
         <textarea class="admin-import-ta" id="adminImportTa" placeholder='[{"id":1,"topic":"...","passage":"...","pro":{"id":"p1","text":"..."},"con":{"id":"c1","text":"..."}}]'></textarea>
         <button class="admin-import-apply" id="adminImportApply">▶ APPLY</button>
       </div>
@@ -773,10 +783,26 @@
       }
     });
 
+    document.getElementById('adminDownloadBtn').addEventListener('click', () => {
+      const json = JSON.stringify(adminData, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href = url;
+      a.download = 'admin_content.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      const btn = document.getElementById('adminDownloadBtn');
+      btn.textContent = '✓ DOWNLOADED!';
+      setTimeout(() => btn.textContent = '⬇ DOWNLOAD FILE', 2000);
+    });
+
     document.getElementById('adminCopyBtn').addEventListener('click', () => {
       const ta = document.getElementById('adminExportTa');
       ta.select();
-      document.execCommand('copy');
+      navigator.clipboard?.writeText(ta.value).catch(() => document.execCommand('copy'));
       document.getElementById('adminCopyBtn').textContent = '✓ COPIED!';
       setTimeout(() => document.getElementById('adminCopyBtn').textContent = '📋 COPY', 2000);
     });
@@ -809,13 +835,24 @@
     // ================================================================
     //  GAME DATA & STATE
     // ================================================================
-    let gameData = loadGameData();
+    let gameData = [];
+    let _cachedJsonData = null; // cache fetched admin_content.json
 
-    function loadGameData() {
+    async function loadGameData() {
+      // 1. localStorage (in-session admin saves take priority)
       const saved = localStorage.getItem('prosCons');
       if (saved) {
         try { return JSON.parse(saved); } catch(e) {}
       }
+      // 2. admin_content.json (source of truth on GitHub)
+      if (!_cachedJsonData) {
+        try {
+          const res = await fetch('./admin_content.json');
+          if (res.ok) _cachedJsonData = await res.json();
+        } catch(e) {}
+      }
+      if (_cachedJsonData) return _cachedJsonData;
+      // 3. Built-in fallback
       return window.PROS_CONS_DATA || [];
     }
 
@@ -1120,18 +1157,23 @@
       document.getElementById('scoreDisplay').textContent = 'SCORE: —';
     }
 
-    function playAgain() {
-      // Reload game data (in case admin saved)
-      gameData = loadGameData();
+    async function playAgain() {
+      gameData = await loadGameData();
       buildGame();
-      // Shuffle pool by re-rendering
-      renderPool();
     }
 
     // ================================================================
     //  INIT
     // ================================================================
-    buildGame();
+    async function initGame() {
+      gameData = await loadGameData();
+      buildGame();
+      // Auto-open admin panel if navigated from settings
+      if (new URLSearchParams(location.search).get('admin') === 'open' && isLoggedIn()) {
+        openAdminPanel();
+      }
+    }
+    initGame();
   </script>
 
 </body>
