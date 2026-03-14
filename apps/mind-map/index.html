@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sơ đồ Tư Duy — PIXELVERSE</title>
+  <title>🐙 — PIXELVERSE</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' fill='%2300fff5'>◈</text></svg>">
   <link rel="stylesheet" href="../../css/style.css" />
   <script src="../../data/mind-map.js"></script>
   <script src="../../js/sfx.js"></script>
@@ -693,8 +694,7 @@
 
     <div class="action-bar">
       <button class="action-btn action-btn--check"      id="checkBtn"     onclick="checkAnswers()">✓ CHECK</button>
-      <button class="action-btn action-btn--reset"      id="resetBtn"     onclick="resetGame()">↺ RESET</button>
-      <button class="action-btn action-btn--play-again" id="playAgainBtn" onclick="playAgain()" style="display:none">▶ PLAY AGAIN</button>
+      <button class="action-btn action-btn--play-again" id="playAgainBtn" onclick="playAgain()" style="display:none">▶ CONTINUE</button>
     </div>
 
     <div class="result-banner" id="resultBanner">
@@ -1218,10 +1218,6 @@
 
       checked = true;
 
-      // Auto-group siblings visually (no score effect)
-      autoGroupSiblings();
-      renderGamePlaced();
-
       // Score
       const correctRowMap = {};
       gameData.keywords.forEach(kw => { correctRowMap[kw.id] = kw.correctRow; });
@@ -1263,48 +1259,6 @@
       document.getElementById('playAgainBtn').style.display = '';
       document.getElementById('checkBtn').style.display = 'none';
       clearGameSelection();
-    }
-
-    // Auto-group siblings: sort each row so nodes connected to the same parent are adjacent
-    function autoGroupSiblings() {
-      for (let row = 1; row < gameData.rowCount; row++) {
-        const rowAbove  = row - 1;
-        const aboveKids = gameData.keywords.filter(kw => placements[kw.id] === rowAbove).map(kw => kw.id);
-        const curKids   = gameData.keywords.filter(kw => placements[kw.id] === row).map(kw => kw.id);
-        if (!aboveKids.length || !curKids.length) continue;
-
-        // Parent order in the row above (use rowOrder or natural order)
-        const parentOrder = [...(rowOrder[rowAbove] || [])];
-        aboveKids.forEach(id => { if (!parentOrder.includes(id)) parentOrder.push(id); });
-
-        // Each node's primary parent (first connected node in row above)
-        const parentOf = {};
-        curKids.forEach(kid => {
-          for (const p of parentOrder) {
-            if (connections.has(ck(kid, p))) { parentOf[kid] = p; break; }
-          }
-        });
-
-        // Sort current row by parent order, unparented go last
-        const sorted = [...curKids].sort((a, b) => {
-          const ia = parentOf[a] ? parentOrder.indexOf(parentOf[a]) : 999;
-          const ib = parentOf[b] ? parentOrder.indexOf(parentOf[b]) : 999;
-          return ia !== ib ? ia - ib : curKids.indexOf(a) - curKids.indexOf(b);
-        });
-        rowOrder[row] = sorted;
-      }
-    }
-
-    function resetGame() {
-      checked = false;
-      clearGameSelection();
-      document.querySelectorAll('#mapCanvas .map-node').forEach(n => n.classList.remove('correct', 'wrong'));
-      refreshGameConnections();
-      document.getElementById('resultBanner').style.display = 'none';
-      document.getElementById('playAgainBtn').style.display = 'none';
-      document.getElementById('checkBtn').style.display = '';
-      document.getElementById('scoreDisplay').textContent = 'SCORE: —';
-      updateProgress();
     }
 
     async function playAgain() { gameData = await loadGameData(); buildGame(); }
