@@ -1294,6 +1294,18 @@
         rowOrder[row] = rowKids;
       }
       renderGamePlaced();
+
+      // Re-apply correct/wrong classes lost when renderGamePlaced rebuilt the DOM
+      const correctRowMap = {};
+      gameData.keywords.forEach(kw => { correctRowMap[kw.id] = kw.correctRow; });
+      gameData.keywords.forEach(kw => {
+        const isOk = placements[kw.id] === correctRowMap[kw.id];
+        const nodeEl = document.querySelector(`#mapCanvas .map-node[data-kid="${kw.id}"]`);
+        if (nodeEl) nodeEl.classList.add(isOk ? 'correct' : 'wrong');
+      });
+      // Re-render colored connection lines
+      const correctConnSet = new Set(gameData.connections.map(c => ck(c.from, c.to)));
+      refreshGameConnections(correctConnSet);
     }
 
     function continueGame() {

@@ -997,10 +997,6 @@
       buildGame();
     });
 
-    document.getElementById('adminClose').addEventListener('click', () => {
-      document.getElementById('adminPanel').classList.remove('open');
-    });
-
     // ================================================================
     //  GAMES POPUP
     // ================================================================
@@ -1012,13 +1008,7 @@
     // ================================================================
     //  ADMIN AUTH
     // ================================================================
-    const adminBtn    = document.getElementById('adminBtn');
-    const adminModal  = document.getElementById('adminModal');
-    const adminPanel  = document.getElementById('adminPanel');
-    const adminPw     = document.getElementById('adminPw');
-    const adminError  = document.getElementById('adminError');
-    const adminLoginBtn  = document.getElementById('adminLoginBtn');
-    const adminCancelBtn = document.getElementById('adminCancelBtn');
+    const adminPanel = document.getElementById('adminPanel');
 
     function openAdminPanel() {
       adminData = JSON.parse(JSON.stringify(gameData));
@@ -1026,37 +1016,9 @@
       adminPanel.classList.add('open');
     }
 
-    adminBtn.addEventListener('click', () => {
-      SFX.click();
-      if (AdminAuth.isLoggedIn()) {
-        openAdminPanel();
-      } else {
-        adminModal.classList.remove('hidden');
-        adminPw.value = '';
-        adminError.textContent = '';
-        setTimeout(() => adminPw.focus(), 50);
-      }
-    });
+    document.getElementById('adminClose').addEventListener('click', () => adminPanel.classList.remove('open'));
 
-    adminLoginBtn.addEventListener('click', () => {
-      if (AdminAuth.login(adminPw.value)) {
-        adminModal.classList.add('hidden');
-        adminBtn.classList.add('logged-in');
-        adminBtn.textContent = '🔓 ADMIN';
-        openAdminPanel();
-      } else {
-        adminError.textContent = '✕ SAI MẬT KHẨU';
-        SFX.wrong();
-      }
-    });
-
-    adminPw.addEventListener('keydown', e => { if (e.key === 'Enter') adminLoginBtn.click(); });
-    adminCancelBtn.addEventListener('click', () => adminModal.classList.add('hidden'));
-
-    if (AdminAuth.isLoggedIn()) {
-      adminBtn.classList.add('logged-in');
-      adminBtn.textContent = '🔓 ADMIN';
-    }
+    initAdminAuth({ onLogin: openAdminPanel });
 
     // ================================================================
     //  INIT
@@ -1072,10 +1034,8 @@
 
       buildGame();
 
-      // Handle ?admin=open URL param
       if (new URLSearchParams(location.search).get('admin') === 'open') {
-        if (AdminAuth.isLoggedIn()) openAdminPanel();
-        else { adminModal.classList.remove('hidden'); setTimeout(() => adminPw.focus(), 50); }
+        if (isAdminLoggedIn()) openAdminPanel();
       }
     }
 

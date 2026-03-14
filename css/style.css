@@ -155,10 +155,10 @@ body::after {
 .navbar__links a {
   color: var(--white);
   text-decoration: none;
-  font-size: 8px;
-  letter-spacing: 1px;
+  font-size: 20px;
+  letter-spacing: 0;
   /* min 44px touch height; flex centering keeps text visually same */
-  padding: 6px 10px;
+  padding: 4px 10px;
   min-height: 44px;
   display: inline-flex;
   align-items: center;
@@ -471,12 +471,12 @@ section {
 /* ===== ADMIN BUTTON (navbar) ===== */
 .navbar__admin-btn {
   font-family: var(--font-pixel);
-  font-size: 7px;
+  font-size: 16px;
   background: transparent;
   border: 2px solid transparent;
   color: var(--yellow);
   /* min-height 44px for touch; padding adjusted to keep visual size */
-  padding: 5px 12px;
+  padding: 4px 10px;
   min-height: 44px;
   cursor: pointer;
   letter-spacing: 1px;

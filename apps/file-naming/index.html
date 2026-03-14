@@ -784,46 +784,12 @@
     // ================================================================
     //  ADMIN AUTH
     // ================================================================
-    const adminBtn    = document.getElementById('adminBtn');
-    const adminModal  = document.getElementById('adminModal');
-    const adminPanel  = document.getElementById('adminPanel');
-    const adminPw     = document.getElementById('adminPw');
-    const adminError  = document.getElementById('adminError');
-    const adminLoginBtn  = document.getElementById('adminLoginBtn');
-    const adminCancelBtn = document.getElementById('adminCancelBtn');
+    const adminPanel = document.getElementById('adminPanel');
 
-    adminBtn.addEventListener('click', () => {
-      SFX.click();
-      if (AdminAuth.isLoggedIn()) {
-        adminPanel.classList.add('open');
-      } else {
-        adminModal.classList.remove('hidden');
-        adminPw.value = '';
-        adminError.textContent = '';
-        setTimeout(() => adminPw.focus(), 50);
-      }
-    });
-
-    adminLoginBtn.addEventListener('click', () => {
-      if (AdminAuth.login(adminPw.value)) {
-        adminModal.classList.add('hidden');
-        adminBtn.classList.add('logged-in');
-        adminBtn.textContent = '🔓 ADMIN';
-        adminPanel.classList.add('open');
-      } else {
-        adminError.textContent = '✕ SAI MẬT KHẨU';
-        SFX.wrong();
-      }
-    });
-
-    adminPw.addEventListener('keydown', e => { if (e.key === 'Enter') adminLoginBtn.click(); });
-    adminCancelBtn.addEventListener('click', () => adminModal.classList.add('hidden'));
+    function openAdminPanel() { adminPanel.classList.add('open'); }
     document.getElementById('adminClose').addEventListener('click', () => adminPanel.classList.remove('open'));
 
-    if (AdminAuth.isLoggedIn()) {
-      adminBtn.classList.add('logged-in');
-      adminBtn.textContent = '🔓 ADMIN';
-    }
+    initAdminAuth({ onLogin: openAdminPanel });
 
     // ================================================================
     //  INIT
@@ -839,9 +805,8 @@
       buildQNav();
       goToQ(0);
 
-      if (new URLSearchParams(location.search).get('admin') === 'open') {
-        if (AdminAuth.isLoggedIn()) adminPanel.classList.add('open');
-        else { adminModal.classList.remove('hidden'); setTimeout(() => adminPw.focus(), 50); }
+      if (new URLSearchParams(location.search).get('admin') === 'open' && isAdminLoggedIn()) {
+        openAdminPanel();
       }
     }
 
