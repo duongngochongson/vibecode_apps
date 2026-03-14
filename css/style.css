@@ -162,7 +162,6 @@ body::after {
   min-height: 44px;
   display: inline-flex;
   align-items: center;
-  border: 2px solid transparent;
   transition: all 0.15s steps(2);
   position: relative;
 }
@@ -170,8 +169,6 @@ body::after {
 .navbar__links a:hover,
 .navbar__links a.active {
   color: var(--cyan);
-  border-color: var(--cyan);
-  box-shadow: 0 0 8px var(--cyan), inset 0 0 6px rgba(0,255,245,0.1);
   text-shadow: 0 0 8px var(--cyan);
 }
 
@@ -476,7 +473,7 @@ section {
   font-family: var(--font-pixel);
   font-size: 7px;
   background: transparent;
-  border: 2px solid var(--yellow);
+  border: 2px solid transparent;
   color: var(--yellow);
   /* min-height 44px for touch; padding adjusted to keep visual size */
   padding: 5px 12px;
@@ -485,21 +482,20 @@ section {
   letter-spacing: 1px;
   transition: all 0.15s steps(2);
   text-shadow: 0 0 6px var(--yellow);
-  box-shadow: 0 0 6px rgba(255,230,0,0.3);
 }
 .navbar__admin-btn:hover {
   background: var(--yellow);
+  border-color: var(--yellow);
   color: var(--bg-dark);
   box-shadow: 0 0 14px rgba(255,230,0,0.6);
 }
 .navbar__admin-btn.logged-in {
-  border-color: var(--green);
   color: var(--green);
   text-shadow: 0 0 6px var(--green);
-  box-shadow: 0 0 6px rgba(57,255,20,0.3);
 }
 .navbar__admin-btn.logged-in:hover {
   background: var(--green);
+  border-color: var(--green);
   color: var(--bg-dark);
 }
 
