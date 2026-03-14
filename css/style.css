@@ -550,7 +550,7 @@ section {
 .navbar__games-list {
   display: grid;
   grid-template-columns: repeat(3, 48px);
-  gap: 8px;
+  gap: 6px;
 }
 .navbar__game-item {
   display: flex;
@@ -558,16 +558,16 @@ section {
   justify-content: center;
   width: 48px;
   height: 48px;
-  border: 1px solid var(--grey);
+  border: none;
   color: var(--white);
-  font-size: 22px;
+  font-size: 34px;
   text-decoration: none;
-  transition: border-color 0.1s;
+  transition: transform 0.1s, filter 0.1s;
+  line-height: 1;
 }
-.navbar__game-item:hover { border-color: var(--cyan); color: var(--cyan); }
-.navbar__game-item--active { border-color: var(--cyan); color: var(--cyan); pointer-events: none; }
-.navbar__game-item--soon { opacity: 0.4; pointer-events: none; font-size: 14px; }
-.navbar__game-item__icon { font-size: 18px; }
+.navbar__game-item:hover { transform: scale(1.2); filter: drop-shadow(0 0 6px var(--cyan)); }
+.navbar__game-item--active { transform: scale(1.1); filter: drop-shadow(0 0 4px var(--cyan)); pointer-events: none; }
+.navbar__game-item--soon { opacity: 0.4; pointer-events: none; font-size: 18px; }
 
 /* ===== ADMIN MODAL ===== */
 .admin-modal-overlay {
