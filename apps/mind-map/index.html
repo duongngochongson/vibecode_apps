@@ -597,8 +597,8 @@
   <!-- ===== GAMES POPUP ===== -->
   <div class="navbar__games-popup" id="gamesPopup">
     <div class="navbar__games-list">
-      <a href="../pros-cons/index.html" class="navbar__game-item">Đoán Ưu/Nhược</a>
-      <div class="navbar__game-item navbar__game-item--active" id="navGameName">Sơ đồ Tư Duy</div>
+      <a href="../pros-cons/index.html" class="navbar__game-item">🐺</a>
+      <div class="navbar__game-item navbar__game-item--active" id="navGameName">🐙</div>
       <div class="navbar__game-item navbar__game-item--soon">?</div>
     </div>
   </div>
@@ -682,7 +682,7 @@
 
     <div class="page-header">
       <a href="../../index.html" class="page-header__back">◀ BACK TO HOME</a>
-      <h1 id="gameTitle">🗺 Sơ đồ Tư Duy</h1>
+      <h1 id="gameTitle">🐙 Sơ đồ Tư Duy</h1>
       <p class="page-header__sub">Kéo thả từ khóa vào đúng hàng · Ấn 2 ô khác hàng để nối · Ấn lại để bỏ nối</p>
     </div>
 
@@ -721,10 +721,9 @@
 
   <script>
     // ================================================================
-    //  RANDOM ANIMAL EMOJI — one per session, used everywhere
+    //  GAME EMOJI
     // ================================================================
-    const ANIMALS = ['🐯','🦊','🐻','🦁','🐨','🐺','🦝','🐸','🦔','🐙','🦋','🐬','🦜','🦚','🐊','🐘','🦒','🦓','🦙','🦘','🦅','🐆','🦈','🐳','🦌','🦩','🦀','🦦'];
-    const GAME_EMOJI = ANIMALS[Math.floor(Math.random() * ANIMALS.length)];
+    const GAME_EMOJI = '🐙';
 
     // ================================================================
     //  UTILITIES
@@ -1596,10 +1595,9 @@
       }
 
       // Apply emoji everywhere
-      const title = `${GAME_EMOJI} Sơ đồ Tư Duy`;
-      document.title = `${title} — PIXELVERSE`;
-      document.getElementById('gameTitle').textContent = title;
-      document.getElementById('navGameName').textContent = title;
+      document.title = `${GAME_EMOJI} — PIXELVERSE`;
+      document.getElementById('gameTitle').textContent = `${GAME_EMOJI} Sơ đồ Tư Duy`;
+      document.getElementById('navGameName').textContent = GAME_EMOJI;
       document.getElementById('adminPanelTitle').textContent = `⚙ ADMIN — ${GAME_EMOJI} SƠ ĐỒ TƯ DUY`;
 
       buildGame();
