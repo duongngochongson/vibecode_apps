@@ -581,8 +581,9 @@
   <div class="navbar__games-popup" id="gamesPopup">
     <div class="navbar__games-list">
       <div class="navbar__game-item navbar__game-item--active">🐺</div>
-      <a href="../../apps/mind-map/index.html" class="navbar__game-item">🐙</a>
-      <div class="navbar__game-item navbar__game-item--soon">?</div>
+      <a href="../mind-map/index.html" class="navbar__game-item">🐙</a>
+      <a href="../matching/index.html" class="navbar__game-item">🐿️</a>
+      <a href="../file-naming/index.html" class="navbar__game-item">🐟</a>
     </div>
   </div>
 
@@ -668,7 +669,7 @@
 
     <div class="action-bar">
       <button class="action-btn action-btn--check"      id="checkBtn"    onclick="checkAnswers()">✓ CHECK</button>
-      <button class="action-btn action-btn--play-again" id="playAgainBtn" onclick="playAgain()" style="display:none">▶ CONTINUE</button>
+      <button class="action-btn action-btn--play-again" id="playAgainBtn" onclick="continueGame()" style="display:none">▶ CONTINUE</button>
     </div>
 
     <div class="result-banner" id="resultBanner">
@@ -1206,6 +1207,14 @@
       document.getElementById('resultBanner').style.display = 'block';
       document.getElementById('checkBtn').style.display = 'none';
       document.getElementById('playAgainBtn').style.display = '';
+    }
+
+    function continueGame() {
+      checked = false;
+      document.querySelectorAll('.drop-zone').forEach(z => z.classList.remove('correct', 'wrong'));
+      document.getElementById('resultBanner').style.display = 'none';
+      document.getElementById('checkBtn').style.display = '';
+      document.getElementById('playAgainBtn').style.display = 'none';
     }
 
     async function playAgain() {

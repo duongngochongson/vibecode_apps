@@ -260,7 +260,8 @@
     <div class="navbar__games-list">
       <a href="apps/pros-cons/index.html" class="navbar__game-item">🐺</a>
       <a href="apps/mind-map/index.html" class="navbar__game-item">🐙</a>
-      <div class="navbar__game-item navbar__game-item--soon">?</div>
+      <a href="apps/matching/index.html" class="navbar__game-item">🐿️</a>
+      <a href="apps/file-naming/index.html" class="navbar__game-item">🐟</a>
     </div>
   </div>
 
@@ -297,6 +298,18 @@
             <span class="admin-game-icon">🐙</span>
           </div>
           <a href="apps/mind-map/index.html?admin=open" class="admin-game-edit-btn">✏ EDIT</a>
+        </div>
+        <div class="admin-game-item">
+          <div class="admin-game-info">
+            <span class="admin-game-icon">🐿️</span>
+          </div>
+          <a href="apps/matching/index.html?admin=open" class="admin-game-edit-btn">✏ EDIT</a>
+        </div>
+        <div class="admin-game-item">
+          <div class="admin-game-info">
+            <span class="admin-game-icon">🐟</span>
+          </div>
+          <a href="apps/file-naming/index.html?admin=open" class="admin-game-edit-btn">✏ EDIT</a>
         </div>
       </div>
 
@@ -367,19 +380,25 @@
         <a href="apps/mind-map/index.html" class="app-card__btn">▶ PLAY</a>
       </article>
 
-      <!-- Card 3: Coming Soon -->
-      <article class="app-card pixel-box app-card--yellow app-card--soon">
-        <h3 class="app-card__title font-vi-h">?</h3>
-        <a href="#" class="app-card__btn">⏳ SOON</a>
+      <!-- Card 3: Nối Từ (Matching) -->
+      <article class="app-card pixel-box app-card--green" onclick="SFX.navigate();location.href='apps/matching/index.html'">
+        <div class="app-card__icon">🐿️</div>
+        <h3 class="app-card__title font-vi-h">Nối Từ</h3>
+        <p class="app-card__desc font-vi">Nối các từ khóa ở hai cột với nhau theo mối quan hệ đúng.</p>
+        <span class="app-card__btn">▶ PLAY</span>
+      </article>
+
+      <!-- Card 4: Đặt Tên File -->
+      <article class="app-card pixel-box app-card--yellow" onclick="SFX.navigate();location.href='apps/file-naming/index.html'">
+        <div class="app-card__icon">🐟</div>
+        <h3 class="app-card__title font-vi-h">Đặt Tên File</h3>
+        <p class="app-card__desc font-vi">Điền đường dẫn và kéo hành tinh vào đúng thư mục trong cây vũ trụ.</p>
+        <span class="app-card__btn">▶ PLAY</span>
       </article>
 
     </div>
   </section>
 
-  <!-- ===== FOOTER ===== -->
-  <footer class="footer">
-    <p>duongngochongson@gmail.com</p>
-  </footer>
 
   <script>
     // ===== GAMES POPUP =====

@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🐿️ — PIXELVERSE</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' fill='%2300fff5'>◈</text></svg>">
+  <link rel="stylesheet" href="../../css/style.css" />
+  <script src="../../data/matching.js"></script>
+  <script src="../../js/sfx.js"></script>
+  <script src="../../js/admin-auth.js"></script>
+  <style>
+    /* ===== PAGE LAYOUT ===== */
+    .game-page {
+      position: relative;
+      z-index: 2;
+      padding: 32px 1.5rem 80px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .page-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .page-header__back {
+      display: inline-block;
+      font-size: 12px;
+      color: var(--grey);
+      text-decoration: none;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+      transition: color 0.15s;
+    }
+    .page-header__back:hover { color: var(--cyan); }
+    .page-header__title {
+      font-size: clamp(20px, 4vw, 32px);
+      color: var(--green);
+      text-shadow: 0 0 16px var(--green);
+      margin: 0;
+    }
+
+    /* ===== STATUS BAR ===== */
+    .status-bar {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-bottom: 20px;
+      font-size: 9px;
+      letter-spacing: 1px;
+      color: var(--grey);
+    }
+    #scoreDisplay { color: var(--green); text-shadow: 0 0 6px var(--green); }
+    #setDisplay   { color: var(--cyan);  text-shadow: 0 0 6px var(--cyan); }
+
+    /* ===== MATCHING ARENA ===== */
+    .match-arena {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 60px 1fr;
+      gap: 0;
+      align-items: start;
+      min-height: 300px;
+    }
+
+    /* ===== COLUMNS ===== */
+    .match-col {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 8px 0;
+    }
+
+    .match-item {
+      position: relative;
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      padding: 8px 16px;
+      background: rgba(12,12,26,0.7);
+      border: 2px solid rgba(255,255,255,0.08);
+      font-size: 10px;
+      letter-spacing: 1px;
+      color: var(--white);
+      transition: border-color 0.15s, box-shadow 0.15s;
+      user-select: none;
+    }
+    .match-item.correct {
+      border-color: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      color: var(--green);
+    }
+    .match-item.wrong {
+      border-color: var(--magenta);
+      box-shadow: 0 0 8px var(--magenta);
+      color: var(--magenta);
+    }
+
+    /* Left column: text left, dot on right edge */
+    .match-col--left .match-item { padding-right: 28px; }
+    .match-col--left .match-item .dot {
+      position: absolute;
+      right: -10px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--grey);
+      border: 2px solid var(--bg-dark);
+      cursor: pointer;
+      z-index: 10;
+      transition: background 0.15s, box-shadow 0.15s;
+    }
+    /* Right column: dot on left edge, text right */
+    .match-col--right .match-item { padding-left: 28px; }
+    .match-col--right .match-item .dot {
+      position: absolute;
+      left: -10px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--grey);
+      border: 2px solid var(--bg-dark);
+      cursor: pointer;
+      z-index: 10;
+      transition: background 0.15s, box-shadow 0.15s;
+    }
+    .dot:hover, .dot.pending {
+      background: var(--cyan);
+      box-shadow: 0 0 8px var(--cyan);
+    }
+    .dot.connected {
+      background: var(--green);
+    }
+
+    /* ===== SVG OVERLAY ===== */
+    .match-svg-wrap {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      overflow: visible;
+      z-index: 5;
+    }
+    .match-svg-wrap svg {
+      width: 100%; height: 100%;
+      overflow: visible;
+    }
+    .conn-line {
+      stroke: var(--cyan);
+      stroke-width: 2;
+      fill: none;
+      opacity: 0.7;
+    }
+    .conn-line.correct { stroke: var(--green); opacity: 1; }
+    .conn-line.wrong   { stroke: var(--magenta); opacity: 1; }
+
+    /* ===== DELETE BUTTON ON LINE ===== */
+    .conn-del {
+      pointer-events: all;
+      cursor: pointer;
+      font-size: 9px;
+      fill: var(--magenta);
+      font-family: var(--font-pixel);
+      dominant-baseline: middle;
+      text-anchor: middle;
+    }
+    .conn-del:hover { fill: var(--white); }
+    .conn-del-bg {
+      pointer-events: all;
+      cursor: pointer;
+      fill: var(--bg-dark);
+      stroke: var(--magenta);
+      stroke-width: 1;
+    }
+
+    /* ===== SET NAVIGATION ===== */
+    .set-nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      font-size: 9px;
+      letter-spacing: 1px;
+    }
+    .set-nav__btn {
+      background: transparent;
+      border: 2px solid var(--grey);
+      color: var(--grey);
+      font-family: var(--font-pixel);
+      font-size: 8px;
+      padding: 4px 10px;
+      cursor: pointer;
+      transition: all 0.15s steps(2);
+    }
+    .set-nav__btn:hover:not(:disabled) {
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+    .set-nav__btn:disabled { opacity: 0.3; cursor: default; }
+    .set-nav__label { color: var(--cyan); min-width: 80px; text-align: center; }
+
+    /* ===== ACTION BAR ===== */
+    .action-bar {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 24px;
+    }
+    .action-btn {
+      font-family: var(--font-pixel);
+      font-size: 8px;
+      letter-spacing: 2px;
+      padding: 10px 24px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s steps(2);
+    }
+    .action-btn--check {
+      background: var(--green);
+      color: var(--bg-dark);
+      box-shadow: 0 0 12px var(--green);
+    }
+    .action-btn--check:hover { box-shadow: 0 0 20px var(--green); }
+    .action-btn--play-again {
+      background: var(--cyan);
+      color: var(--bg-dark);
+      box-shadow: 0 0 12px var(--cyan);
+    }
+    .action-btn--play-again:hover { box-shadow: 0 0 20px var(--cyan); }
+
+    /* ===== RESULT BANNER ===== */
+    .result-banner {
+      display: none;
+      text-align: center;
+      padding: 16px;
+      margin-top: 16px;
+      border: 2px solid var(--green);
+      background: rgba(57,255,20,0.05);
+    }
+    .result-banner__score {
+      font-size: 14px;
+      color: var(--green);
+      text-shadow: 0 0 10px var(--green);
+      margin-bottom: 6px;
+    }
+    .result-banner__msg {
+      font-size: 10px;
+      color: var(--white);
+      letter-spacing: 1px;
+    }
+
+    /* ===== TOAST ===== */
+    .toast {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--bg-mid);
+      border: 2px solid var(--yellow);
+      color: var(--yellow);
+      font-size: 9px;
+      letter-spacing: 1px;
+      padding: 8px 20px;
+      z-index: 9999;
+      opacity: 0;
+      transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ===== ADMIN PANEL ===== */
+    .admin-panel {
+      position: fixed;
+      top: 0; right: -480px;
+      width: min(480px, 100vw);
+      height: 100%;
+      background: var(--bg-mid);
+      border-left: 2px solid var(--yellow);
+      z-index: 200;
+      overflow-y: auto;
+      transition: right 0.3s steps(4);
+      padding: 24px 20px 40px;
+    }
+    .admin-panel.open { right: 0; }
+    .admin-panel__title {
+      font-size: 10px;
+      color: var(--yellow);
+      letter-spacing: 2px;
+      margin-bottom: 20px;
+    }
+    .admin-panel__close {
+      position: absolute;
+      top: 16px; right: 16px;
+      background: transparent;
+      border: 2px solid var(--yellow);
+      color: var(--yellow);
+      font-family: var(--font-pixel);
+      font-size: 8px;
+      padding: 4px 10px;
+      cursor: pointer;
+    }
+    .admin-set-card {
+      border: 2px solid rgba(255,255,255,0.1);
+      padding: 12px;
+      margin-bottom: 16px;
+      background: rgba(0,0,0,0.3);
+    }
+    .admin-set-title {
+      font-size: 9px;
+      color: var(--cyan);
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .admin-set-title input {
+      flex: 1;
+      background: transparent;
+      border: 1px solid var(--grey);
+      color: var(--white);
+      font-family: var(--font-pixel);
+      font-size: 9px;
+      padding: 3px 6px;
+    }
+    .admin-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .admin-col-label {
+      font-size: 8px;
+      color: var(--grey);
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+    .admin-kw-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 4px;
+    }
+    .admin-kw-row input {
+      flex: 1;
+      background: transparent;
+      border: 1px solid var(--grey);
+      color: var(--white);
+      font-family: var(--font-pixel);
+      font-size: 8px;
+      padding: 3px 6px;
+    }
+    .admin-del-btn {
+      background: transparent;
+      border: 1px solid var(--magenta);
+      color: var(--magenta);
+      font-family: var(--font-pixel);
+      font-size: 7px;
+      padding: 2px 5px;
+      cursor: pointer;
+    }
+    .admin-add-btn {
+      background: transparent;
+      border: 1px solid var(--grey);
+      color: var(--grey);
+      font-family: var(--font-pixel);
+      font-size: 7px;
+      padding: 3px 8px;
+      cursor: pointer;
+      margin-top: 2px;
+    }
+    .admin-add-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+    .admin-conn-label {
+      font-size: 8px;
+      color: var(--grey);
+      letter-spacing: 1px;
+      margin: 8px 0 4px;
+    }
+    .admin-conn-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+      font-size: 8px;
+      color: var(--white);
+    }
+    .admin-conn-row select {
+      flex: 1;
+      background: var(--bg-dark);
+      border: 1px solid var(--grey);
+      color: var(--white);
+      font-family: var(--font-pixel);
+      font-size: 8px;
+      padding: 2px 4px;
+    }
+    .admin-save-btn {
+      width: 100%;
+      background: var(--yellow);
+      color: var(--bg-dark);
+      border: none;
+      font-family: var(--font-pixel);
+      font-size: 9px;
+      letter-spacing: 2px;
+      padding: 10px;
+      cursor: pointer;
+      margin-top: 16px;
+      transition: box-shadow 0.15s;
+    }
+    .admin-save-btn:hover { box-shadow: 0 0 14px var(--yellow); }
+    .admin-add-set-btn {
+      width: 100%;
+      background: transparent;
+      border: 2px solid var(--green);
+      color: var(--green);
+      font-family: var(--font-pixel);
+      font-size: 9px;
+      letter-spacing: 2px;
+      padding: 8px;
+      cursor: pointer;
+      margin-bottom: 16px;
+    }
+    .admin-add-set-btn:hover { background: rgba(57,255,20,0.1); }
+    .admin-del-set-btn {
+      background: transparent;
+      border: 1px solid var(--magenta);
+      color: var(--magenta);
+      font-family: var(--font-pixel);
+      font-size: 7px;
+      padding: 2px 6px;
+      cursor: pointer;
+      margin-left: auto;
+    }
+  </style>
+</head>
+<body>
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar">
+    <a href="../../index.html" class="navbar__logo">◈ PIXELVERSE</a>
+    <ul class="navbar__links">
+      <li><a href="../../index.html" title="Home">🏠</a></li>
+      <li>
+        <button class="navbar__grid-btn" id="gamesBtn" title="Games">
+          <span class="navbar__grid-btn__dots">
+            <span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span>
+            <span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span>
+            <span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span>
+          </span>
+        </button>
+      </li>
+      <li><button class="navbar__admin-btn" id="adminBtn">🔒 ADMIN</button></li>
+    </ul>
+  </nav>
+
+  <!-- ===== GAMES POPUP ===== -->
+  <div class="navbar__games-popup" id="gamesPopup">
+    <div class="navbar__games-list">
+      <a href="../pros-cons/index.html" class="navbar__game-item">🐺</a>
+      <a href="../mind-map/index.html" class="navbar__game-item">🐙</a>
+      <div class="navbar__game-item navbar__game-item--active">🐿️</div>
+      <a href="../file-naming/index.html" class="navbar__game-item">🐟</a>
+    </div>
+  </div>
+
+  <!-- ===== ADMIN LOGIN MODAL ===== -->
+  <div class="admin-modal-overlay hidden" id="adminModal">
+    <div class="admin-modal pixel-box pixel-box--yellow">
+      <div class="admin-modal__title">🔐 ADMIN LOGIN</div>
+      <div>
+        <label class="admin-modal__label" for="adminPw">PASSWORD</label>
+        <input class="admin-modal__input" type="password" id="adminPw" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+      <div class="admin-modal__error" id="adminError"></div>
+      <div class="admin-modal__btns">
+        <button class="admin-modal__btn" id="adminLoginBtn">▶ LOGIN</button>
+        <button class="admin-modal__btn admin-modal__btn--cancel" id="adminCancelBtn">✕ CANCEL</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ADMIN PANEL ===== -->
+  <div class="admin-panel" id="adminPanel">
+    <div class="admin-panel__title" id="adminPanelTitle">⚙ ADMIN — 🐿️ NỐI TỪ</div>
+    <button class="admin-panel__close" id="adminClose">✕ CLOSE</button>
+
+    <button class="admin-add-set-btn" id="adminAddSetBtn">＋ ADD SET</button>
+    <div id="adminSetList"></div>
+
+    <button class="admin-save-btn" id="adminSaveBtn">💾 SAVE</button>
+  </div>
+
+  <!-- ===== MAIN ===== -->
+  <main class="game-page">
+    <div class="page-header">
+      <a href="../../index.html" class="page-header__back" onclick="SFX.navigate()">◂ PIXELVERSE</a>
+      <h1 class="page-header__title" id="gameTitle">🐿️ Nối Từ</h1>
+    </div>
+
+    <div class="status-bar">
+      <span id="scoreDisplay">SCORE: 0</span>
+      <span id="setDisplay">BỘ: 1 / 1</span>
+    </div>
+
+    <div class="set-nav">
+      <button class="set-nav__btn" id="prevSetBtn" onclick="prevSet()">◂ TRƯỚC</button>
+      <span class="set-nav__label" id="setLabel">BỘ 1</span>
+      <button class="set-nav__btn" id="nextSetBtn" onclick="nextSet()">TIẾP ▸</button>
+    </div>
+
+    <div class="match-arena" id="matchArena">
+      <div class="match-col match-col--left"  id="colLeft"></div>
+      <div></div>
+      <div class="match-col match-col--right" id="colRight"></div>
+      <div class="match-svg-wrap" id="svgWrap">
+        <svg id="matchSvg" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+    </div>
+
+    <div class="action-bar">
+      <button class="action-btn action-btn--check"      id="checkBtn"    onclick="checkAnswers()">✓ CHECK</button>
+      <button class="action-btn action-btn--play-again" id="playAgainBtn" onclick="continueGame()" style="display:none">▶ CONTINUE</button>
+    </div>
+
+    <div class="result-banner" id="resultBanner">
+      <div class="result-banner__score" id="resultScore"></div>
+      <div class="result-banner__msg"   id="resultMsg"></div>
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ================================================================
+    //  CONSTANTS & STATE
+    // ================================================================
+    const GAME_EMOJI = '🐿️';
+    const STORAGE_KEY = 'matching';
+
+    let gameData   = [];   // array of set objects
+    let currentSet = 0;    // index into gameData
+    let connections = new Set();  // "L1|R1" style keys for current set
+    let pendingDot  = null;       // { id, side } or null
+    let checked     = false;
+    let totalCorrect = 0;
+    let totalAnswered = 0;
+
+    // Per-set connection state
+    let setConnections = {};   // setIdx → Set of connection keys
+
+    // ================================================================
+    //  UTILS
+    // ================================================================
+    function ck(a, b) { return a < b ? `${a}|${b}` : `${b}|${a}`; }
+
+    function showToast(msg, dur = 2000) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), dur);
+    }
+
+    // ================================================================
+    //  DATA LOADING
+    // ================================================================
+    async function loadGameData() {
+      // Try localStorage first (admin saved)
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try { return JSON.parse(saved); } catch(e) {}
+      }
+      // Fallback to bundled data
+      if (window.MATCHING_DATA) return JSON.parse(JSON.stringify(window.MATCHING_DATA));
+      return [];
+    }
+
+    // ================================================================
+    //  DOT POSITIONS (for SVG lines)
+    // ================================================================
+    function getDotPos(dotEl) {
+      const arena = document.getElementById('matchArena');
+      const arenaRect = arena.getBoundingClientRect();
+      const dotRect   = dotEl.getBoundingClientRect();
+      return {
+        x: dotRect.left + dotRect.width / 2 - arenaRect.left,
+        y: dotRect.top  + dotRect.height / 2 - arenaRect.top
+      };
+    }
+
+    function getDotElById(id) {
+      return document.querySelector(`[data-dot="${id}"]`);
+    }
+
+    // ================================================================
+    //  RENDER LINES
+    // ================================================================
+    function renderLines(correctSet) {
+      const svg = document.getElementById('matchSvg');
+      svg.innerHTML = '';
+
+      connections.forEach(key => {
+        const [a, b] = key.split('|');
+        const elA = getDotElById(a);
+        const elB = getDotElById(b);
+        if (!elA || !elB) return;
+
+        const posA = getDotPos(elA);
+        const posB = getDotPos(elB);
+
+        const mx = (posA.x + posB.x) / 2;
+        const my = (posA.y + posB.y) / 2;
+
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', posA.x); line.setAttribute('y1', posA.y);
+        line.setAttribute('x2', posB.x); line.setAttribute('y2', posB.y);
+        line.classList.add('conn-line');
+        if (correctSet) {
+          line.classList.add(correctSet.has(key) ? 'correct' : 'wrong');
+        }
+        svg.appendChild(line);
+
+        // Delete button (only when not checked)
+        if (!checked) {
+          const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+          g.style.cursor = 'pointer';
+          g.addEventListener('click', () => { SFX.click(); deleteConn(key); });
+
+          const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          bg.setAttribute('x', mx - 7); bg.setAttribute('y', my - 7);
+          bg.setAttribute('width', 14);  bg.setAttribute('height', 14);
+          bg.classList.add('conn-del-bg');
+
+          const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          txt.setAttribute('x', mx); txt.setAttribute('y', my);
+          txt.classList.add('conn-del');
+          txt.textContent = '✕';
+
+          g.appendChild(bg); g.appendChild(txt);
+          svg.appendChild(g);
+        }
+      });
+    }
+
+    function deleteConn(key) {
+      connections.delete(key);
+      setConnections[currentSet] = new Set(connections);
+      updateDotColors();
+      renderLines();
+    }
+
+    function updateDotColors() {
+      // Highlight dots that have at least one connection
+      document.querySelectorAll('[data-dot]').forEach(dot => {
+        const id = dot.dataset.dot;
+        const hasConn = [...connections].some(k => k.split('|').includes(id));
+        dot.classList.toggle('connected', hasConn);
+        dot.classList.toggle('pending', pendingDot && pendingDot.id === id);
+      });
+    }
+
+    // ================================================================
+    //  BUILD GAME
+    // ================================================================
+    function buildGame() {
+      const set = gameData[currentSet];
+      if (!set) return;
+
+      // Restore saved connections for this set
+      connections = setConnections[currentSet] || new Set();
+      setConnections[currentSet] = connections;
+
+      checked = false;
+
+      const colLeft  = document.getElementById('colLeft');
+      const colRight = document.getElementById('colRight');
+      colLeft.innerHTML  = '';
+      colRight.innerHTML = '';
+
+      set.leftItems.forEach(item => {
+        const el = document.createElement('div');
+        el.className = 'match-item';
+        el.dataset.id = item.id;
+        el.innerHTML = `<span>${item.text}</span><div class="dot" data-dot="${item.id}" data-side="left"></div>`;
+        colLeft.appendChild(el);
+      });
+
+      set.rightItems.forEach(item => {
+        const el = document.createElement('div');
+        el.className = 'match-item';
+        el.dataset.id = item.id;
+        el.innerHTML = `<div class="dot" data-dot="${item.id}" data-side="right"></div><span>${item.text}</span>`;
+        colRight.appendChild(el);
+      });
+
+      // Attach dot click listeners
+      document.querySelectorAll('[data-dot]').forEach(dot => {
+        dot.addEventListener('click', onDotClick);
+      });
+
+      updateDotColors();
+      renderLines();
+      updateSetNav();
+    }
+
+    function onDotClick(e) {
+      if (checked) return;
+      e.stopPropagation();
+      SFX.click();
+
+      const id   = e.currentTarget.dataset.dot;
+      const side = e.currentTarget.dataset.side;
+
+      if (!pendingDot) {
+        // Start a new connection
+        pendingDot = { id, side };
+        updateDotColors();
+        return;
+      }
+
+      if (pendingDot.id === id) {
+        // Clicked same dot — cancel
+        pendingDot = null;
+        updateDotColors();
+        return;
+      }
+
+      if (pendingDot.side === side) {
+        // Same column — switch pending to this dot
+        pendingDot = { id, side };
+        updateDotColors();
+        return;
+      }
+
+      // Connect: one from each side
+      const leftId  = side === 'right' ? pendingDot.id : id;
+      const rightId = side === 'right' ? id : pendingDot.id;
+      const key = ck(leftId, rightId);
+
+      if (connections.has(key)) {
+        // Toggle off
+        connections.delete(key);
+      } else {
+        connections.add(key);
+        SFX.place();
+      }
+
+      setConnections[currentSet] = new Set(connections);
+      pendingDot = null;
+      updateDotColors();
+      renderLines();
+    }
+
+    // Cancel pending on outside click
+    document.addEventListener('click', () => {
+      if (pendingDot) { pendingDot = null; updateDotColors(); }
+    });
+
+    // ================================================================
+    //  SET NAVIGATION
+    // ================================================================
+    function updateSetNav() {
+      const total = gameData.length;
+      document.getElementById('setLabel').textContent = `BỘ ${currentSet + 1}`;
+      document.getElementById('setDisplay').textContent = `BỘ: ${currentSet + 1} / ${total}`;
+      document.getElementById('prevSetBtn').disabled = currentSet === 0;
+      document.getElementById('nextSetBtn').disabled = currentSet === total - 1;
+    }
+
+    function prevSet() {
+      if (currentSet > 0) {
+        SFX.navigate();
+        currentSet--;
+        checked = false;
+        document.getElementById('resultBanner').style.display = 'none';
+        document.getElementById('checkBtn').style.display = '';
+        document.getElementById('playAgainBtn').style.display = 'none';
+        buildGame();
+      }
+    }
+
+    function nextSet() {
+      if (currentSet < gameData.length - 1) {
+        SFX.navigate();
+        currentSet++;
+        checked = false;
+        document.getElementById('resultBanner').style.display = 'none';
+        document.getElementById('checkBtn').style.display = '';
+        document.getElementById('playAgainBtn').style.display = 'none';
+        buildGame();
+      }
+    }
+
+    // ================================================================
+    //  CHECK & CONTINUE
+    // ================================================================
+    function checkAnswers() {
+      const set = gameData[currentSet];
+      const correctSet = new Set(set.connections.map(c => ck(c.from, c.to)));
+
+      checked = true;
+      let correct = 0;
+
+      connections.forEach(key => { if (correctSet.has(key)) correct++; });
+
+      // Also count missed correct connections
+      const total = correctSet.size;
+      const pct   = total === 0 ? 100 : Math.round(correct / total * 100);
+
+      SFX[pct === 100 ? 'correct' : 'wrong']();
+
+      // Color items
+      const allIds = new Set();
+      [...connections, ...correctSet].forEach(k => k.split('|').forEach(id => allIds.add(id)));
+      allIds.forEach(id => {
+        const item = document.querySelector(`[data-id="${id}"]`);
+        if (!item) return;
+        const hasCorrect = [...connections].some(k => {
+          const parts = k.split('|');
+          return parts.includes(id) && correctSet.has(k);
+        });
+        const hasWrong = [...connections].some(k => {
+          const parts = k.split('|');
+          return parts.includes(id) && !correctSet.has(k);
+        });
+        item.classList.remove('correct', 'wrong');
+        if (hasCorrect && !hasWrong) item.classList.add('correct');
+        else if (hasWrong) item.classList.add('wrong');
+      });
+
+      renderLines(correctSet);
+
+      const msgs = [
+        [100, '🏆 Hoàn hảo! Nối đúng tất cả!'],
+        [70,  '🎉 Rất tốt! Còn một vài nối sai.'],
+        [40,  '👍 Khá ổn! Hãy thử lại để cải thiện.'],
+        [0,   '💪 Chưa đạt! Xem lại các mối quan hệ nhé.'],
+      ];
+      const msg = msgs.find(([min]) => pct >= min)[1];
+
+      document.getElementById('scoreDisplay').textContent = `SCORE: ${correct}/${total}`;
+      document.getElementById('resultScore').textContent  = `${correct} / ${total} ĐÚNG (${pct}%)`;
+      document.getElementById('resultMsg').textContent    = msg;
+      document.getElementById('resultBanner').style.display = 'block';
+      document.getElementById('checkBtn').style.display = 'none';
+      document.getElementById('playAgainBtn').style.display = '';
+    }
+
+    function continueGame() {
+      checked = false;
+      document.querySelectorAll('.match-item').forEach(el => el.classList.remove('correct', 'wrong'));
+      renderLines();
+      document.getElementById('resultBanner').style.display = 'none';
+      document.getElementById('checkBtn').style.display = '';
+      document.getElementById('playAgainBtn').style.display = 'none';
+    }
+
+    // ================================================================
+    //  RESIZE → REDRAW LINES
+    // ================================================================
+    window.addEventListener('resize', () => renderLines(checked ? undefined : undefined));
+
+    // ================================================================
+    //  ADMIN PANEL
+    // ================================================================
+    let adminData = null;
+
+    function buildAdminUI() {
+      const list = document.getElementById('adminSetList');
+      list.innerHTML = '';
+      adminData.forEach((set, si) => {
+        const card = document.createElement('div');
+        card.className = 'admin-set-card';
+
+        // Title
+        const titleRow = document.createElement('div');
+        titleRow.className = 'admin-set-title';
+        titleRow.innerHTML = `<span>BỘ ${si + 1}:</span>`;
+        const titleInput = document.createElement('input');
+        titleInput.value = set.title || '';
+        titleInput.addEventListener('input', () => { adminData[si].title = titleInput.value; });
+        const delSetBtn = document.createElement('button');
+        delSetBtn.className = 'admin-del-set-btn';
+        delSetBtn.textContent = '✕ XÓA';
+        delSetBtn.addEventListener('click', () => { adminData.splice(si, 1); buildAdminUI(); });
+        titleRow.appendChild(titleInput); titleRow.appendChild(delSetBtn);
+        card.appendChild(titleRow);
+
+        // Columns
+        const cols = document.createElement('div');
+        cols.className = 'admin-cols';
+
+        ['left', 'right'].forEach(side => {
+          const col = document.createElement('div');
+          const label = document.createElement('div');
+          label.className = 'admin-col-label';
+          label.textContent = side === 'left' ? 'CỘT TRÁI' : 'CỘT PHẢI';
+          col.appendChild(label);
+
+          const items = side === 'left' ? set.leftItems : set.rightItems;
+          items.forEach((item, ii) => {
+            const row = document.createElement('div');
+            row.className = 'admin-kw-row';
+            const inp = document.createElement('input');
+            inp.value = item.text;
+            inp.addEventListener('input', () => { items[ii].text = inp.value; });
+            const del = document.createElement('button');
+            del.className = 'admin-del-btn'; del.textContent = '✕';
+            del.addEventListener('click', () => { items.splice(ii, 1); buildAdminUI(); });
+            row.appendChild(inp); row.appendChild(del);
+            col.appendChild(row);
+          });
+          const addBtn = document.createElement('button');
+          addBtn.className = 'admin-add-btn'; addBtn.textContent = '＋';
+          addBtn.addEventListener('click', () => {
+            const newId = side === 'left' ? `L${Date.now()}` : `R${Date.now()}`;
+            items.push({ id: newId, text: '' });
+            buildAdminUI();
+          });
+          col.appendChild(addBtn);
+          cols.appendChild(col);
+        });
+        card.appendChild(cols);
+
+        // Connections
+        const connLabel = document.createElement('div');
+        connLabel.className = 'admin-conn-label';
+        connLabel.textContent = 'KẾT NỐI ĐÚNG:';
+        card.appendChild(connLabel);
+
+        set.connections.forEach((conn, ci) => {
+          const row = document.createElement('div');
+          row.className = 'admin-conn-row';
+
+          const selL = document.createElement('select');
+          set.leftItems.forEach(l => {
+            const opt = document.createElement('option');
+            opt.value = l.id; opt.textContent = l.text || l.id;
+            if (l.id === conn.from) opt.selected = true;
+            selL.appendChild(opt);
+          });
+          selL.addEventListener('change', () => { adminData[si].connections[ci].from = selL.value; });
+
+          const arrow = document.createElement('span');
+          arrow.textContent = '→';
+
+          const selR = document.createElement('select');
+          set.rightItems.forEach(r => {
+            const opt = document.createElement('option');
+            opt.value = r.id; opt.textContent = r.text || r.id;
+            if (r.id === conn.to) opt.selected = true;
+            selR.appendChild(opt);
+          });
+          selR.addEventListener('change', () => { adminData[si].connections[ci].to = selR.value; });
+
+          const del = document.createElement('button');
+          del.className = 'admin-del-btn'; del.textContent = '✕';
+          del.addEventListener('click', () => { adminData[si].connections.splice(ci, 1); buildAdminUI(); });
+
+          row.appendChild(selL); row.appendChild(arrow); row.appendChild(selR); row.appendChild(del);
+          card.appendChild(row);
+        });
+
+        const addConnBtn = document.createElement('button');
+        addConnBtn.className = 'admin-add-btn';
+        addConnBtn.textContent = '＋ THÊM KẾT NỐI';
+        addConnBtn.addEventListener('click', () => {
+          const lId = set.leftItems[0]?.id || '';
+          const rId = set.rightItems[0]?.id || '';
+          if (lId && rId) { set.connections.push({ from: lId, to: rId }); buildAdminUI(); }
+        });
+        card.appendChild(addConnBtn);
+        list.appendChild(card);
+      });
+    }
+
+    document.getElementById('adminAddSetBtn').addEventListener('click', () => {
+      adminData.push({
+        id: Date.now(),
+        title: `Bộ ${adminData.length + 1}`,
+        leftItems:  [{ id: `L${Date.now()}a`, text: '' }],
+        rightItems: [{ id: `R${Date.now()}b`, text: '' }],
+        connections: []
+      });
+      buildAdminUI();
+    });
+
+    document.getElementById('adminSaveBtn').addEventListener('click', () => {
+      SFX.correct();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(adminData));
+      showToast('Đã lưu!');
+      gameData = JSON.parse(JSON.stringify(adminData));
+      setConnections = {};
+      currentSet = 0;
+      buildGame();
+    });
+
+    document.getElementById('adminClose').addEventListener('click', () => {
+      document.getElementById('adminPanel').classList.remove('open');
+    });
+
+    // ================================================================
+    //  GAMES POPUP
+    // ================================================================
+    const gamesBtn   = document.getElementById('gamesBtn');
+    const gamesPopup = document.getElementById('gamesPopup');
+    gamesBtn.addEventListener('click', e => { e.stopPropagation(); SFX.click(); gamesPopup.classList.toggle('open'); });
+    document.addEventListener('click', () => gamesPopup.classList.remove('open'));
+
+    // ================================================================
+    //  ADMIN AUTH
+    // ================================================================
+    const adminBtn    = document.getElementById('adminBtn');
+    const adminModal  = document.getElementById('adminModal');
+    const adminPanel  = document.getElementById('adminPanel');
+    const adminPw     = document.getElementById('adminPw');
+    const adminError  = document.getElementById('adminError');
+    const adminLoginBtn  = document.getElementById('adminLoginBtn');
+    const adminCancelBtn = document.getElementById('adminCancelBtn');
+
+    function openAdminPanel() {
+      adminData = JSON.parse(JSON.stringify(gameData));
+      buildAdminUI();
+      adminPanel.classList.add('open');
+    }
+
+    adminBtn.addEventListener('click', () => {
+      SFX.click();
+      if (AdminAuth.isLoggedIn()) {
+        openAdminPanel();
+      } else {
+        adminModal.classList.remove('hidden');
+        adminPw.value = '';
+        adminError.textContent = '';
+        setTimeout(() => adminPw.focus(), 50);
+      }
+    });
+
+    adminLoginBtn.addEventListener('click', () => {
+      if (AdminAuth.login(adminPw.value)) {
+        adminModal.classList.add('hidden');
+        adminBtn.classList.add('logged-in');
+        adminBtn.textContent = '🔓 ADMIN';
+        openAdminPanel();
+      } else {
+        adminError.textContent = '✕ SAI MẬT KHẨU';
+        SFX.wrong();
+      }
+    });
+
+    adminPw.addEventListener('keydown', e => { if (e.key === 'Enter') adminLoginBtn.click(); });
+    adminCancelBtn.addEventListener('click', () => adminModal.classList.add('hidden'));
+
+    if (AdminAuth.isLoggedIn()) {
+      adminBtn.classList.add('logged-in');
+      adminBtn.textContent = '🔓 ADMIN';
+    }
+
+    // ================================================================
+    //  INIT
+    // ================================================================
+    async function initGame() {
+      gameData = await loadGameData();
+      setConnections = {};
+      currentSet = 0;
+
+      document.title = `${GAME_EMOJI} — PIXELVERSE`;
+      document.getElementById('gameTitle').textContent = `${GAME_EMOJI} Nối Từ`;
+      document.getElementById('adminPanelTitle').textContent = `⚙ ADMIN — ${GAME_EMOJI} NỐI TỪ`;
+
+      buildGame();
+
+      // Handle ?admin=open URL param
+      if (new URLSearchParams(location.search).get('admin') === 'open') {
+        if (AdminAuth.isLoggedIn()) openAdminPanel();
+        else { adminModal.classList.remove('hidden'); setTimeout(() => adminPw.focus(), 50); }
+      }
+    }
+
+    initGame();
+  </script>
+</body>
+</html>

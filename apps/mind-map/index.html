@@ -587,7 +587,8 @@
     <div class="navbar__games-list">
       <a href="../pros-cons/index.html" class="navbar__game-item">🐺</a>
       <div class="navbar__game-item navbar__game-item--active" id="navGameName">🐙</div>
-      <div class="navbar__game-item navbar__game-item--soon">?</div>
+      <a href="../matching/index.html" class="navbar__game-item">🐿️</a>
+      <a href="../file-naming/index.html" class="navbar__game-item">🐟</a>
     </div>
   </div>
 
@@ -694,7 +695,7 @@
 
     <div class="action-bar">
       <button class="action-btn action-btn--check"      id="checkBtn"     onclick="checkAnswers()">✓ CHECK</button>
-      <button class="action-btn action-btn--play-again" id="playAgainBtn" onclick="playAgain()" style="display:none">▶ CONTINUE</button>
+      <button class="action-btn action-btn--play-again" id="playAgainBtn" onclick="continueGame()" style="display:none">▶ CONTINUE</button>
     </div>
 
     <div class="result-banner" id="resultBanner">
@@ -1203,7 +1204,7 @@
       const placedKids = Object.keys(placements);
       if (placedKids.length < gameData.keywords.length) {
         const missing = gameData.keywords.length - placedKids.length;
-        showToast(`Place all keywords first! (${missing} remaining)`);
+        showToast(`Hãy đặt tất cả từ khóa trước! (còn ${missing} từ)`);
         return;
       }
 
@@ -1212,7 +1213,7 @@
       connections.forEach(key => { const [a, b] = cpair(key); connectedSet.add(a); connectedSet.add(b); });
       const unconnected = gameData.keywords.filter(kw => !connectedSet.has(kw.id));
       if (unconnected.length > 0) {
-        showToast(`${unconnected.length} node${unconnected.length > 1 ? 's' : ''} still unconnected!`);
+        showToast(`${unconnected.length} nút chưa được kết nối!`);
         return;
       }
 
@@ -1246,10 +1247,10 @@
       document.getElementById('progressDisplay').textContent = `${correct} / ${total} CORRECT`;
 
       const msgs = [
-        [100, '🏆 Perfect! Outstanding mind map!'],
-        [70,  '🎉 Great job! A few connections off.'],
-        [40,  '👍 Not bad! Review the rows and links.'],
-        [0,   '💪 Keep trying! Check your structure.'],
+        [100, '🏆 Hoàn hảo! Sơ đồ tư duy xuất sắc!'],
+        [70,  '🎉 Rất tốt! Một vài kết nối cần xem lại.'],
+        [40,  '👍 Khá ổn! Hãy kiểm tra hàng và liên kết.'],
+        [0,   '💪 Chưa đạt! Xem lại cấu trúc nhé.'],
       ];
       const msg = msgs.find(([min]) => pct >= min)[1];
 
@@ -1258,7 +1259,51 @@
       document.getElementById('resultBanner').style.display = 'block';
       document.getElementById('playAgainBtn').style.display = '';
       document.getElementById('checkBtn').style.display = 'none';
+      autoGroupSiblings();
       clearGameSelection();
+    }
+
+    function autoGroupSiblings() {
+      // Group nodes in each row so siblings sharing the same parent are adjacent.
+      const childrenOf = {};
+      connections.forEach(key => {
+        const [a, b] = cpair(key);
+        const rowA = placements[a], rowB = placements[b];
+        if (rowA !== undefined && rowB !== undefined) {
+          if (rowA < rowB) {
+            if (!childrenOf[a]) childrenOf[a] = [];
+            childrenOf[a].push(b);
+          } else if (rowB < rowA) {
+            if (!childrenOf[b]) childrenOf[b] = [];
+            childrenOf[b].push(a);
+          }
+        }
+      });
+      const rows = Object.values(placements);
+      if (!rows.length) return;
+      const maxRow = Math.max(...rows);
+      for (let row = 1; row <= maxRow; row++) {
+        const rowKids = (rowOrder[row] || []).filter(id => placements[id] === row);
+        if (rowKids.length < 2) continue;
+        const parentOrder = (rowOrder[row - 1] || []);
+        rowKids.sort((a, b) => {
+          const pA = parentOrder.findIndex(p => (childrenOf[p] || []).includes(a));
+          const pB = parentOrder.findIndex(p => (childrenOf[p] || []).includes(b));
+          return (pA === -1 ? 9999 : pA) - (pB === -1 ? 9999 : pB);
+        });
+        rowOrder[row] = rowKids;
+      }
+      renderGamePlaced();
+    }
+
+    function continueGame() {
+      checked = false;
+      document.querySelectorAll('#mapCanvas .map-node').forEach(n => n.classList.remove('correct', 'wrong'));
+      refreshGameConnections();
+      document.getElementById('resultBanner').style.display = 'none';
+      document.getElementById('checkBtn').style.display = '';
+      document.getElementById('playAgainBtn').style.display = 'none';
+      updateProgress();
     }
 
     async function playAgain() { gameData = await loadGameData(); buildGame(); }
