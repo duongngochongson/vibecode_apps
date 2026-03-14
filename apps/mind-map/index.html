@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sơ đồ Tư Duy — PIXELVERSE</title>
+  <link rel="stylesheet" href="../../css/style.css" />
+  <script src="../../data/mind-map.js"></script>
+  <script src="../../js/sfx.js"></script>
+  <script src="../../js/admin-auth.js"></script>
+  <style>
+    /* ===== GAME PAGE ===== */
+    .game-page {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 28px 2rem 60px;
+      position: relative;
+      z-index: 2;
+    }
+    .page-header {
+      margin-bottom: 20px;
+    }
+    .page-header__back {
+      font-family: var(--font-pixel);
+      font-size: 7px;
+      color: var(--grey);
+      text-decoration: none;
+      letter-spacing: 1px;
+      display: inline-block;
+      margin-bottom: 12px;
+    }
+    .page-header__back:hover { color: var(--cyan); }
+    .page-header h1 {
+      font-family: var(--font-vi-heading);
+      font-size: clamp(18px, 4vw, 26px);
+      color: var(--white);
+      margin-bottom: 6px;
+    }
+    .page-header__sub {
+      font-family: var(--font-vi-body);
+      font-size: 13px;
+      color: rgba(232,232,255,0.55);
+    }
+
+    /* ===== SCORE BAR ===== */
+    .score-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+    .score-chip {
+      font-family: var(--font-pixel);
+      font-size: 7px;
+      padding: 8px 14px;
+      letter-spacing: 1px;
+      color: var(--cyan);
+    }
+    .score-chip--yellow { color: var(--yellow); }
+
+    /* ===== MAP LAYOUT ===== */
+    .map-layout {
+      display: grid;
+      grid-template-columns: 1fr 200px;
+      gap: 20px;
+      align-items: start;
+    }
+
+    /* ===== MAP CANVAS ===== */
+    .map-canvas {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-height: 280px;
+    }
+    .map-svg {
+      position: absolute;
+      inset: 0;
+      overflow: visible;
+      z-index: 10;
+      fill: none;
+    }
+
+    /* ===== ROWS ===== */
+    .map-row {
+      min-height: 72px;
+      border: 2px dashed var(--grey);
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 2;
+      transition: border-color 0.1s, box-shadow 0.1s;
+    }
+    .map-row.accepting {
+      border-color: rgba(0,255,245,0.4);
+    }
+    .map-row.drag-over {
+      border-color: var(--cyan);
+      box-shadow: inset 0 0 14px rgba(0,255,245,0.12);
+    }
+    .row-label {
+      font-family: var(--font-pixel);
+      font-size: 7px;
+      color: var(--grey);
+      min-width: 20px;
+      user-select: none;
+    }
+    .row-nodes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      flex: 1;
+    }
+
+    /* ===== NODE ===== */
+    .map-node {
+      position: relative;
+      padding: 10px 16px;
+      border: 2px solid var(--cyan);
+      background: var(--bg-card);
+      cursor: pointer;
+      user-select: none;
+      font-size: 13px;
+      color: var(--white);
+      transition: border-color 0.1s, box-shadow 0.1s;
+    }
+    .map-node:hover { border-color: var(--white); }
+    .map-node.selected {
+      border-color: var(--yellow);
+      box-shadow: 0 0 12px rgba(255,230,0,0.45);
+    }
+    .map-node.correct {
+      border-color: var(--green);
+      box-shadow: 0 0 8px rgba(57,255,20,0.35);
+    }
+    .map-node.wrong {
+      border-color: var(--orange);
+      box-shadow: 0 0 8px rgba(255,107,0,0.35);
+    }
+    .map-node.shake {
+      animation: node-shake 0.3s ease;
+    }
+    @keyframes node-shake {
+      0%,100% { transform: translateX(0); }
+      25%      { transform: translateX(-4px); }
+      75%      { transform: translateX(4px); }
+    }
+    .map-node.dragging { opacity: 0.4; cursor: grabbing; }
+
+    /* ===== CONNECTION DOTS ===== */
+    .node-dot {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--cyan);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 4;
+      pointer-events: none;
+      transition: background 0.1s, box-shadow 0.1s;
+    }
+    .node-dot--top    { top: -6px; }
+    .node-dot--bottom { bottom: -6px; }
+    .map-node.selected .node-dot {
+      background: var(--yellow);
+      box-shadow: 0 0 6px rgba(255,230,0,0.7);
+    }
+    .map-node.correct .node-dot { background: var(--green); }
+    .map-node.wrong   .node-dot { background: var(--orange); }
+
+    /* ===== SVG LINES ===== */
+    .map-line {
+      stroke: var(--cyan);
+      stroke-width: 2;
+      stroke-dasharray: 6 3;
+      fill: none;
+    }
+    .map-line.correct { stroke: var(--green);  stroke-dasharray: none; }
+    .map-line.wrong   { stroke: var(--orange); stroke-dasharray: none; }
+    .map-line-hit {
+      stroke: transparent;
+      stroke-width: 16;
+      fill: none;
+      cursor: pointer;
+    }
+
+    /* ===== KEYWORD POOL ===== */
+    .kw-pool-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .kw-pool-header {
+      font-family: var(--font-pixel);
+      font-size: 7px;
+      color: var(--magenta);
+      letter-spacing: 2px;
+    }
+    .kw-pool {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-height: 60px;
+      padding: 10px;
+      border: 2px solid var(--grey);
+    }
+    .kw-pool.drag-over { border-color: var(--magenta); }
+    .kw-chip {
+      padding: 9px 12px;
+      border: 2px solid var(--magenta);
+      background: var(--bg-card2);
+      cursor: grab;
+      font-size: 12px;
+      color: var(--white);
+      transition: border-color 0.1s, background 0.1s;
+    }
+    .kw-chip:hover { border-color: var(--white); }
+    .kw-chip.dragging { opacity: 0.35; cursor: grabbing; }
+    .pool-empty {
+      font-family: var(--font-pixel);
+      font-size: 6px;
+      color: var(--grey);
+      letter-spacing: 1px;
+      text-align: center;
+      padding: 8px 0;
+    }
+
+    /* ===== ACTION BAR ===== */
+    .action-bar {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 28px;
+    }
+    .action-btn {
+      font-family: var(--font-pixel);
+      font-size: 9px;
+      padding: 14px 22px;
+      min-height: 44px;
+      border: 2px solid;
+      background: transparent;
+      cursor: pointer;
+      letter-spacing: 1px;
+      transition: all 0.1s steps(1);
+    }
+    .action-btn--check     { color: var(--green);  border-color: var(--green); }
+    .action-btn--check:hover { background: var(--green); color: var(--bg-dark); }
+    .action-btn--reset     { color: var(--grey);   border-color: var(--grey); }
+    .action-btn--reset:hover { background: var(--grey); color: var(--bg-dark); }
+    .action-btn--play-again { color: var(--cyan);  border-color: var(--cyan); }
+    .action-btn--play-again:hover { background: var(--cyan); color: var(--bg-dark); }
+
+    /* ===== RESULT BANNER ===== */
+    .result-banner {
+      display: none;
+      text-align: center;
+      margin-top: 24px;
+      padding: 20px 24px;
+      border: 3px solid var(--green);
+      box-shadow: 0 0 20px rgba(57,255,20,0.3);
+    }
+    .result-banner__score {
+      font-family: var(--font-pixel);
+      font-size: 10px;
+      color: var(--green);
+      letter-spacing: 2px;
+      margin-bottom: 10px;
+    }
+    .result-banner__msg {
+      font-family: var(--font-vi-body);
+      font-size: 16px;
+      color: var(--white);
+    }
+
+    /* ===== ADMIN PANEL ===== */
+    .admin-panel {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 300;
+      background: rgba(5,5,15,0.96);
+      overflow-y: auto;
+      padding: 2rem 1rem;
+    }
+    .admin-panel.open { display: block; }
+    .admin-panel__inner {
+      max-width: 960px;
+      margin: 0 auto;
+      background: var(--bg-card);
+      border: 3px solid var(--yellow);
+      box-shadow: 0 0 30px rgba(255,230,0,0.2);
+      padding: 28px 24px;
+    }
+    .admin-panel__title {
+      font-family: var(--font-vi-heading);
+      font-size: 18px;
+      color: var(--yellow);
+      text-shadow: 0 0 10px var(--yellow);
+      letter-spacing: 2px;
+      margin-bottom: 24px;
+    }
+
+    /* Admin sections */
+    .admin-section { margin-bottom: 24px; }
+    .admin-section-title {
+      font-family: var(--font-pixel);
+      font-size: 8px;
+      color: var(--cyan);
+      letter-spacing: 2px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid var(--grey);
+      padding-bottom: 6px;
+    }
+
+    /* Keyword list */
+    .admin-kw-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+    .admin-kw-entry {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-card2);
+      padding: 8px 10px;
+      border: 1px solid var(--grey);
+    }
+    .admin-kw-num {
+      font-family: var(--font-pixel);
+      font-size: 6px;
+      color: var(--grey);
+      min-width: 22px;
+    }
+    .admin-remove-kw {
+      font-family: var(--font-pixel);
+      font-size: 6px;
+      background: transparent;
+      border: 1px solid var(--orange);
+      color: var(--orange);
+      padding: 4px 8px;
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+    .admin-remove-kw:hover { background: var(--orange); color: var(--bg-dark); }
+
+    /* Row count control */
+    .admin-row-ctrl {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .admin-row-ctrl-label {
+      font-family: var(--font-pixel);
+      font-size: 7px;
+      color: var(--grey);
+      letter-spacing: 1px;
+    }
+    .admin-row-btn {
+      font-family: var(--font-pixel);
+      font-size: 10px;
+      width: 30px;
+      height: 30px;
+      border: 2px solid var(--cyan);
+      background: transparent;
+      color: var(--cyan);
+      cursor: pointer;
+      transition: all 0.1s steps(1);
+    }
+    .admin-row-btn:hover { background: var(--cyan); color: var(--bg-dark); }
+    #adminRowCountDisplay {
+      font-family: var(--font-pixel);
+      font-size: 11px;
+      color: var(--white);
+      min-width: 20px;
+      text-align: center;
+    }
+
+    /* Admin canvas (mirrors game canvas layout) */
+    .admin-canvas-layout {
+      grid-template-columns: 1fr 180px;
+    }
+    .admin-map-canvas .map-row {
+      background: rgba(0,0,0,0.15);
+    }
+
+    /* Admin form inputs (reuse pros-cons styles) */
+    .admin-input {
+      font-family: var(--font-vi-body);
+      font-size: 13px;
+      background: var(--bg-card2);
+      border: 2px solid var(--grey);
+      color: var(--white);
+      padding: 7px 10px;
+      outline: none;
+      transition: border-color 0.15s;
+      flex: 1;
+    }
+    .admin-input:focus { border-color: var(--yellow); box-shadow: 0 0 6px rgba(255,230,0,0.25); }
+
+    /* Admin action bar */
+    .admin-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .admin-bar-btn {
+      font-family: var(--font-pixel);
+      font-size: 7px;
+      padding: 9px 14px;
+      border: 2px solid;
+      background: transparent;
+      cursor: pointer;
+      letter-spacing: 1px;
+      transition: all 0.1s steps(1);
+    }
+    .admin-bar-btn--add    { color: var(--green);   border-color: var(--green); }
+    .admin-bar-btn--add:hover { background: var(--green); color: var(--bg-dark); }
+    .admin-bar-btn--save   { color: var(--cyan);    border-color: var(--cyan); }
+    .admin-bar-btn--save:hover { background: var(--cyan); color: var(--bg-dark); }
+    .admin-bar-btn--export { color: var(--yellow);  border-color: var(--yellow); }
+    .admin-bar-btn--export:hover { background: var(--yellow); color: var(--bg-dark); }
+    .admin-bar-btn--import { color: var(--magenta); border-color: var(--magenta); }
+    .admin-bar-btn--import:hover { background: var(--magenta); color: var(--bg-dark); }
+    .admin-bar-btn--close  { color: var(--grey); border-color: var(--grey); margin-left: auto; }
+    .admin-bar-btn--close:hover { color: var(--white); border-color: var(--white); }
+
+    .admin-status {
+      font-size: 13px;
+      color: var(--green);
+      min-height: 18px;
+      margin-top: 8px;
+      letter-spacing: 1px;
+    }
+    .admin-export-box, .admin-import-box { display: none; margin-top: 14px; }
+    .admin-export-box label, .admin-import-box label {
+      font-family: var(--font-pixel);
+      font-size: 7px;
+      color: var(--yellow);
+      letter-spacing: 1px;
+      display: block;
+      margin-bottom: 6px;
+    }
+    .admin-import-box label { color: var(--magenta); }
+    .admin-export-ta, .admin-import-ta {
+      font-family: monospace;
+      font-size: 11px;
+      background: var(--bg-dark);
+      border: 2px solid var(--yellow);
+      color: var(--white);
+      padding: 10px;
+      width: 100%;
+      min-height: 100px;
+      resize: vertical;
+    }
+    .admin-import-ta { border-color: var(--magenta); }
+    .admin-copy-btn {
+      font-family: var(--font-pixel);
+      font-size: 7px;
+      margin-top: 6px;
+      padding: 7px 12px;
+      border: 2px solid var(--yellow);
+      background: transparent;
+      color: var(--yellow);
+      cursor: pointer;
+    }
+    .admin-copy-btn:hover { background: var(--yellow); color: var(--bg-dark); }
+    .admin-copy-btn--dl { border-color: var(--cyan); color: var(--cyan); }
+    .admin-copy-btn--dl:hover { background: var(--cyan); color: var(--bg-dark); }
+    .admin-import-apply {
+      font-family: var(--font-pixel);
+      font-size: 7px;
+      margin-top: 6px;
+      padding: 7px 12px;
+      border: 2px solid var(--magenta);
+      background: transparent;
+      color: var(--magenta);
+      cursor: pointer;
+    }
+    .admin-import-apply:hover { background: var(--magenta); color: var(--bg-dark); }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .map-layout { grid-template-columns: 1fr; }
+      .kw-pool-section { order: -1; }
+      .kw-pool { flex-direction: row; flex-wrap: wrap; }
+      .kw-chip { flex: 0 0 auto; }
+      .admin-canvas-layout { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 480px) {
+      .game-page { padding: 16px 1rem 40px; }
+      .map-node { padding: 8px 10px; font-size: 12px; }
+      .action-bar { gap: 8px; }
+      .admin-panel__inner { padding: 20px 14px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar">
+    <a href="../../index.html" class="navbar__logo">◈ PIXELVERSE</a>
+    <ul class="navbar__links">
+      <li><a href="../../index.html">HOME</a></li>
+      <li>
+        <button class="navbar__grid-btn" id="gamesBtn" title="Games">
+          <span class="navbar__grid-btn__dots">
+            <span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span>
+            <span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span>
+            <span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span>
+          </span>
+        </button>
+      </li>
+      <li><button class="navbar__admin-btn" id="adminBtn">🔒 ADMIN</button></li>
+    </ul>
+  </nav>
+
+  <!-- ===== GAMES POPUP ===== -->
+  <div class="navbar__games-popup" id="gamesPopup">
+    <div class="navbar__games-list">
+      <a href="../pros-cons/index.html" class="navbar__game-item">Đoán Ưu/Nhược</a>
+      <div class="navbar__game-item navbar__game-item--active">Sơ đồ Tư Duy</div>
+      <div class="navbar__game-item navbar__game-item--soon">?</div>
+    </div>
+  </div>
+
+  <!-- ===== ADMIN LOGIN MODAL ===== -->
+  <div class="admin-modal-overlay hidden" id="adminModal">
+    <div class="admin-modal pixel-box pixel-box--yellow">
+      <div class="admin-modal__title">🔐 ADMIN LOGIN</div>
+      <div>
+        <label class="admin-modal__label" for="adminPw">PASSWORD</label>
+        <input class="admin-modal__input" type="password" id="adminPw" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+      <div class="admin-modal__error" id="adminError"></div>
+      <div class="admin-modal__btns">
+        <button class="admin-modal__btn" id="adminLoginBtn">▶ LOGIN</button>
+        <button class="admin-modal__btn admin-modal__btn--cancel" id="adminCancelBtn">✕ CANCEL</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ADMIN PANEL ===== -->
+  <div class="admin-panel" id="adminPanel">
+    <div class="admin-panel__inner">
+      <div class="admin-panel__title">⚙ ADMIN — SƠ ĐỒ TƯ DUY</div>
+
+      <!-- Keyword list editor -->
+      <div class="admin-section">
+        <div class="admin-section-title">▸ TỪ KHÓA</div>
+        <div class="admin-kw-list" id="adminKwList"></div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <button class="admin-bar-btn admin-bar-btn--add" id="adminAddKwBtn">+ THÊM TỪ KHÓA</button>
+          <div class="admin-row-ctrl">
+            <span class="admin-row-ctrl-label">SỐ HÀNG:</span>
+            <button class="admin-row-btn" id="adminRowMinus">−</button>
+            <span id="adminRowCountDisplay">3</span>
+            <button class="admin-row-btn" id="adminRowPlus">+</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Canvas editor -->
+      <div class="admin-section">
+        <div class="admin-section-title">▸ THIẾT KẾ SƠ ĐỒ (kéo từ khóa vào hàng, ấn 2 ô để nối)</div>
+        <div class="map-layout admin-canvas-layout">
+          <div class="map-canvas admin-map-canvas" id="adminMapCanvas">
+            <svg class="map-svg" id="adminMapSvg"></svg>
+          </div>
+          <div class="kw-pool-section">
+            <div class="kw-pool-header">▸ CHƯA ĐẶT</div>
+            <div class="kw-pool" id="adminKwPool"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action bar -->
+      <div class="admin-bar">
+        <button class="admin-bar-btn admin-bar-btn--save"   id="adminSaveBtn">💾 SAVE</button>
+        <button class="admin-bar-btn admin-bar-btn--export" id="adminExportBtn">⬇ EXPORT</button>
+        <button class="admin-bar-btn admin-bar-btn--import" id="adminImportBtn">⬆ IMPORT</button>
+        <button class="admin-bar-btn admin-bar-btn--close"  id="adminCloseBtn">✕ CLOSE</button>
+      </div>
+
+      <div class="admin-status" id="adminStatus"></div>
+
+      <div class="admin-export-box" id="adminExportBox">
+        <label>Tải file hoặc copy nội dung → paste vào <strong style="color:var(--cyan)">admin_content.json</strong>:</label>
+        <textarea class="admin-export-ta" id="adminExportTa" readonly></textarea>
+        <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;">
+          <button class="admin-copy-btn admin-copy-btn--dl" id="adminDownloadBtn">⬇ DOWNLOAD FILE</button>
+          <button class="admin-copy-btn" id="adminCopyBtn">📋 COPY</button>
+        </div>
+      </div>
+
+      <div class="admin-import-box" id="adminImportBox">
+        <label>Paste JSON vào đây để load vào editor:</label>
+        <textarea class="admin-import-ta" id="adminImportTa" placeholder='[{"id":1,"title":"...","rowCount":3,"keywords":[...],"connections":[...]}]'></textarea>
+        <button class="admin-import-apply" id="adminImportApply">▶ APPLY</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== GAME PAGE ===== -->
+  <main class="game-page">
+
+    <div class="page-header">
+      <a href="../../index.html" class="page-header__back">◀ BACK TO HOME</a>
+      <h1>🗺 Sơ đồ Tư Duy</h1>
+      <p class="page-header__sub">Kéo thả từ khóa vào đúng hàng, sau đó nối các ô liên quan</p>
+    </div>
+
+    <div class="score-bar">
+      <div class="score-chip pixel-box" id="progressDisplay">0 / 0 ĐÃ ĐẶT</div>
+      <div class="score-chip score-chip--yellow pixel-box pixel-box--yellow" id="scoreDisplay">SCORE: —</div>
+    </div>
+
+    <div class="map-layout" id="mainMapLayout">
+      <div class="map-canvas" id="mapCanvas">
+        <svg class="map-svg" id="mapSvg"></svg>
+        <!-- rows rendered by JS -->
+      </div>
+      <div class="kw-pool-section">
+        <div class="kw-pool-header">▸ TỪ KHÓA</div>
+        <div class="kw-pool" id="kwPool"></div>
+      </div>
+    </div>
+
+    <div class="action-bar">
+      <button class="action-btn action-btn--check"      id="checkBtn"     onclick="checkAnswers()">✓ CHECK</button>
+      <button class="action-btn action-btn--reset"      id="resetBtn"     onclick="resetGame()">↺ RESET</button>
+      <button class="action-btn action-btn--play-again" id="playAgainBtn" onclick="playAgain()" style="display:none">▶ PLAY AGAIN</button>
+    </div>
+
+    <div class="result-banner" id="resultBanner">
+      <div class="result-banner__score" id="resultScore"></div>
+      <div class="result-banner__msg"   id="resultMsg"></div>
+    </div>
+
+  </main>
+
+  <script>
+    // ================================================================
+    //  UTILITIES
+    // ================================================================
+    const SEP = '|';
+    function ck(a, b)  { return a < b ? `${a}${SEP}${b}` : `${b}${SEP}${a}`; }
+    function cpair(k)  { return k.split(SEP); }
+    function escHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    // ================================================================
+    //  GAMES POPUP
+    // ================================================================
+    const gamesBtn   = document.getElementById('gamesBtn');
+    const gamesPopup = document.getElementById('gamesPopup');
+    gamesBtn.addEventListener('click', e => { e.stopPropagation(); SFX.click(); gamesPopup.classList.toggle('open'); });
+    document.addEventListener('click', () => gamesPopup.classList.remove('open'));
+
+    // ================================================================
+    //  DATA LOADING
+    // ================================================================
+    let _cachedJson = null;
+    async function loadGameData() {
+      const saved = localStorage.getItem('mindMap');
+      if (saved) { try { return JSON.parse(saved)[0]; } catch(e) {} }
+      if (!_cachedJson) {
+        try {
+          const r = await fetch('./admin_content.json');
+          if (r.ok) _cachedJson = await r.json();
+        } catch(e) {}
+      }
+      if (_cachedJson) return _cachedJson[0];
+      return (window.MIND_MAP_DATA || [])[0] || null;
+    }
+
+    // ================================================================
+    //  GAME STATE
+    // ================================================================
+    let gameData        = null;
+    let placements      = {};          // { kid: rowIdx }
+    let connections     = new Set();   // Set<"k1|k2">
+    let checked         = false;
+    let selectedNodeId  = null;
+    let dragKid         = null;        // kid being dragged in game
+
+    // ================================================================
+    //  GAME: BUILD
+    // ================================================================
+    function buildGame() {
+      checked = false; placements = {}; connections = new Set(); selectedNodeId = null;
+      renderGameRows();
+      renderGamePool();
+      // No placed nodes at start
+      refreshGameConnections();
+      updateProgress();
+      document.getElementById('resultBanner').style.display = 'none';
+      document.getElementById('playAgainBtn').style.display = 'none';
+      document.getElementById('checkBtn').style.display = '';
+      document.getElementById('scoreDisplay').textContent = 'SCORE: —';
+    }
+
+    // ================================================================
+    //  GAME: RENDER ROWS
+    // ================================================================
+    function renderGameRows() {
+      const canvas = document.getElementById('mapCanvas');
+      canvas.querySelectorAll('.map-row').forEach(r => r.remove());
+      for (let i = 0; i < gameData.rowCount; i++) {
+        canvas.appendChild(makeRow(i, false));
+      }
+    }
+
+    function makeRow(idx, isAdmin) {
+      const pfx = isAdmin ? 'admin' : 'game';
+      const row = document.createElement('div');
+      row.className = 'map-row';
+      row.dataset.row = idx;
+      row.id = `${pfx}-row-${idx}`;
+
+      const lbl = document.createElement('span');
+      lbl.className = 'row-label';
+      lbl.textContent = String(idx + 1).padStart(2, '0');
+
+      const nodes = document.createElement('div');
+      nodes.className = 'row-nodes';
+      nodes.id = `${pfx}-nodes-${idx}`;
+
+      row.appendChild(lbl);
+      row.appendChild(nodes);
+
+      // Dragover
+      row.addEventListener('dragover', e => {
+        const dkid = isAdmin ? adminDragKid : dragKid;
+        if (!dkid) return;
+        if (!isAdmin && checked) return;
+        e.preventDefault();
+        row.classList.add('drag-over');
+      });
+      row.addEventListener('dragleave', e => {
+        if (!row.contains(e.relatedTarget)) row.classList.remove('drag-over');
+      });
+      row.addEventListener('drop', e => {
+        e.preventDefault();
+        row.classList.remove('drag-over');
+        const dkid = isAdmin ? adminDragKid : dragKid;
+        if (!dkid) return;
+        if (!isAdmin && checked) return;
+        if (isAdmin) {
+          adminPlacements[dkid] = idx;
+          adminDragKid = null;
+          renderAdminPool();
+          renderAdminPlaced();
+          refreshAdminConnections();
+        } else {
+          placements[dkid] = idx;
+          dragKid = null;
+          renderGamePool();
+          renderGamePlaced();
+          refreshGameConnections();
+          updateProgress();
+        }
+      });
+      return row;
+    }
+
+    // ================================================================
+    //  GAME: RENDER POOL
+    // ================================================================
+    function renderGamePool() {
+      const pool = document.getElementById('kwPool');
+      pool.innerHTML = '';
+      const placed = new Set(Object.keys(placements));
+      gameData.keywords.forEach(kw => {
+        if (!placed.has(kw.id)) pool.appendChild(makeChip(kw, false));
+      });
+      if (placed.size === gameData.keywords.length) {
+        const e = document.createElement('div');
+        e.className = 'pool-empty';
+        e.textContent = 'Đã đặt tất cả!';
+        pool.appendChild(e);
+      }
+    }
+
+    function makeChip(kw, isAdmin) {
+      const div = document.createElement('div');
+      div.className = 'kw-chip font-vi';
+      div.textContent = kw.text;
+      div.draggable = true;
+      div.dataset.kid = kw.id;
+
+      div.addEventListener('dragstart', e => {
+        if (isAdmin) { adminDragKid = kw.id; }
+        else { if (checked) { e.preventDefault(); return; } dragKid = kw.id; }
+        div.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        const sel = isAdmin ? '.admin-map-canvas .map-row' : '#mapCanvas .map-row';
+        document.querySelectorAll(sel).forEach(r => r.classList.add('accepting'));
+      });
+      div.addEventListener('dragend', () => {
+        div.classList.remove('dragging');
+        const sel = isAdmin ? '.admin-map-canvas .map-row' : '#mapCanvas .map-row';
+        document.querySelectorAll(sel).forEach(r => r.classList.remove('accepting', 'drag-over'));
+        if (isAdmin) adminDragKid = null; else dragKid = null;
+      });
+
+      // Touch support
+      div.addEventListener('touchstart', e => {
+        if (isAdmin) adminDragKid = kw.id; else { if (checked) return; dragKid = kw.id; }
+        div.classList.add('dragging');
+        const sel = isAdmin ? '.admin-map-canvas .map-row' : '#mapCanvas .map-row';
+        document.querySelectorAll(sel).forEach(r => r.classList.add('accepting'));
+      }, { passive: true });
+      div.addEventListener('touchend', e => {
+        div.classList.remove('dragging');
+        const sel = isAdmin ? '.admin-map-canvas .map-row' : '#mapCanvas .map-row';
+        document.querySelectorAll(sel).forEach(r => r.classList.remove('accepting', 'drag-over'));
+        const touch = e.changedTouches[0];
+        const el = document.elementFromPoint(touch.clientX, touch.clientY);
+        const rowEl = el ? el.closest('.map-row') : null;
+        if (rowEl) {
+          const rowIdx = parseInt(rowEl.dataset.row);
+          if (isAdmin) {
+            adminPlacements[kw.id] = rowIdx;
+            adminDragKid = null;
+            renderAdminPool(); renderAdminPlaced(); refreshAdminConnections();
+          } else {
+            placements[kw.id] = rowIdx;
+            dragKid = null;
+            renderGamePool(); renderGamePlaced(); refreshGameConnections(); updateProgress();
+          }
+        } else {
+          if (isAdmin) adminDragKid = null; else dragKid = null;
+        }
+      });
+
+      return div;
+    }
+
+    // ================================================================
+    //  GAME: RENDER PLACED NODES
+    // ================================================================
+    function renderGamePlaced() {
+      for (let i = 0; i < gameData.rowCount; i++) {
+        const c = document.getElementById(`game-nodes-${i}`);
+        if (c) c.innerHTML = '';
+      }
+      gameData.keywords.forEach(kw => {
+        const row = placements[kw.id];
+        if (row === undefined) return;
+        const c = document.getElementById(`game-nodes-${row}`);
+        if (c) c.appendChild(makeNode(kw, false));
+      });
+    }
+
+    function makeNode(kw, isAdmin) {
+      const div = document.createElement('div');
+      div.className = 'map-node font-vi';
+      div.dataset.kid = kw.id;
+      div.draggable = true;
+      div.innerHTML = `<div class="node-dot node-dot--top"></div><span>${escHtml(kw.text)}</span><div class="node-dot node-dot--bottom"></div>`;
+
+      div.addEventListener('click', e => {
+        e.stopPropagation();
+        if (isAdmin) handleAdminNodeClick(kw.id);
+        else handleGameNodeClick(kw.id);
+      });
+
+      // Drag to another row
+      div.addEventListener('dragstart', e => {
+        e.stopPropagation();
+        if (isAdmin) { adminDragKid = kw.id; }
+        else { if (checked) { e.preventDefault(); return; } dragKid = kw.id; }
+        div.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        const sel = isAdmin ? '.admin-map-canvas .map-row' : '#mapCanvas .map-row';
+        document.querySelectorAll(sel).forEach(r => r.classList.add('accepting'));
+      });
+      div.addEventListener('dragend', () => {
+        div.classList.remove('dragging');
+        const sel = isAdmin ? '.admin-map-canvas .map-row' : '#mapCanvas .map-row';
+        document.querySelectorAll(sel).forEach(r => r.classList.remove('accepting', 'drag-over'));
+        if (isAdmin) adminDragKid = null; else dragKid = null;
+      });
+
+      return div;
+    }
+
+    // Drop on pool → return keyword
+    document.getElementById('kwPool').addEventListener('dragover', e => { if (dragKid && !checked) e.preventDefault(); });
+    document.getElementById('kwPool').addEventListener('drop', e => {
+      e.preventDefault();
+      if (!dragKid || checked) return;
+      // Remove connections involving this kid
+      connections.forEach(key => {
+        const [a, b] = cpair(key);
+        if (a === dragKid || b === dragKid) connections.delete(key);
+      });
+      delete placements[dragKid];
+      dragKid = null;
+      renderGamePool(); renderGamePlaced(); refreshGameConnections(); updateProgress();
+    });
+
+    // Deselect on canvas click
+    document.getElementById('mapCanvas').addEventListener('click', () => clearGameSelection());
+
+    // ================================================================
+    //  GAME: CLICK-TO-CONNECT
+    // ================================================================
+    function handleGameNodeClick(kid) {
+      if (checked) return;
+      if (selectedNodeId === null) {
+        selectedNodeId = kid;
+        document.querySelectorAll('#mapCanvas .map-node').forEach(n => n.classList.remove('selected'));
+        document.querySelector(`#mapCanvas .map-node[data-kid="${kid}"]`)?.classList.add('selected');
+        SFX.select();
+      } else if (selectedNodeId === kid) {
+        clearGameSelection();
+      } else {
+        const rowA = placements[selectedNodeId];
+        const rowB = placements[kid];
+        if (rowA === undefined || rowB === undefined) { clearGameSelection(); return; }
+        if (rowA === rowB) {
+          SFX.wrong();
+          const n = document.querySelector(`#mapCanvas .map-node[data-kid="${kid}"]`);
+          if (n) { n.classList.add('shake'); setTimeout(() => n.classList.remove('shake'), 400); }
+        } else {
+          const key = ck(selectedNodeId, kid);
+          if (connections.has(key)) connections.delete(key);
+          else { connections.add(key); SFX.place(); }
+          refreshGameConnections();
+        }
+        clearGameSelection();
+      }
+    }
+
+    function clearGameSelection() {
+      selectedNodeId = null;
+      document.querySelectorAll('#mapCanvas .map-node').forEach(n => n.classList.remove('selected'));
+    }
+
+    // ================================================================
+    //  SVG CONNECTION DRAWING
+    // ================================================================
+    function getDotPos(kid, dotType, canvasEl, svgEl) {
+      const nodeEl = canvasEl.querySelector(`.map-node[data-kid="${kid}"]`);
+      if (!nodeEl) return null;
+      const dotEl = nodeEl.querySelector(`.node-dot--${dotType}`);
+      if (!dotEl) return null;
+      const svgRect = svgEl.getBoundingClientRect();
+      const r = dotEl.getBoundingClientRect();
+      return { x: r.left + r.width / 2 - svgRect.left, y: r.top + r.height / 2 - svgRect.top };
+    }
+
+    function drawLines(conns, plcmts, canvasEl, svgEl, isAdmin, correctSet) {
+      svgEl.innerHTML = '';
+      const ns = 'http://www.w3.org/2000/svg';
+      const mid = isAdmin ? 'arr-a' : 'arr-g';
+      const defs = document.createElementNS(ns, 'defs');
+      defs.innerHTML = `<marker id="${mid}" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" style="fill:var(--cyan)"/></marker>`;
+      svgEl.appendChild(defs);
+
+      conns.forEach(key => {
+        const [kA, kB] = cpair(key);
+        const rowA = plcmts[kA], rowB = plcmts[kB];
+        if (rowA === undefined || rowB === undefined) return;
+
+        const upper = rowA <= rowB ? kA : kB;
+        const lower = rowA <= rowB ? kB : kA;
+
+        const p1 = getDotPos(upper, 'bottom', canvasEl, svgEl);
+        const p2 = getDotPos(lower, 'top',   canvasEl, svgEl);
+        if (!p1 || !p2) return;
+
+        let cls = 'map-line';
+        if (correctSet) cls += correctSet.has(key) ? ' correct' : ' wrong';
+
+        const line = document.createElementNS(ns, 'line');
+        line.setAttribute('x1', p1.x); line.setAttribute('y1', p1.y);
+        line.setAttribute('x2', p2.x); line.setAttribute('y2', p2.y);
+        line.setAttribute('class', cls);
+        line.setAttribute('marker-end', `url(#${mid})`);
+
+        const hit = document.createElementNS(ns, 'line');
+        hit.setAttribute('x1', p1.x); hit.setAttribute('y1', p1.y);
+        hit.setAttribute('x2', p2.x); hit.setAttribute('y2', p2.y);
+        hit.setAttribute('class', 'map-line-hit');
+        hit.addEventListener('click', ev => {
+          ev.stopPropagation();
+          if (!isAdmin && checked) return;
+          conns.delete(key);
+          if (isAdmin) refreshAdminConnections();
+          else refreshGameConnections();
+        });
+
+        svgEl.appendChild(line);
+        svgEl.appendChild(hit);
+      });
+    }
+
+    function refreshGameConnections(correctSet) {
+      drawLines(connections, placements,
+        document.getElementById('mapCanvas'),
+        document.getElementById('mapSvg'),
+        false, correctSet || null);
+    }
+
+    function refreshAdminConnections() {
+      drawLines(adminConnections, adminPlacements,
+        document.querySelector('.admin-map-canvas'),
+        document.getElementById('adminMapSvg'),
+        true, null);
+    }
+
+    window.addEventListener('resize', () => {
+      refreshGameConnections();
+      if (document.getElementById('adminPanel').classList.contains('open')) refreshAdminConnections();
+    });
+
+    // ================================================================
+    //  GAME: PROGRESS & CHECK
+    // ================================================================
+    function updateProgress() {
+      const placed = Object.keys(placements).length;
+      const total  = gameData ? gameData.keywords.length : 0;
+      document.getElementById('progressDisplay').textContent = `${placed} / ${total} ĐÃ ĐẶT`;
+    }
+
+    function checkAnswers() {
+      if (checked) return;
+      checked = true;
+
+      const correctRowMap = {};
+      gameData.keywords.forEach(kw => { correctRowMap[kw.id] = kw.correctRow; });
+      const correctConnSet = new Set(gameData.connections.map(c => ck(c.from, c.to)));
+
+      let correctPl = 0, correctCo = 0;
+      const totalPl = gameData.keywords.length;
+      const totalCo = gameData.connections.length;
+
+      // Mark nodes
+      gameData.keywords.forEach(kw => {
+        const isOk = placements[kw.id] === correctRowMap[kw.id];
+        if (isOk) correctPl++;
+        const nodeEl = document.querySelector(`#mapCanvas .map-node[data-kid="${kw.id}"]`);
+        if (nodeEl) nodeEl.classList.add(isOk ? 'correct' : 'wrong');
+      });
+
+      // Count correct connections (player drew + in answer)
+      connections.forEach(key => { if (correctConnSet.has(key)) correctCo++; });
+
+      // Draw lines with correct/wrong state
+      refreshGameConnections(correctConnSet);
+
+      const total   = totalPl + totalCo;
+      const correct = correctPl + correctCo;
+      const pct = total === 0 ? 100 : Math.round(correct / total * 100);
+
+      SFX[pct === 100 ? 'correct' : 'wrong']();
+
+      document.getElementById('scoreDisplay').textContent = `SCORE: ${correct}/${total}`;
+      document.getElementById('progressDisplay').textContent = `${correct} / ${total} ĐÚNG`;
+
+      const msgs = [
+        [100, '🏆 Hoàn hảo! Sơ đồ tư duy xuất sắc!'],
+        [70,  '🎉 Rất tốt! Còn vài kết nối chưa đúng.'],
+        [40,  '👍 Khá ổn! Hãy kiểm tra lại các hàng và kết nối.'],
+        [0,   '💪 Chưa đạt! Đọc lại và thử lại nhé!'],
+      ];
+      const msg = msgs.find(([min]) => pct >= min)[1];
+
+      document.getElementById('resultScore').textContent = `${correct} / ${total} ĐÚNG (${pct}%)`;
+      document.getElementById('resultMsg').textContent   = msg;
+      document.getElementById('resultBanner').style.display = 'block';
+      document.getElementById('playAgainBtn').style.display = '';
+      document.getElementById('checkBtn').style.display = 'none';
+    }
+
+    function resetGame() {
+      checked = false; placements = {}; connections = new Set(); selectedNodeId = null;
+      renderGameRows();
+      renderGamePool();
+      refreshGameConnections();
+      updateProgress();
+      document.getElementById('resultBanner').style.display = 'none';
+      document.getElementById('playAgainBtn').style.display = 'none';
+      document.getElementById('checkBtn').style.display = '';
+      document.getElementById('scoreDisplay').textContent = 'SCORE: —';
+    }
+
+    async function playAgain() {
+      gameData = await loadGameData();
+      buildGame();
+    }
+
+    // ================================================================
+    //  ADMIN STATE
+    // ================================================================
+    let adminData          = null;
+    let adminPlacements    = {};
+    let adminConnections   = new Set();
+    let adminSelectedNodeId= null;
+    let adminDragKid       = null;
+
+    // ================================================================
+    //  ADMIN: OPEN PANEL
+    // ================================================================
+    function openAdminPanel() {
+      adminData = JSON.parse(JSON.stringify(gameData));
+
+      // Init placements from correctRow
+      adminPlacements = {};
+      adminData.keywords.forEach(kw => {
+        if (kw.correctRow !== null && kw.correctRow !== undefined) {
+          adminPlacements[kw.id] = kw.correctRow;
+        }
+      });
+
+      // Init connections
+      adminConnections = new Set(adminData.connections.map(c => ck(c.from, c.to)));
+
+      document.getElementById('adminRowCountDisplay').textContent = adminData.rowCount;
+      renderAdminKeywordList();
+      renderAdminCanvas();
+
+      document.getElementById('adminPanel').classList.add('open');
+      document.getElementById('adminExportBox').style.display = 'none';
+      document.getElementById('adminImportBox').style.display = 'none';
+      document.getElementById('adminStatus').textContent = '';
+
+      // Deselect on canvas click
+      document.querySelector('.admin-map-canvas').addEventListener('click', () => clearAdminSelection(), { once: false });
+    }
+
+    initAdminAuth({ onLogin: openAdminPanel });
+
+    document.getElementById('adminCloseBtn').addEventListener('click', () => {
+      document.getElementById('adminPanel').classList.remove('open');
+    });
+
+    // Auto-open if ?admin=open and logged in
+    if (new URLSearchParams(location.search).get('admin') === 'open' && isAdminLoggedIn()) {
+      // Will be called after initGame
+    }
+
+    // ================================================================
+    //  ADMIN: KEYWORD LIST
+    // ================================================================
+    function renderAdminKeywordList() {
+      const list = document.getElementById('adminKwList');
+      list.innerHTML = '';
+      adminData.keywords.forEach((kw, idx) => {
+        const div = document.createElement('div');
+        div.className = 'admin-kw-entry';
+        div.innerHTML = `
+          <span class="admin-kw-num">${String(idx+1).padStart(2,'0')}</span>
+          <input class="admin-input" value="${escHtml(kw.text)}" />
+          <button class="admin-remove-kw">✕</button>
+        `;
+        const input = div.querySelector('input');
+        input.addEventListener('input', () => {
+          adminData.keywords[idx].text = input.value;
+          // Update node text live
+          const nTxt = document.querySelector(`.admin-map-canvas .map-node[data-kid="${kw.id}"] span`);
+          if (nTxt) nTxt.textContent = input.value;
+        });
+        div.querySelector('.admin-remove-kw').addEventListener('click', () => {
+          const kid = adminData.keywords[idx].id;
+          adminData.keywords.splice(idx, 1);
+          delete adminPlacements[kid];
+          adminConnections.forEach(key => {
+            const [a, b] = cpair(key);
+            if (a === kid || b === kid) adminConnections.delete(key);
+          });
+          renderAdminKeywordList();
+          renderAdminCanvas();
+        });
+        list.appendChild(div);
+      });
+    }
+
+    document.getElementById('adminAddKwBtn').addEventListener('click', () => {
+      const newId = 'k' + Date.now();
+      adminData.keywords.push({ id: newId, text: '', correctRow: null });
+      renderAdminKeywordList();
+      renderAdminPool();
+      // Focus last input
+      const inputs = document.querySelectorAll('#adminKwList .admin-input');
+      if (inputs.length) inputs[inputs.length - 1].focus();
+    });
+
+    // Row count controls
+    document.getElementById('adminRowMinus').addEventListener('click', () => changeAdminRowCount(-1));
+    document.getElementById('adminRowPlus').addEventListener('click',  () => changeAdminRowCount(1));
+
+    function changeAdminRowCount(delta) {
+      const next = adminData.rowCount + delta;
+      if (next < 1 || next > 6) return;
+      if (delta < 0) {
+        const removed = adminData.rowCount - 1;
+        Object.entries(adminPlacements).forEach(([kid, row]) => {
+          if (row === removed) delete adminPlacements[kid];
+        });
+        adminConnections.forEach(key => {
+          const [a, b] = cpair(key);
+          if (adminPlacements[a] === undefined || adminPlacements[b] === undefined) adminConnections.delete(key);
+        });
+      }
+      adminData.rowCount = next;
+      document.getElementById('adminRowCountDisplay').textContent = next;
+      renderAdminCanvas();
+    }
+
+    // ================================================================
+    //  ADMIN: CANVAS
+    // ================================================================
+    function renderAdminCanvas() {
+      const canvas = document.querySelector('.admin-map-canvas');
+      canvas.querySelectorAll('.map-row').forEach(r => r.remove());
+      for (let i = 0; i < adminData.rowCount; i++) {
+        canvas.appendChild(makeRow(i, true));
+      }
+      // Admin pool drop: return to unplaced
+      const adminPool = document.getElementById('adminKwPool');
+      adminPool.addEventListener('dragover', e => { if (adminDragKid) e.preventDefault(); });
+      adminPool.addEventListener('drop', e => {
+        e.preventDefault();
+        if (!adminDragKid) return;
+        const kid = adminDragKid;
+        adminConnections.forEach(key => {
+          const [a, b] = cpair(key);
+          if (a === kid || b === kid) adminConnections.delete(key);
+        });
+        delete adminPlacements[kid];
+        adminDragKid = null;
+        renderAdminPool(); renderAdminPlaced(); refreshAdminConnections();
+      });
+      renderAdminPool();
+      renderAdminPlaced();
+      refreshAdminConnections();
+    }
+
+    function renderAdminPool() {
+      const pool = document.getElementById('adminKwPool');
+      pool.innerHTML = '';
+      const placed = new Set(Object.keys(adminPlacements));
+      adminData.keywords.forEach(kw => {
+        if (!placed.has(kw.id)) pool.appendChild(makeChip(kw, true));
+      });
+      if (adminData.keywords.length > 0 && placed.size === adminData.keywords.length) {
+        const e = document.createElement('div');
+        e.className = 'pool-empty';
+        e.textContent = 'Đã đặt tất cả!';
+        pool.appendChild(e);
+      }
+    }
+
+    function renderAdminPlaced() {
+      for (let i = 0; i < adminData.rowCount; i++) {
+        const c = document.getElementById(`admin-nodes-${i}`);
+        if (c) c.innerHTML = '';
+      }
+      adminData.keywords.forEach(kw => {
+        const row = adminPlacements[kw.id];
+        if (row === undefined) return;
+        const c = document.getElementById(`admin-nodes-${row}`);
+        if (c) c.appendChild(makeNode(kw, true));
+      });
+    }
+
+    // ================================================================
+    //  ADMIN: CLICK-TO-CONNECT
+    // ================================================================
+    function handleAdminNodeClick(kid) {
+      if (adminSelectedNodeId === null) {
+        adminSelectedNodeId = kid;
+        document.querySelectorAll('.admin-map-canvas .map-node').forEach(n => n.classList.remove('selected'));
+        document.querySelector(`.admin-map-canvas .map-node[data-kid="${kid}"]`)?.classList.add('selected');
+        SFX.select();
+      } else if (adminSelectedNodeId === kid) {
+        clearAdminSelection();
+      } else {
+        const rowA = adminPlacements[adminSelectedNodeId];
+        const rowB = adminPlacements[kid];
+        if (rowA === undefined || rowB === undefined) { clearAdminSelection(); return; }
+        if (rowA === rowB) {
+          SFX.wrong();
+        } else {
+          const key = ck(adminSelectedNodeId, kid);
+          if (adminConnections.has(key)) adminConnections.delete(key);
+          else { adminConnections.add(key); SFX.place(); }
+          refreshAdminConnections();
+        }
+        clearAdminSelection();
+      }
+    }
+
+    function clearAdminSelection() {
+      adminSelectedNodeId = null;
+      document.querySelectorAll('.admin-map-canvas .map-node').forEach(n => n.classList.remove('selected'));
+    }
+
+    // ================================================================
+    //  ADMIN: SAVE / EXPORT / IMPORT
+    // ================================================================
+    document.getElementById('adminSaveBtn').addEventListener('click', () => {
+      for (const kw of adminData.keywords) {
+        if (!kw.text.trim()) {
+          setAdminStatus('⚠ Từ khóa không được để trống!', 'orange');
+          return;
+        }
+      }
+      const kwData = adminData.keywords.map(kw => ({
+        ...kw,
+        correctRow: adminPlacements[kw.id] !== undefined ? adminPlacements[kw.id] : null
+      }));
+      const connData = [...adminConnections].map(key => {
+        const [from, to] = cpair(key); return { from, to };
+      });
+      const saved = { ...adminData, keywords: kwData, connections: connData };
+      localStorage.setItem('mindMap', JSON.stringify([saved]));
+      gameData = JSON.parse(JSON.stringify(saved));
+      setAdminStatus('✓ ĐÃ LƯU! Nhấn Play Again để áp dụng.', 'green');
+    });
+
+    document.getElementById('adminExportBtn').addEventListener('click', () => {
+      const box = document.getElementById('adminExportBox');
+      box.style.display = box.style.display === 'none' ? 'block' : 'none';
+      if (box.style.display === 'block') {
+        const kwData = adminData.keywords.map(kw => ({ ...kw, correctRow: adminPlacements[kw.id] !== undefined ? adminPlacements[kw.id] : null }));
+        const connData = [...adminConnections].map(key => { const [from,to]=cpair(key); return {from,to}; });
+        document.getElementById('adminExportTa').value = JSON.stringify([{ ...adminData, keywords: kwData, connections: connData }], null, 2);
+      }
+    });
+
+    document.getElementById('adminDownloadBtn').addEventListener('click', () => {
+      const json = document.getElementById('adminExportTa').value;
+      const blob = new Blob([json], { type: 'application/json' });
+      const url  = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'admin_content.json';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+      const btn = document.getElementById('adminDownloadBtn');
+      btn.textContent = '✓ DOWNLOADED!';
+      setTimeout(() => btn.textContent = '⬇ DOWNLOAD FILE', 2000);
+    });
+
+    document.getElementById('adminCopyBtn').addEventListener('click', () => {
+      const ta = document.getElementById('adminExportTa');
+      ta.select();
+      navigator.clipboard?.writeText(ta.value).catch(() => document.execCommand('copy'));
+      const btn = document.getElementById('adminCopyBtn');
+      btn.textContent = '✓ COPIED!';
+      setTimeout(() => btn.textContent = '📋 COPY', 2000);
+    });
+
+    document.getElementById('adminImportBtn').addEventListener('click', () => {
+      const box = document.getElementById('adminImportBox');
+      box.style.display = box.style.display === 'none' ? 'block' : 'none';
+    });
+
+    document.getElementById('adminImportApply').addEventListener('click', () => {
+      try {
+        const parsed = JSON.parse(document.getElementById('adminImportTa').value);
+        if (!Array.isArray(parsed) || !parsed[0]) throw new Error();
+        adminData = parsed[0];
+        adminPlacements = {};
+        adminData.keywords.forEach(kw => {
+          if (kw.correctRow !== null && kw.correctRow !== undefined) adminPlacements[kw.id] = kw.correctRow;
+        });
+        adminConnections = new Set((adminData.connections || []).map(c => ck(c.from, c.to)));
+        document.getElementById('adminRowCountDisplay').textContent = adminData.rowCount;
+        renderAdminKeywordList();
+        renderAdminCanvas();
+        setAdminStatus('✓ IMPORT OK! Nhấn SAVE để áp dụng.', 'cyan');
+      } catch(e) {
+        setAdminStatus('✕ JSON không hợp lệ!', 'orange');
+      }
+    });
+
+    function setAdminStatus(msg, color) {
+      const el = document.getElementById('adminStatus');
+      el.textContent = msg;
+      el.style.color = `var(--${color})`;
+    }
+
+    // ================================================================
+    //  INIT
+    // ================================================================
+    async function initGame() {
+      gameData = await loadGameData();
+      if (!gameData) {
+        document.getElementById('progressDisplay').textContent = 'Không có dữ liệu';
+        return;
+      }
+      buildGame();
+      if (new URLSearchParams(location.search).get('admin') === 'open' && isAdminLoggedIn()) {
+        openAdminPanel();
+      }
+    }
+    initGame();
+  </script>
+
+</body>
+</html>

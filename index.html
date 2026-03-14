@@ -258,7 +258,7 @@
   <div class="navbar__games-popup" id="gamesPopup">
     <div class="navbar__games-list">
       <a href="apps/pros-cons/index.html" class="navbar__game-item">Đoán Ưu/Nhược</a>
-      <div class="navbar__game-item navbar__game-item--soon">?</div>
+      <a href="apps/mind-map/index.html" class="navbar__game-item">Sơ đồ Tư Duy</a>
       <div class="navbar__game-item navbar__game-item--soon">?</div>
     </div>
   </div>
@@ -292,6 +292,13 @@
           </div>
           <a href="apps/pros-cons/index.html?admin=open" class="admin-game-edit-btn">✏ EDIT</a>
         </div>
+        <div class="admin-game-item">
+          <div class="admin-game-info">
+            <span class="admin-game-icon">🗺</span>
+            <div class="admin-game-name">Sơ đồ Tư Duy</div>
+          </div>
+          <a href="apps/mind-map/index.html?admin=open" class="admin-game-edit-btn">✏ EDIT</a>
+        </div>
       </div>
 
       <button class="admin-settings-close" id="adminSettingsClose">✕ CLOSE</button>
@@ -316,7 +323,7 @@
 
     <div class="stats-bar">
       <div class="stat-item">
-        <span class="stat-item__value">1+</span>
+        <span class="stat-item__value">2+</span>
         <span class="stat-item__label">APPS &amp; GAMES</span>
       </div>
       <div class="stat-item">
@@ -354,9 +361,10 @@
       </article>
 
       <!-- Card 2: Coming Soon -->
-      <article class="app-card pixel-box app-card--magenta app-card--soon">
-        <h3 class="app-card__title font-vi-h">?</h3>
-        <a href="#" class="app-card__btn">⏳ SOON</a>
+      <article class="app-card pixel-box app-card--magenta" onclick="location.href='apps/mind-map/index.html'" style="cursor:pointer">
+        <h3 class="app-card__title font-vi-h">Sơ đồ Tư Duy</h3>
+        <p class="app-card__desc">Kéo thả từ khóa, nối quan hệ, hoàn thiện sơ đồ</p>
+        <a href="apps/mind-map/index.html" class="app-card__btn">▶ PLAY</a>
       </article>
 
       <!-- Card 3: Coming Soon -->
