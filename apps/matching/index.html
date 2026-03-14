@@ -84,6 +84,11 @@
       color: var(--white);
       transition: border-color 0.15s, box-shadow 0.15s;
       user-select: none;
+      cursor: pointer;
+    }
+    .match-item.pending {
+      border-color: var(--cyan);
+      box-shadow: 0 0 8px var(--cyan);
     }
     .match-item.correct {
       border-color: var(--green);
@@ -108,7 +113,7 @@
       border-radius: 50%;
       background: var(--grey);
       border: 2px solid var(--bg-dark);
-      cursor: pointer;
+      pointer-events: none;
       z-index: 10;
       transition: background 0.15s, box-shadow 0.15s;
     }
@@ -124,11 +129,11 @@
       border-radius: 50%;
       background: var(--grey);
       border: 2px solid var(--bg-dark);
-      cursor: pointer;
+      pointer-events: none;
       z-index: 10;
       transition: background 0.15s, box-shadow 0.15s;
     }
-    .dot:hover, .dot.pending {
+    .dot.pending {
       background: var(--cyan);
       box-shadow: 0 0 8px var(--cyan);
     }
@@ -191,9 +196,8 @@
       background: transparent;
       border: 2px solid var(--grey);
       color: var(--grey);
-      font-family: var(--font-pixel);
-      font-size: 8px;
-      padding: 4px 10px;
+      font-size: 18px;
+      padding: 4px 12px;
       cursor: pointer;
       transition: all 0.15s steps(2);
     }
@@ -435,6 +439,46 @@
       cursor: pointer;
       margin-left: auto;
     }
+
+    /* ===== ADMIN ARENA ===== */
+    .admin-arena {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 20px 1fr;
+      min-height: 40px;
+      margin: 8px 0;
+    }
+    .admin-arena-col {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .admin-arena-item {
+      position: relative;
+      display: flex;
+      align-items: center;
+      min-height: 30px;
+      padding: 4px 8px;
+      background: rgba(12,12,26,0.5);
+      border: 1px solid rgba(255,255,255,0.08);
+      font-size: 9px;
+      color: var(--white);
+      cursor: pointer;
+      user-select: none;
+    }
+    .admin-arena-item:hover { border-color: rgba(255,255,255,0.3); }
+    .admin-arena-item.pending { border-color: var(--cyan); box-shadow: 0 0 4px var(--cyan); }
+    .admin-arena-item.connected { border-color: var(--green); }
+    .admin-left .admin-arena-item { padding-right: 20px; }
+    .admin-right .admin-arena-item { padding-left: 20px; }
+    .admin-arena-item .dot {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      pointer-events: none;
+    }
+    .admin-left  .admin-arena-item .dot { right: -5px; }
+    .admin-right .admin-arena-item .dot { left: -5px; }
   </style>
 </head>
 <body>
@@ -506,9 +550,9 @@
     </div>
 
     <div class="set-nav">
-      <button class="set-nav__btn" id="prevSetBtn" onclick="prevSet()">◂ TRƯỚC</button>
+      <button class="set-nav__btn" id="prevSetBtn" onclick="prevSet()">◀</button>
       <span class="set-nav__label" id="setLabel">BỘ 1</span>
-      <button class="set-nav__btn" id="nextSetBtn" onclick="nextSet()">TIẾP ▸</button>
+      <button class="set-nav__btn" id="nextSetBtn" onclick="nextSet()">▶</button>
     </div>
 
     <div class="match-arena" id="matchArena">
@@ -652,12 +696,14 @@
     }
 
     function updateDotColors() {
-      // Highlight dots that have at least one connection
       document.querySelectorAll('[data-dot]').forEach(dot => {
         const id = dot.dataset.dot;
         const hasConn = [...connections].some(k => k.split('|').includes(id));
         dot.classList.toggle('connected', hasConn);
         dot.classList.toggle('pending', pendingDot && pendingDot.id === id);
+        // Also update parent match-item for pending highlight
+        const item = dot.closest('.match-item');
+        if (item) item.classList.toggle('pending', pendingDot && pendingDot.id === id);
       });
     }
 
@@ -679,25 +725,31 @@
       colLeft.innerHTML  = '';
       colRight.innerHTML = '';
 
-      set.leftItems.forEach(item => {
+      // Shuffle display order
+      const leftOrder  = [...set.leftItems].sort(() => Math.random() - 0.5);
+      const rightOrder = [...set.rightItems].sort(() => Math.random() - 0.5);
+
+      leftOrder.forEach(item => {
         const el = document.createElement('div');
         el.className = 'match-item';
-        el.dataset.id = item.id;
-        el.innerHTML = `<span>${item.text}</span><div class="dot" data-dot="${item.id}" data-side="left"></div>`;
+        el.dataset.id   = item.id;
+        el.dataset.side = 'left';
+        el.innerHTML = `<span>${item.text}</span><div class="dot" data-dot="${item.id}"></div>`;
         colLeft.appendChild(el);
       });
 
-      set.rightItems.forEach(item => {
+      rightOrder.forEach(item => {
         const el = document.createElement('div');
         el.className = 'match-item';
-        el.dataset.id = item.id;
-        el.innerHTML = `<div class="dot" data-dot="${item.id}" data-side="right"></div><span>${item.text}</span>`;
+        el.dataset.id   = item.id;
+        el.dataset.side = 'right';
+        el.innerHTML = `<div class="dot" data-dot="${item.id}"></div><span>${item.text}</span>`;
         colRight.appendChild(el);
       });
 
-      // Attach dot click listeners
-      document.querySelectorAll('[data-dot]').forEach(dot => {
-        dot.addEventListener('click', onDotClick);
+      // Click on whole row
+      document.querySelectorAll('.match-item').forEach(item => {
+        item.addEventListener('click', onItemClick);
       });
 
       updateDotColors();
@@ -705,30 +757,29 @@
       updateSetNav();
     }
 
-    function onDotClick(e) {
+    function onItemClick(e) {
       if (checked) return;
       e.stopPropagation();
       SFX.click();
 
-      const id   = e.currentTarget.dataset.dot;
+      const id   = e.currentTarget.dataset.id;
       const side = e.currentTarget.dataset.side;
 
       if (!pendingDot) {
-        // Start a new connection
         pendingDot = { id, side };
         updateDotColors();
         return;
       }
 
       if (pendingDot.id === id) {
-        // Clicked same dot — cancel
+        // Same item — cancel
         pendingDot = null;
         updateDotColors();
         return;
       }
 
       if (pendingDot.side === side) {
-        // Same column — switch pending to this dot
+        // Same column — switch pending to this item
         pendingDot = { id, side };
         updateDotColors();
         return;
@@ -740,7 +791,6 @@
       const key = ck(leftId, rightId);
 
       if (connections.has(key)) {
-        // Toggle off
         connections.delete(key);
       } else {
         connections.add(key);
@@ -865,7 +915,9 @@
     // ================================================================
     //  ADMIN PANEL
     // ================================================================
-    let adminData = null;
+    let adminData    = null;
+    let adminConns   = {};    // si → Set of connection keys
+    let adminPending = null;  // { id, side, si } or null
 
     function buildAdminUI() {
       const list = document.getElementById('adminSetList');
@@ -874,7 +926,7 @@
         const card = document.createElement('div');
         card.className = 'admin-set-card';
 
-        // Title
+        // Title row
         const titleRow = document.createElement('div');
         titleRow.className = 'admin-set-title';
         titleRow.innerHTML = `<span>BỘ ${si + 1}:</span>`;
@@ -884,21 +936,24 @@
         const delSetBtn = document.createElement('button');
         delSetBtn.className = 'admin-del-set-btn';
         delSetBtn.textContent = '✕ XÓA';
-        delSetBtn.addEventListener('click', () => { adminData.splice(si, 1); buildAdminUI(); });
+        delSetBtn.addEventListener('click', () => {
+          adminData.splice(si, 1);
+          adminConns = {};
+          adminData.forEach((s, i) => { adminConns[i] = new Set(s.connections.map(c => ck(c.from, c.to))); });
+          buildAdminUI();
+        });
         titleRow.appendChild(titleInput); titleRow.appendChild(delSetBtn);
         card.appendChild(titleRow);
 
-        // Columns
+        // Columns (keyword editor)
         const cols = document.createElement('div');
         cols.className = 'admin-cols';
-
         ['left', 'right'].forEach(side => {
           const col = document.createElement('div');
           const label = document.createElement('div');
           label.className = 'admin-col-label';
           label.textContent = side === 'left' ? 'CỘT TRÁI' : 'CỘT PHẢI';
           col.appendChild(label);
-
           const items = side === 'left' ? set.leftItems : set.rightItems;
           items.forEach((item, ii) => {
             const row = document.createElement('div');
@@ -924,71 +979,199 @@
         });
         card.appendChild(cols);
 
-        // Connections
+        // Connection arena (game-like)
         const connLabel = document.createElement('div');
         connLabel.className = 'admin-conn-label';
-        connLabel.textContent = 'KẾT NỐI ĐÚNG:';
+        connLabel.textContent = 'KẾT NỐI ĐÚNG — bấm để nối / xóa:';
         card.appendChild(connLabel);
 
-        set.connections.forEach((conn, ci) => {
-          const row = document.createElement('div');
-          row.className = 'admin-conn-row';
+        const arena = document.createElement('div');
+        arena.className = 'admin-arena';
+        arena.id = `admin-arena-${si}`;
 
-          const selL = document.createElement('select');
-          set.leftItems.forEach(l => {
-            const opt = document.createElement('option');
-            opt.value = l.id; opt.textContent = l.text || l.id;
-            if (l.id === conn.from) opt.selected = true;
-            selL.appendChild(opt);
-          });
-          selL.addEventListener('change', () => { adminData[si].connections[ci].from = selL.value; });
-
-          const arrow = document.createElement('span');
-          arrow.textContent = '→';
-
-          const selR = document.createElement('select');
-          set.rightItems.forEach(r => {
-            const opt = document.createElement('option');
-            opt.value = r.id; opt.textContent = r.text || r.id;
-            if (r.id === conn.to) opt.selected = true;
-            selR.appendChild(opt);
-          });
-          selR.addEventListener('change', () => { adminData[si].connections[ci].to = selR.value; });
-
-          const del = document.createElement('button');
-          del.className = 'admin-del-btn'; del.textContent = '✕';
-          del.addEventListener('click', () => { adminData[si].connections.splice(ci, 1); buildAdminUI(); });
-
-          row.appendChild(selL); row.appendChild(arrow); row.appendChild(selR); row.appendChild(del);
-          card.appendChild(row);
+        const leftCol = document.createElement('div');
+        leftCol.className = 'admin-arena-col admin-left';
+        set.leftItems.forEach(item => {
+          const el = document.createElement('div');
+          el.className = 'admin-arena-item';
+          el.dataset.adotId   = item.id;
+          el.dataset.adotSide = 'left';
+          el.dataset.adotSi   = si;
+          el.innerHTML = `<span>${item.text || item.id}</span><div class="dot" data-adot="a${si}_${item.id}"></div>`;
+          el.addEventListener('click', e => { e.stopPropagation(); onAdminItemClick(item.id, 'left', si); });
+          leftCol.appendChild(el);
         });
 
-        const addConnBtn = document.createElement('button');
-        addConnBtn.className = 'admin-add-btn';
-        addConnBtn.textContent = '＋ THÊM KẾT NỐI';
-        addConnBtn.addEventListener('click', () => {
-          const lId = set.leftItems[0]?.id || '';
-          const rId = set.rightItems[0]?.id || '';
-          if (lId && rId) { set.connections.push({ from: lId, to: rId }); buildAdminUI(); }
+        const midCol = document.createElement('div');
+
+        const rightCol = document.createElement('div');
+        rightCol.className = 'admin-arena-col admin-right';
+        set.rightItems.forEach(item => {
+          const el = document.createElement('div');
+          el.className = 'admin-arena-item';
+          el.dataset.adotId   = item.id;
+          el.dataset.adotSide = 'right';
+          el.dataset.adotSi   = si;
+          el.innerHTML = `<div class="dot" data-adot="a${si}_${item.id}"></div><span>${item.text || item.id}</span>`;
+          el.addEventListener('click', e => { e.stopPropagation(); onAdminItemClick(item.id, 'right', si); });
+          rightCol.appendChild(el);
         });
-        card.appendChild(addConnBtn);
+
+        // SVG overlay for lines
+        const svgWrap = document.createElement('div');
+        svgWrap.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;';
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.id = `admin-svg-${si}`;
+        svg.style.cssText = 'width:100%;height:100%;overflow:visible;';
+        svgWrap.appendChild(svg);
+
+        arena.appendChild(leftCol);
+        arena.appendChild(midCol);
+        arena.appendChild(rightCol);
+        arena.appendChild(svgWrap);
+        card.appendChild(arena);
         list.appendChild(card);
+      });
+
+      // Render lines after DOM is ready
+      requestAnimationFrame(() => {
+        adminData.forEach((set, si) => renderAdminLines(si));
       });
     }
 
+    function getAdminDotPos(dotEl, si) {
+      const arena = document.getElementById(`admin-arena-${si}`);
+      if (!arena || !dotEl) return null;
+      const arenaRect = arena.getBoundingClientRect();
+      const dotRect   = dotEl.getBoundingClientRect();
+      return {
+        x: dotRect.left + dotRect.width / 2 - arenaRect.left,
+        y: dotRect.top  + dotRect.height / 2 - arenaRect.top
+      };
+    }
+
+    function renderAdminLines(si) {
+      const svg = document.getElementById(`admin-svg-${si}`);
+      if (!svg) return;
+      svg.innerHTML = '';
+      const conns = adminConns[si] || new Set();
+      conns.forEach(key => {
+        const [a, b] = key.split('|');
+        const elA = document.querySelector(`[data-adot="a${si}_${a}"]`);
+        const elB = document.querySelector(`[data-adot="a${si}_${b}"]`);
+        if (!elA || !elB) return;
+        const posA = getAdminDotPos(elA, si);
+        const posB = getAdminDotPos(elB, si);
+        if (!posA || !posB) return;
+
+        const mx = (posA.x + posB.x) / 2;
+        const my = (posA.y + posB.y) / 2;
+
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', posA.x); line.setAttribute('y1', posA.y);
+        line.setAttribute('x2', posB.x); line.setAttribute('y2', posB.y);
+        line.classList.add('conn-line');
+        svg.appendChild(line);
+
+        // Delete button on midpoint
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        g.style.cssText = 'cursor:pointer;pointer-events:all;';
+        g.addEventListener('click', e => {
+          e.stopPropagation(); SFX.click();
+          adminConns[si].delete(key);
+          renderAdminLines(si);
+          updateAdminColors(si);
+        });
+        const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        bg.setAttribute('x', mx - 7); bg.setAttribute('y', my - 7);
+        bg.setAttribute('width', 14); bg.setAttribute('height', 14);
+        bg.classList.add('conn-del-bg');
+        const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        txt.setAttribute('x', mx); txt.setAttribute('y', my);
+        txt.classList.add('conn-del');
+        txt.textContent = '✕';
+        g.appendChild(bg); g.appendChild(txt);
+        svg.appendChild(g);
+      });
+      updateAdminColors(si);
+    }
+
+    function updateAdminColors(si) {
+      const conns = adminConns[si] || new Set();
+      document.querySelectorAll(`[data-adot-si="${si}"]`).forEach(item => {
+        const id = item.dataset.adotId;
+        const hasConn = [...conns].some(k => k.split('|').includes(id));
+        item.classList.toggle('connected', hasConn);
+        item.classList.toggle('pending', adminPending && adminPending.si == si && adminPending.id === id);
+      });
+    }
+
+    function onAdminItemClick(id, side, si) {
+      SFX.click();
+      if (!adminPending) {
+        adminPending = { id, side, si };
+        updateAdminColors(si);
+        return;
+      }
+      if (adminPending.si != si) {
+        // Different set — cancel previous, start new
+        const prevSi = adminPending.si;
+        adminPending = { id, side, si };
+        updateAdminColors(prevSi);
+        updateAdminColors(si);
+        return;
+      }
+      if (adminPending.id === id) {
+        // Same item — cancel
+        adminPending = null;
+        updateAdminColors(si);
+        return;
+      }
+      if (adminPending.side === side) {
+        // Same column — switch pending
+        adminPending = { id, side, si };
+        updateAdminColors(si);
+        return;
+      }
+      // Connect
+      const leftId  = side === 'right' ? adminPending.id : id;
+      const rightId = side === 'right' ? id : adminPending.id;
+      const key = ck(leftId, rightId);
+      if (!adminConns[si]) adminConns[si] = new Set();
+      if (adminConns[si].has(key)) {
+        adminConns[si].delete(key);
+      } else {
+        adminConns[si].add(key);
+        SFX.place();
+      }
+      adminPending = null;
+      renderAdminLines(si);
+    }
+
     document.getElementById('adminAddSetBtn').addEventListener('click', () => {
+      const si = adminData.length;
       adminData.push({
         id: Date.now(),
-        title: `Bộ ${adminData.length + 1}`,
+        title: `Bộ ${si + 1}`,
         leftItems:  [{ id: `L${Date.now()}a`, text: '' }],
         rightItems: [{ id: `R${Date.now()}b`, text: '' }],
         connections: []
       });
+      adminConns[si] = new Set();
       buildAdminUI();
     });
 
     document.getElementById('adminSaveBtn').addEventListener('click', () => {
       SFX.correct();
+      // Convert adminConns back to connections format
+      adminData.forEach((set, si) => {
+        const conns = adminConns[si] || new Set();
+        set.connections = [...conns].map(key => {
+          const [a, b] = key.split('|');
+          const isALeft = set.leftItems.some(it => it.id === a);
+          return isALeft ? { from: a, to: b } : { from: b, to: a };
+        });
+      });
       localStorage.setItem(STORAGE_KEY, JSON.stringify(adminData));
       showToast('Đã lưu!');
       gameData = JSON.parse(JSON.stringify(adminData));
@@ -1002,7 +1185,14 @@
     // ================================================================
     const gamesBtn   = document.getElementById('gamesBtn');
     const gamesPopup = document.getElementById('gamesPopup');
-    gamesBtn.addEventListener('click', e => { e.stopPropagation(); SFX.click(); gamesPopup.classList.toggle('open'); });
+    gamesBtn.addEventListener('click', e => {
+      e.stopPropagation(); SFX.click(); gamesPopup.classList.toggle('open');
+      if (gamesPopup.classList.contains('open')) {
+        const r = gamesBtn.getBoundingClientRect();
+        gamesPopup.style.left = (r.left + r.width / 2) + 'px';
+        gamesPopup.style.top  = (r.bottom + 6) + 'px';
+      }
+    });
     document.addEventListener('click', () => gamesPopup.classList.remove('open'));
 
     // ================================================================
@@ -1012,6 +1202,11 @@
 
     function openAdminPanel() {
       adminData = JSON.parse(JSON.stringify(gameData));
+      adminConns = {};
+      adminPending = null;
+      adminData.forEach((set, si) => {
+        adminConns[si] = new Set(set.connections.map(c => ck(c.from, c.to)));
+      });
       buildAdminUI();
       adminPanel.classList.add('open');
     }

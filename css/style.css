@@ -527,7 +527,8 @@ section {
 .navbar__games-popup {
   position: fixed;
   top: 62px;
-  right: 1rem;
+  left: 0;
+  transform: translateX(-50%);
   z-index: 200;
   background: var(--bg-card);
   border: 2px solid var(--cyan);

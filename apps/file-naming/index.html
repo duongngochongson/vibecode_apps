@@ -778,7 +778,14 @@
     // ================================================================
     const gamesBtn   = document.getElementById('gamesBtn');
     const gamesPopup = document.getElementById('gamesPopup');
-    gamesBtn.addEventListener('click', e => { e.stopPropagation(); SFX.click(); gamesPopup.classList.toggle('open'); });
+    gamesBtn.addEventListener('click', e => {
+      e.stopPropagation(); SFX.click(); gamesPopup.classList.toggle('open');
+      if (gamesPopup.classList.contains('open')) {
+        const r = gamesBtn.getBoundingClientRect();
+        gamesPopup.style.left = (r.left + r.width / 2) + 'px';
+        gamesPopup.style.top  = (r.bottom + 6) + 'px';
+      }
+    });
     document.addEventListener('click', () => gamesPopup.classList.remove('open'));
 
     // ================================================================
