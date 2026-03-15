@@ -173,31 +173,6 @@
       padding: 20px;
     }
 
-    /* Planet info tooltip */
-    .fn-planet-info {
-      position: absolute;
-      top: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      margin-top: 4px;
-      background: var(--bg-mid);
-      border: 1px solid var(--cyan);
-      padding: 6px 10px;
-      z-index: 50;
-      white-space: nowrap;
-      pointer-events: none;
-    }
-    .fn-planet-info-name {
-      font-size: 9px;
-      color: var(--cyan);
-      margin-bottom: 2px;
-    }
-    .fn-planet-info-path {
-      font-size: 8px;
-      color: var(--grey);
-      letter-spacing: 0.5px;
-    }
-
     /* ===== ANSWER BAR ===== */
     .fn-answer-bar {
       grid-row: 3;
@@ -207,7 +182,7 @@
       padding: 10px 16px;
       background: var(--bg-mid);
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: 12px;
       flex-wrap: wrap;
       min-height: 56px;
@@ -217,6 +192,7 @@
       align-items: center;
       gap: 6px;
       flex-shrink: 0;
+      padding-top: 4px;
     }
     .fn-nav-btn {
       background: transparent;
@@ -239,16 +215,44 @@
       min-width: 50px;
       text-align: center;
     }
-    .fn-q-text {
+
+    /* Question block with type badge + story + answer */
+    .fn-q-block {
+      flex: 1;
+      min-width: 200px;
+    }
+    .fn-q-type-badge {
+      font-size: 8px;
+      letter-spacing: 2px;
+      padding: 2px 8px;
+      margin-bottom: 5px;
+      display: inline-block;
+    }
+    .fn-q-type-badge--find {
+      background: rgba(0,255,245,0.08);
+      color: var(--cyan);
+      border: 1px solid var(--cyan);
+    }
+    .fn-q-type-badge--write {
+      background: rgba(255,255,0,0.06);
+      color: var(--yellow);
+      border: 1px solid var(--yellow);
+    }
+    .fn-story-text {
       font-size: 10px;
       color: var(--white);
-      letter-spacing: 0.5px;
-      flex: 1;
-      min-width: 120px;
+      line-height: 1.65;
+      margin-bottom: 8px;
     }
-    .fn-q-text .fn-q-planet {
+    .fn-story-hi {
       color: var(--cyan);
+      font-style: normal;
       text-shadow: 0 0 6px var(--cyan);
+    }
+    .fn-q-answer-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
     .fn-selected-path {
       font-size: 9px;
@@ -262,6 +266,30 @@
     .fn-selected-path.empty { color: var(--grey); }
     .fn-selected-path.correct { border-color: var(--green); color: var(--green); }
     .fn-selected-path.wrong { border-color: var(--magenta); color: var(--magenta); }
+    .fn-write-input {
+      background: var(--bg-dark);
+      border: 1px solid var(--grey);
+      color: var(--white);
+      font-size: 10px;
+      padding: 5px 10px;
+      letter-spacing: 0.5px;
+      width: 320px;
+      max-width: 100%;
+      font-family: monospace;
+    }
+    .fn-write-input:focus { outline: none; border-color: var(--cyan); }
+    .fn-write-input.input-correct { border-color: var(--green); color: var(--green); }
+    .fn-write-input.input-wrong   { border-color: var(--magenta); color: var(--magenta); }
+
+    /* Right side: check btn + dots */
+    .fn-bar-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+      flex-shrink: 0;
+      padding-top: 4px;
+    }
     .fn-check-btn {
       font-family: var(--font-pixel);
       font-size: 8px;
@@ -275,8 +303,8 @@
       transition: all 0.15s;
       flex-shrink: 0;
     }
-    .fn-check-btn:hover { box-shadow: 0 0 18px var(--green); }
-    .fn-check-btn:disabled { opacity: 0.3; cursor: default; }
+    .fn-check-btn:hover:not(:disabled) { box-shadow: 0 0 18px var(--green); }
+    .fn-check-btn:disabled { opacity: 0.3; cursor: default; box-shadow: none; }
     .fn-dots {
       display: flex;
       gap: 5px;
@@ -291,22 +319,23 @@
       padding: 0;
       transition: background 0.15s, box-shadow 0.15s;
     }
-    .fn-dot.active { background: var(--yellow); box-shadow: 0 0 5px var(--yellow); }
+    .fn-dot.active   { background: var(--yellow); box-shadow: 0 0 5px var(--yellow); }
+    .fn-dot.drafted  { background: rgba(0,255,245,0.45); }
     .fn-dot.answered { background: var(--green); box-shadow: 0 0 4px var(--green); }
-    .fn-dot.wrong-q { background: var(--magenta); }
+    .fn-dot.wrong-q  { background: var(--magenta); }
 
-    /* Correct/wrong answer info shown in answer bar */
+    /* Feedback row below answer input */
     .fn-answer-feedback {
       font-size: 8px;
       letter-spacing: 1px;
       flex-basis: 100%;
-      text-align: center;
       padding: 2px 0;
+      margin-top: 2px;
     }
+    .fn-answer-feedback.wrong   { color: var(--magenta); }
     .fn-answer-feedback.correct { color: var(--green); }
-    .fn-answer-feedback.wrong { color: var(--magenta); }
 
-    /* ===== RESULT BANNER (overlaid) ===== */
+    /* ===== RESULT BANNER ===== */
     .result-banner {
       display: none;
       position: fixed;
@@ -369,6 +398,7 @@
       .fn-grid-item { width: 64px; padding: 8px 4px 6px; }
       .fn-grid-icon { font-size: 22px; }
       .fn-answer-bar { gap: 8px; padding: 8px 10px; }
+      .fn-write-input { width: 200px; }
     }
   </style>
 </head>
@@ -409,7 +439,7 @@
         <a href="../../index.html" class="fn-header__back" onclick="SFX.navigate()">◂</a>
         <h1 class="fn-header__title" id="gameTitle">🐟 Đặt Tên File</h1>
       </div>
-      <span class="fn-header__score" id="scoreDisplay">SCORE: 0 / 10</span>
+      <span class="fn-header__score" id="scoreDisplay">SCORE: — / 10</span>
     </div>
 
     <!-- Tree sidebar -->
@@ -431,10 +461,22 @@
         <span class="fn-q-label" id="fnQLabel">Q1/10</span>
         <button class="fn-nav-btn" id="fnNextQ">▶</button>
       </div>
-      <div class="fn-q-text" id="fnQText"></div>
-      <div class="fn-selected-path empty" id="fnSelectedPath">Chưa chọn</div>
-      <button class="fn-check-btn" id="fnCheckBtn">✓ CHECK</button>
-      <div class="fn-dots" id="fnDots"></div>
+
+      <div class="fn-q-block">
+        <div class="fn-q-type-badge fn-q-type-badge--find" id="fnQTypeBadge">🔍 TÌM FILE</div>
+        <div class="fn-story-text" id="fnStoryText"></div>
+        <div class="fn-q-answer-row">
+          <div class="fn-selected-path empty" id="fnSelectedPath">Chưa chọn</div>
+          <input class="fn-write-input" id="fnWriteInput"
+            placeholder="vutru.thiênhà.ngânhà.hệsao.hànhtinh"
+            autocomplete="off" style="display:none" />
+        </div>
+      </div>
+
+      <div class="fn-bar-right">
+        <button class="fn-check-btn" id="fnCheckBtn" disabled>✓ CHECK</button>
+        <div class="fn-dots" id="fnDots"></div>
+      </div>
     </div>
   </div>
 
@@ -442,7 +484,7 @@
   <div class="result-banner" id="resultBanner">
     <div class="result-banner__score" id="resultScore"></div>
     <div class="result-banner__msg" id="resultMsg"></div>
-    <button class="result-banner__btn" onclick="document.getElementById('resultBanner').style.display='none'">▶ ĐÓNG</button>
+    <button class="result-banner__btn" id="resultContinueBtn">▶ TIẾP TỤC</button>
   </div>
 
   <div class="toast" id="toast"></div>
@@ -454,23 +496,31 @@
     const GAME_EMOJI = '🐟';
     const TOTAL_Q = 10;
 
-    // Icons per tree level
-    const TREE_ICONS  = { root: '◈', th: '◆', nh: '✦', hs: '☆', planet: '●' };
+    const TREE_ICONS    = { root: '◈', th: '◆', nh: '✦', hs: '☆', planet: '●' };
     const BROWSER_ICONS = { root: '🌌', th: '🌀', nh: '✨', hs: '☀', planet: '🪐' };
+
+    const STORIES = [
+      'Tàu thám hiểm đã đáp xuống hành tinh {HP} trong hệ sao {HS}, thuộc ngân hà {NH} của thiên hà {TH}. Nhiệt độ bề mặt −200°C, bầu trời phát ánh tím mờ.',
+      'Đài thiên văn phát hiện tín hiệu lạ từ hành tinh {HP} trong hệ sao {HS}. Ngân hà {NH} nằm ở rìa thiên hà {TH}, nơi không gian bẻ cong ánh sáng.',
+      'Bản đồ vũ trụ cổ đại ghi: từ thiên hà {TH}, tới ngân hà {NH}, đi sâu vào hệ sao {HS} sẽ thấy hành tinh {HP} — nơi ẩn giấu kho báu của đế chế bị lãng quên.',
+      'Nhiệm vụ khẩn cấp: hành tinh {HP} trong hệ sao {HS} thuộc ngân hà {NH}, thiên hà {TH} sắp bị nuốt bởi lỗ đen. Cần sơ tán dân số trước 48 giờ.',
+      'Du ký vũ trụ ghi lại: thiên hà {TH} có ngân hà {NH} xinh đẹp với hệ sao {HS} nổi tiếng. Hành tinh {HP} ở đó có mùa hoa nở kéo dài 300 năm.',
+    ];
 
     // ================================================================
     //  STATE
     // ================================================================
-    let tree = null;            // nested tree object
-    let allPlanets = [];        // flat list of { name, path, node }
-    let questions = [];         // 10 random questions
+    let tree = null;
+    let allPlanets = [];
+    let questions = [];
     let currentQ = 0;
-    let answers = {};           // qIdx → { selectedPath, correctPath, isCorrect }
-    let currentFolder = null;   // current folder node shown in browser
-    let selectedPlanet = null;  // { name, path } or null
+    let draftAnswers = {};   // qIdx → { planet } for find, { text } for write
+    let checkResults  = {};  // qIdx → { isCorrect, correctValue }
+    let selectedPlanet = null;
+    let currentFolder = null;
 
     // ================================================================
-    //  BUILD TREE FROM FLAT DATA
+    //  BUILD TREE
     // ================================================================
     function buildTree() {
       const d = window.FILE_NAMING_TREE;
@@ -517,14 +567,32 @@
     }
 
     // ================================================================
+    //  STORY HELPERS
+    // ================================================================
+    function fillStory(template, planetNode) {
+      const parts = planetNode.path.split('/'); // [VuTru, TH, NH, HS, HP]
+      const hi = s => `<b class="fn-story-hi">${s}</b>`;
+      return template
+        .replace('{TH}', hi(parts[1]))
+        .replace('{NH}', hi(parts[2]))
+        .replace('{HS}', hi(parts[3]))
+        .replace('{HP}', hi(parts[4]));
+    }
+
+    // ================================================================
     //  GENERATE QUESTIONS
     // ================================================================
     function generateQuestions() {
       const shuffled = [...allPlanets].sort(() => Math.random() - 0.5);
-      questions = shuffled.slice(0, TOTAL_Q).map(p => ({
-        planet: p.name,
-        path: p.path
-      }));
+      const planets10 = shuffled.slice(0, 10);
+      const storyIdxs = [0, 1, 2, 3, 4].sort(() => Math.random() - 0.5);
+
+      questions = [];
+      for (let i = 0; i < 5; i++) {
+        const tpl = STORIES[storyIdxs[i]];
+        questions.push({ type: 'find',  planet: planets10[i],     storyHtml: fillStory(tpl, planets10[i]) });
+        questions.push({ type: 'write', planet: planets10[i + 5], storyHtml: fillStory(tpl, planets10[i + 5]) });
+      }
     }
 
     // ================================================================
@@ -545,7 +613,6 @@
       row.style.paddingLeft = (depth * 14 + 8) + 'px';
       row.dataset.path = node.path;
 
-      // Toggle arrow for folders with children
       const toggle = document.createElement('span');
       toggle.className = 'fn-tree-toggle';
       toggle.textContent = isFolder && hasChildren ? '▸' : ' ';
@@ -571,7 +638,6 @@
         node.children.forEach(child => renderTreeNode(child, childrenWrap, depth + 1));
         parent.appendChild(childrenWrap);
 
-        // Expand/collapse on toggle click
         toggle.addEventListener('click', e => {
           e.stopPropagation();
           SFX.click();
@@ -579,7 +645,6 @@
           toggle.textContent = open ? '▾' : '▸';
         });
 
-        // Click row → navigate browser to this folder + expand
         row.addEventListener('click', () => {
           SFX.click();
           navigateTo(node);
@@ -602,7 +667,6 @@
     }
 
     function expandTreeToPath(path) {
-      // Expand all ancestor folders in the tree
       const parts = path.split('/');
       let acc = '';
       parts.forEach((part, i) => {
@@ -610,12 +674,8 @@
         const wrap = document.querySelector(`.fn-tree-children[data-parent-path="${acc}"]`);
         if (wrap && !wrap.classList.contains('open')) {
           wrap.classList.add('open');
-          // Update toggle
-          const prevSibling = wrap.previousElementSibling;
-          if (prevSibling) {
-            const tgl = prevSibling.querySelector('.fn-tree-toggle');
-            if (tgl) tgl.textContent = '▾';
-          }
+          const prev = wrap.previousElementSibling;
+          if (prev) { const tgl = prev.querySelector('.fn-tree-toggle'); if (tgl) tgl.textContent = '▾'; }
         }
       });
     }
@@ -624,7 +684,7 @@
     //  BROWSER PANEL
     // ================================================================
     function navigateTo(node) {
-      if (node.type === 'planet') return; // planets can't be navigated into
+      if (node.type === 'planet') return;
       currentFolder = node;
       renderBreadcrumb();
       renderBrowser();
@@ -638,20 +698,14 @@
       const parts = currentFolder.path.split('/');
       let acc = '';
       parts.forEach((part, i) => {
-        if (i > 0) {
-          const sep = document.createElement('span');
-          sep.className = 'fn-bc-sep';
-          sep.textContent = ' / ';
-          bc.appendChild(sep);
-        }
+        if (i > 0) { const sep = document.createElement('span'); sep.className = 'fn-bc-sep'; sep.textContent = ' / '; bc.appendChild(sep); }
         acc += (i > 0 ? '/' : '') + part;
         const link = document.createElement('span');
-        link.className = 'fn-bc-item';
-        if (i === parts.length - 1) link.classList.add('current');
+        link.className = 'fn-bc-item' + (i === parts.length - 1 ? ' current' : '');
         link.textContent = part;
-        const targetPath = acc;
+        const tp = acc;
         link.addEventListener('click', () => {
-          const target = findNodeByPath(targetPath);
+          const target = findNodeByPath(tp);
           if (target && target.type !== 'planet') { SFX.click(); navigateTo(target); }
         });
         bc.appendChild(link);
@@ -685,10 +739,7 @@
 
         if (child.type === 'planet') {
           item.addEventListener('click', () => selectPlanetNode(child));
-          // Highlight if already selected
-          if (selectedPlanet && selectedPlanet.path === child.path) {
-            item.classList.add('selected');
-          }
+          if (selectedPlanet && selectedPlanet.path === child.path) item.classList.add('selected');
         } else {
           item.addEventListener('click', () => { SFX.navigate(); navigateTo(child); });
         }
@@ -698,180 +749,141 @@
     }
 
     // ================================================================
-    //  PLANET SELECTION
+    //  PLANET SELECTION (find questions only)
     // ================================================================
     function selectPlanetNode(planetNode) {
+      // Only meaningful for find-type questions
+      if (questions[currentQ]?.type !== 'find') return;
+
       SFX.click();
       selectedPlanet = planetNode;
+      draftAnswers[currentQ] = { planet: planetNode };
+
+      // Clear previous check result for this Q if user re-selects
+      if (checkResults[currentQ]) {
+        delete checkResults[currentQ];
+        document.querySelectorAll('.fn-answer-feedback').forEach(el => el.remove());
+      }
 
       // Remove old selection styling
-      document.querySelectorAll('.fn-grid-item.selected').forEach(el => el.classList.remove('selected'));
-      document.querySelectorAll('.fn-tree-item.selected-planet').forEach(el => el.classList.remove('selected-planet'));
+      document.querySelectorAll('.fn-grid-item.selected, .fn-grid-item.correct-sel, .fn-grid-item.wrong-sel')
+        .forEach(el => el.classList.remove('selected', 'correct-sel', 'wrong-sel'));
+      document.querySelectorAll('.fn-tree-item.selected-planet')
+        .forEach(el => el.classList.remove('selected-planet'));
 
       // Highlight in browser
       const browserItem = document.querySelector(`.fn-grid-item[data-path="${planetNode.path}"]`);
-      if (browserItem) {
-        browserItem.classList.add('selected');
-        showPlanetInfo(browserItem, planetNode);
-      }
+      if (browserItem) browserItem.classList.add('selected');
 
       // Highlight in tree
       const treeItem = document.querySelector(`.fn-tree-item[data-path="${planetNode.path}"]`);
       if (treeItem) treeItem.classList.add('selected-planet');
 
-      // Navigate browser to parent folder if planet is not visible
+      // Navigate browser to parent if planet not visible
       if (!browserItem) {
         const parentPath = planetNode.path.split('/').slice(0, -1).join('/');
         const parent = findNodeByPath(parentPath);
         if (parent) navigateTo(parent);
-        // Re-highlight after render
         requestAnimationFrame(() => {
           const el = document.querySelector(`.fn-grid-item[data-path="${planetNode.path}"]`);
-          if (el) { el.classList.add('selected'); showPlanetInfo(el, planetNode); }
+          if (el) el.classList.add('selected');
         });
       }
 
-      // Update answer bar
+      // Update path display
       const pathEl = document.getElementById('fnSelectedPath');
       pathEl.textContent = planetNode.path;
-      pathEl.classList.remove('empty', 'correct', 'wrong');
-    }
+      pathEl.className = 'fn-selected-path';
 
-    function showPlanetInfo(itemEl, planetNode) {
-      // Remove existing tooltips
-      document.querySelectorAll('.fn-planet-info').forEach(el => el.remove());
-
-      const info = document.createElement('div');
-      info.className = 'fn-planet-info';
-      info.innerHTML = `
-        <div class="fn-planet-info-name">🪐 ${planetNode.name}</div>
-        <div class="fn-planet-info-path">${planetNode.path}</div>
-      `;
-      itemEl.appendChild(info);
-
-      // Auto-remove after 3 seconds
-      setTimeout(() => info.remove(), 3000);
-    }
-
-    // ================================================================
-    //  CHECK ANSWER
-    // ================================================================
-    function checkAnswer() {
-      if (answers[currentQ] !== undefined) return; // Already answered
-
-      if (!selectedPlanet) {
-        showToast('Chọn hành tinh trước!');
-        return;
-      }
-
-      const q = questions[currentQ];
-      const isCorrect = selectedPlanet.path.toLowerCase() === q.path.toLowerCase();
-      answers[currentQ] = { selectedPath: selectedPlanet.path, correctPath: q.path, isCorrect };
-
-      if (isCorrect) {
-        SFX.correct();
-      } else {
-        SFX.wrong();
-      }
-
-      updateAnswerBarFeedback();
-      updateScore();
+      updateCheckBtn();
       updateDots();
-
-      // Check if all done
-      const allDone = questions.every((_, i) => answers[i] !== undefined);
-      if (allDone) showFinalResults();
     }
 
-    function updateAnswerBarFeedback() {
-      const a = answers[currentQ];
-      if (!a) return;
-
-      const pathEl = document.getElementById('fnSelectedPath');
-      pathEl.classList.add(a.isCorrect ? 'correct' : 'wrong');
-
-      // Remove old feedback
-      document.querySelectorAll('.fn-answer-feedback').forEach(el => el.remove());
-
-      if (!a.isCorrect) {
-        const fb = document.createElement('div');
-        fb.className = 'fn-answer-feedback wrong';
-        fb.textContent = `✕ Đáp án: ${a.correctPath}`;
-        document.getElementById('fnAnswerBar').appendChild(fb);
-      } else {
-        const fb = document.createElement('div');
-        fb.className = 'fn-answer-feedback correct';
-        fb.textContent = '✓ Chính xác!';
-        document.getElementById('fnAnswerBar').appendChild(fb);
+    // ================================================================
+    //  DRAFT SAVE / RESTORE
+    // ================================================================
+    function saveDraft(idx) {
+      const q = questions[idx];
+      if (!q) return;
+      if (q.type === 'write') {
+        const val = document.getElementById('fnWriteInput').value;
+        if (val.trim()) draftAnswers[idx] = { text: val };
+        else delete draftAnswers[idx];
       }
-
-      // Highlight correct/wrong in browser
-      const sel = document.querySelector('.fn-grid-item.selected');
-      if (sel) {
-        sel.classList.remove('selected');
-        sel.classList.add(a.isCorrect ? 'correct-sel' : 'wrong-sel');
-      }
-
-      document.getElementById('fnCheckBtn').disabled = true;
+      // find type draft is saved immediately in selectPlanetNode
     }
 
     // ================================================================
     //  QUESTION NAVIGATION
     // ================================================================
     function goToQ(idx) {
+      saveDraft(currentQ);
       currentQ = idx;
-      selectedPlanet = null;
+      const q = questions[idx];
 
-      // Reset selection visuals
+      // Type badge
+      const badge = document.getElementById('fnQTypeBadge');
+      if (q.type === 'find') {
+        badge.textContent = '🔍 TÌM FILE';
+        badge.className = 'fn-q-type-badge fn-q-type-badge--find';
+      } else {
+        badge.textContent = '✏️ VIẾT TÊN';
+        badge.className = 'fn-q-type-badge fn-q-type-badge--write';
+      }
+
+      // Story
+      document.getElementById('fnStoryText').innerHTML = q.storyHtml;
+
+      // Clear previous feedback
+      document.querySelectorAll('.fn-answer-feedback').forEach(el => el.remove());
+
+      // Show/hide answer elements
+      const pathEl  = document.getElementById('fnSelectedPath');
+      const inputEl = document.getElementById('fnWriteInput');
+      const draft   = draftAnswers[idx];
+
+      // Reset visual states
       document.querySelectorAll('.fn-grid-item.selected, .fn-grid-item.correct-sel, .fn-grid-item.wrong-sel')
         .forEach(el => el.classList.remove('selected', 'correct-sel', 'wrong-sel'));
       document.querySelectorAll('.fn-tree-item.selected-planet')
         .forEach(el => el.classList.remove('selected-planet'));
-      document.querySelectorAll('.fn-planet-info').forEach(el => el.remove());
-      document.querySelectorAll('.fn-answer-feedback').forEach(el => el.remove());
 
-      const q = questions[idx];
-      document.getElementById('fnQLabel').textContent = `Q${idx + 1}/${TOTAL_Q}`;
-      document.getElementById('fnQText').innerHTML = `🪐 Hành tinh <span class="fn-q-planet">"${q.planet}"</span> nằm ở đâu?`;
-
-      document.getElementById('fnPrevQ').disabled = idx === 0;
-      document.getElementById('fnNextQ').disabled = idx === TOTAL_Q - 1;
-
-      const pathEl = document.getElementById('fnSelectedPath');
-      const checkBtn = document.getElementById('fnCheckBtn');
-
-      if (answers[idx] !== undefined) {
-        // Already answered
-        pathEl.textContent = answers[idx].selectedPath;
-        pathEl.classList.remove('empty');
-        pathEl.classList.add(answers[idx].isCorrect ? 'correct' : 'wrong');
-        checkBtn.disabled = true;
-        updateAnswerBarFeedback();
+      if (q.type === 'find') {
+        pathEl.style.display  = '';
+        inputEl.style.display = 'none';
+        selectedPlanet = draft?.planet || null;
+        if (selectedPlanet) {
+          pathEl.textContent = selectedPlanet.path;
+          pathEl.className   = 'fn-selected-path';
+        } else {
+          pathEl.textContent = 'Chưa chọn';
+          pathEl.className   = 'fn-selected-path empty';
+        }
       } else {
-        pathEl.textContent = 'Chưa chọn';
-        pathEl.className = 'fn-selected-path empty';
-        checkBtn.disabled = false;
+        pathEl.style.display  = 'none';
+        inputEl.style.display = '';
+        inputEl.value = draft?.text || '';
+        inputEl.className = 'fn-write-input';
+        selectedPlanet = null;
       }
 
+      // Show check feedback if already checked
+      if (checkResults[idx]) showCheckFeedback(idx);
+
+      updateNavBtns();
+      updateCheckBtn();
       updateDots();
+      document.getElementById('fnQLabel').textContent = `Q${idx + 1}/${TOTAL_Q}`;
     }
 
-    function updateDots() {
-      document.querySelectorAll('.fn-dot').forEach((dot, i) => {
-        dot.className = 'fn-dot';
-        if (i === currentQ) dot.classList.add('active');
-        if (answers[i] !== undefined) {
-          dot.classList.add(answers[i].isCorrect ? 'answered' : 'wrong-q');
-        }
-      });
+    function updateNavBtns() {
+      document.getElementById('fnPrevQ').disabled = currentQ === 0;
+      document.getElementById('fnNextQ').disabled = currentQ === TOTAL_Q - 1;
     }
 
-    function updateScore() {
-      const correct = Object.values(answers).filter(a => a.isCorrect).length;
-      const total = Object.keys(answers).length;
-      document.getElementById('scoreDisplay').textContent = `SCORE: ${correct} / ${total}`;
-    }
-
+    // ================================================================
+    //  DOTS
+    // ================================================================
     function buildDots() {
       const container = document.getElementById('fnDots');
       container.innerHTML = '';
@@ -883,15 +895,92 @@
       }
     }
 
+    function updateDots() {
+      document.querySelectorAll('.fn-dot').forEach((dot, i) => {
+        dot.className = 'fn-dot';
+        if (i === currentQ) dot.classList.add('active');
+        else if (checkResults[i]?.isCorrect)                  dot.classList.add('answered');
+        else if (checkResults[i] && !checkResults[i].isCorrect) dot.classList.add('wrong-q');
+        else if (draftAnswers[i])                               dot.classList.add('drafted');
+      });
+    }
+
     // ================================================================
-    //  FINAL RESULTS
+    //  CHECK BUTTON
     // ================================================================
-    function showFinalResults() {
-      const correct = Object.values(answers).filter(a => a.isCorrect).length;
+    function updateCheckBtn() {
+      const allDone = questions.every((_, i) => draftAnswers[i] !== undefined);
+      document.getElementById('fnCheckBtn').disabled = !allDone;
+    }
+
+    function doCheckAll() {
+      saveDraft(currentQ);
+
+      let correct = 0;
+      questions.forEach((q, i) => {
+        const draft = draftAnswers[i];
+        let isCorrect = false;
+        let correctValue = '';
+
+        if (q.type === 'find') {
+          correctValue = q.planet.path;
+          isCorrect = (draft?.planet?.path || '').toLowerCase() === correctValue.toLowerCase();
+        } else {
+          correctValue = q.planet.path.replace(/\//g, '.');
+          isCorrect = (draft?.text || '').trim().toLowerCase() === correctValue.toLowerCase();
+        }
+
+        checkResults[i] = { isCorrect, correctValue };
+        if (isCorrect) correct++;
+      });
+
+      SFX[correct === TOTAL_Q ? 'correct' : 'wrong']();
+      showCheckFeedback(currentQ);
+      updateDots();
+      updateScore(correct);
+      showFinalResults(correct);
+    }
+
+    // ================================================================
+    //  CHECK FEEDBACK (per question)
+    // ================================================================
+    function showCheckFeedback(idx) {
+      document.querySelectorAll('.fn-answer-feedback').forEach(el => el.remove());
+      const result = checkResults[idx];
+      if (!result) return;
+
+      const q = questions[idx];
+
+      if (q.type === 'find') {
+        const pathEl = document.getElementById('fnSelectedPath');
+        pathEl.className = 'fn-selected-path ' + (result.isCorrect ? 'correct' : 'wrong');
+        // Also highlight grid item if visible
+        document.querySelectorAll('.fn-grid-item.selected').forEach(el => {
+          el.classList.remove('selected');
+          el.classList.add(result.isCorrect ? 'correct-sel' : 'wrong-sel');
+        });
+      } else {
+        const inputEl = document.getElementById('fnWriteInput');
+        inputEl.className = 'fn-write-input ' + (result.isCorrect ? 'input-correct' : 'input-wrong');
+      }
+
+      if (!result.isCorrect) {
+        const fb = document.createElement('div');
+        fb.className = 'fn-answer-feedback wrong';
+        fb.textContent = `✕ Đáp án đúng: ${result.correctValue}`;
+        document.getElementById('fnAnswerBar').appendChild(fb);
+      }
+    }
+
+    // ================================================================
+    //  SCORE + FINAL RESULTS
+    // ================================================================
+    function updateScore(correct) {
+      document.getElementById('scoreDisplay').textContent = `SCORE: ${correct} / ${TOTAL_Q}`;
+    }
+
+    function showFinalResults(correct) {
       const pct = Math.round(correct / TOTAL_Q * 100);
-
-      SFX[pct === 100 ? 'correct' : 'wrong']();
-
       const msgs = [
         [100, '🏆 Hoàn hảo! Bạn biết rõ mọi ngõ ngách vũ trụ!'],
         [70,  '🎉 Rất tốt! Còn một vài hành tinh lạc đường.'],
@@ -899,8 +988,6 @@
         [0,   '💪 Chưa đạt! Duyệt lại vũ trụ và thử lại nhé.'],
       ];
       const msg = msgs.find(([min]) => pct >= min)[1];
-
-      document.getElementById('scoreDisplay').textContent = `SCORE: ${correct} / ${TOTAL_Q}`;
       document.getElementById('resultScore').textContent = `${correct} / ${TOTAL_Q} ĐÚNG (${pct}%)`;
       document.getElementById('resultMsg').textContent = msg;
       document.getElementById('resultBanner').style.display = 'block';
@@ -934,12 +1021,37 @@
     // ================================================================
     //  EVENT LISTENERS
     // ================================================================
-    document.getElementById('fnCheckBtn').addEventListener('click', checkAnswer);
+    document.getElementById('fnCheckBtn').addEventListener('click', doCheckAll);
     document.getElementById('fnPrevQ').addEventListener('click', () => {
       if (currentQ > 0) { SFX.navigate(); goToQ(currentQ - 1); }
     });
     document.getElementById('fnNextQ').addEventListener('click', () => {
       if (currentQ < TOTAL_Q - 1) { SFX.navigate(); goToQ(currentQ + 1); }
+    });
+
+    // Write input: save draft + clear old check result on edit
+    document.getElementById('fnWriteInput').addEventListener('input', () => {
+      const val = document.getElementById('fnWriteInput').value;
+      if (val.trim()) {
+        draftAnswers[currentQ] = { text: val };
+        // Clear check result if user edits after checking
+        if (checkResults[currentQ]) {
+          delete checkResults[currentQ];
+          document.querySelectorAll('.fn-answer-feedback').forEach(el => el.remove());
+          document.getElementById('fnWriteInput').className = 'fn-write-input';
+          updateDots();
+        }
+      } else {
+        delete draftAnswers[currentQ];
+      }
+      updateCheckBtn();
+    });
+
+    document.getElementById('resultContinueBtn').addEventListener('click', () => {
+      document.getElementById('resultBanner').style.display = 'none';
+      // Navigate to first wrong Q for easy editing
+      const wrongIdx = questions.findIndex((_, i) => checkResults[i] && !checkResults[i].isCorrect);
+      if (wrongIdx !== -1) goToQ(wrongIdx);
     });
 
     // ================================================================
@@ -950,17 +1062,18 @@
         const r = await fetch('../../data/admin_content.json');
         if (r.ok) { const d = await r.json(); window.FILE_NAMING_TREE = d.fileNaming; }
       } catch(e) {}
+
       document.title = `${GAME_EMOJI} — PIXELVERSE`;
       document.getElementById('gameTitle').textContent = `${GAME_EMOJI} Đặt Tên File`;
+
       tree = buildTree();
       collectPlanets(tree);
       generateQuestions();
 
       renderTree();
-      navigateTo(tree); // Start at root
+      navigateTo(tree);
       buildDots();
       goToQ(0);
-
     }
 
     initGame();
