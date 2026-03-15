@@ -419,6 +419,8 @@
       transition: box-shadow 0.15s;
     }
     .admin-save-btn:hover { box-shadow: 0 0 14px var(--yellow); }
+    .admin-download-btn { background: transparent; border: 2px solid var(--cyan); color: var(--cyan); margin-top: 8px; }
+    .admin-download-btn:hover { background: var(--cyan); color: var(--bg-dark); box-shadow: 0 0 14px var(--cyan); }
     .admin-add-set-btn {
       width: 100%;
       background: transparent;
@@ -544,6 +546,7 @@
       <div id="adminSetList"></div>
 
       <button class="admin-save-btn" id="adminSaveBtn">💾 SAVE</button>
+      <button class="admin-save-btn admin-download-btn" id="adminDownloadBtn">⬇ DOWNLOAD JSON</button>
     </div>
   </div>
 
@@ -1197,6 +1200,19 @@
       setConnections = {};
       currentSet = 0;
       buildGame();
+    });
+
+    document.getElementById('adminDownloadBtn').addEventListener('click', () => {
+      const json = JSON.stringify(adminData, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href = url; a.download = 'admin_matching.json';
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a); URL.revokeObjectURL(url);
+      const btn = document.getElementById('adminDownloadBtn');
+      btn.textContent = '✓ DOWNLOADED!';
+      setTimeout(() => btn.textContent = '⬇ DOWNLOAD JSON', 2000);
     });
 
     // ================================================================
