@@ -228,27 +228,21 @@
     .map-line.correct { stroke: var(--green);  stroke-dasharray: none; opacity: 1; }
     .map-line.wrong   { stroke: var(--orange); stroke-dasharray: none; opacity: 1; }
 
-    /* ===== CONNECTION DELETE BUTTON ===== */
-    .conn-delete-btn {
-      position: absolute;
-      width: 20px; height: 20px;
-      background: var(--orange);
-      border: 2px solid var(--white);
-      color: var(--white);
-      font-size: 11px;
-      cursor: pointer;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 10;
-      transform: translate(-50%, -50%);
-      border-radius: 0;
-      padding: 0;
-      line-height: 1;
+    /* ===== CONNECTION GROUP (hover to show delete, click line to delete) ===== */
+    .conn-group { cursor: pointer; }
+    .conn-hit   { stroke: transparent; stroke-width: 20; pointer-events: stroke; fill: none; }
+    .conn-del-group { visibility: hidden; pointer-events: none; }
+    .conn-group:hover .conn-del-group { visibility: visible; }
+    .conn-del-bg { fill: var(--bg-dark); stroke: var(--orange); stroke-width: 1.5; }
+    .conn-del-txt {
+      fill: var(--orange); font-size: 11px;
+      text-anchor: middle; dominant-baseline: central;
     }
-    .map-canvas:hover .conn-delete-btn,
-    .admin-map-canvas:hover .conn-delete-btn { display: flex; }
-    .conn-delete-btn:hover { background: #ff3333; }
+    /* Highlight connected nodes on hover */
+    .map-node.highlight {
+      border-color: var(--magenta) !important;
+      box-shadow: 0 0 10px rgba(255,0,204,0.45) !important;
+    }
 
     /* ===== KEYWORD POOL ===== */
     .kw-pool-section {
@@ -776,6 +770,12 @@
         else handleGameNodeClick(kw.id);
       });
 
+      // Hover to highlight connected nodes
+      if (!isAdmin) {
+        div.addEventListener('mouseenter', () => mmHighlightConn(kw.id));
+        div.addEventListener('mouseleave', mmClearHighlight);
+      }
+
       const rowSel = isAdmin ? '.admin-map-canvas .map-row' : '#mapCanvas .map-row';
 
       // Drag to different row
@@ -872,9 +872,9 @@
       return { x: dr.left + dr.width / 2 - sr.left, y: dr.top + dr.height / 2 - sr.top };
     }
 
-    function drawLines(conns, plcmts, canvasEl, svgEl, isAdmin, correctSet) {
+    function drawLines(conns, plcmts, canvasEl, svgEl, allowDelete, onDelete, correctSet) {
       svgEl.innerHTML = '';
-      const ns  = 'http://www.w3.org/2000/svg';
+      const ns = 'http://www.w3.org/2000/svg';
 
       conns.forEach(key => {
         const [kA, kB] = cpair(key);
@@ -887,48 +887,71 @@
         const p2 = getDotPos(lower, 'top',    canvasEl, svgEl);
         if (!p1 || !p2) return;
 
-        let cls = 'map-line';
-        if (correctSet) cls += correctSet.has(key) ? ' correct' : ' wrong';
+        const mx = (p1.x + p2.x) / 2, my = (p1.y + p2.y) / 2;
 
+        let lineCls = 'map-line';
+        if (correctSet) lineCls += correctSet.has(key) ? ' correct' : ' wrong';
+
+        const g = document.createElementNS(ns, 'g');
+        g.setAttribute('class', allowDelete ? 'conn-group' : '');
+
+        // Thick invisible hit area (clickable)
+        const hit = document.createElementNS(ns, 'line');
+        hit.setAttribute('x1', p1.x); hit.setAttribute('y1', p1.y);
+        hit.setAttribute('x2', p2.x); hit.setAttribute('y2', p2.y);
+        hit.setAttribute('class', 'conn-hit');
+
+        // Visible styled line
         const line = document.createElementNS(ns, 'line');
         line.setAttribute('x1', p1.x); line.setAttribute('y1', p1.y);
         line.setAttribute('x2', p2.x); line.setAttribute('y2', p2.y);
-        line.setAttribute('class', cls);
-        svgEl.appendChild(line);
-      });
-    }
+        line.setAttribute('class', lineCls);
+        line.style.pointerEvents = 'none';
 
-    function renderConnectionBtns(conns, plcmts, canvasEl, svgEl, isAdmin) {
-      canvasEl.querySelectorAll('.conn-delete-btn').forEach(b => b.remove());
-      conns.forEach(key => {
-        const [kA, kB] = cpair(key);
-        const rowA = plcmts[kA], rowB = plcmts[kB];
-        if (rowA === undefined || rowB === undefined) return;
-        const upper = rowA <= rowB ? kA : kB;
-        const lower = rowA <= rowB ? kB : kA;
-        const p1 = getDotPos(upper, 'bottom', canvasEl, svgEl);
-        const p2 = getDotPos(lower, 'top',    canvasEl, svgEl);
-        if (!p1 || !p2) return;
-        const btn = document.createElement('button');
-        btn.className = 'conn-delete-btn';
-        btn.textContent = '✕';
-        btn.style.left = ((p1.x + p2.x) / 2) + 'px';
-        btn.style.top  = ((p1.y + p2.y) / 2) + 'px';
-        btn.addEventListener('click', e => {
-          e.stopPropagation();
-          if (isAdmin) { adminConnections.delete(key); refreshAdminConnections(); }
-          else { connections.delete(key); refreshGameConnections(); updateProgress(); }
-        });
-        canvasEl.appendChild(btn);
+        g.appendChild(hit);
+        g.appendChild(line);
+
+        if (allowDelete) {
+          // Delete indicator — shown on group hover
+          const dg = document.createElementNS(ns, 'g');
+          dg.setAttribute('class', 'conn-del-group');
+          const bg = document.createElementNS(ns, 'rect');
+          bg.setAttribute('x', mx - 9); bg.setAttribute('y', my - 9);
+          bg.setAttribute('width', 18); bg.setAttribute('height', 18);
+          bg.setAttribute('rx', 3); bg.setAttribute('class', 'conn-del-bg');
+          const txt = document.createElementNS(ns, 'text');
+          txt.setAttribute('x', mx); txt.setAttribute('y', my);
+          txt.setAttribute('class', 'conn-del-txt'); txt.textContent = '✕';
+          dg.appendChild(bg); dg.appendChild(txt);
+          g.appendChild(dg);
+
+          g.addEventListener('click', e => { e.stopPropagation(); onDelete(key); });
+        }
+
+        svgEl.appendChild(g);
       });
     }
 
     function refreshGameConnections(correctSet) {
       const canvas = document.getElementById('mapCanvas');
       const svg    = document.getElementById('mapSvg');
-      drawLines(connections, placements, canvas, svg, false, correctSet || null);
-      if (!checked) renderConnectionBtns(connections, placements, canvas, svg, false);
-      else canvas.querySelectorAll('.conn-delete-btn').forEach(b => b.remove());
+      drawLines(connections, placements, canvas, svg,
+        !checked,
+        key => { connections.delete(key); refreshGameConnections(); updateProgress(); },
+        correctSet || null);
+    }
+
+    function mmHighlightConn(kid) {
+      document.querySelectorAll('#mapCanvas .map-node.highlight').forEach(n => n.classList.remove('highlight'));
+      connections.forEach(key => {
+        if (key.split('|').includes(kid)) {
+          const partner = key.split('|').find(k => k !== kid);
+          document.querySelector(`#mapCanvas .map-node[data-kid="${partner}"]`)?.classList.add('highlight');
+        }
+      });
+    }
+    function mmClearHighlight() {
+      document.querySelectorAll('#mapCanvas .map-node.highlight').forEach(n => n.classList.remove('highlight'));
     }
 
     window.addEventListener('resize', () => {

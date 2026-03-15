@@ -162,23 +162,20 @@
     .conn-line.correct { stroke: var(--green); opacity: 1; }
     .conn-line.wrong   { stroke: var(--magenta); opacity: 1; }
 
-    /* ===== DELETE BUTTON ON LINE ===== */
-    .conn-del {
-      pointer-events: all;
-      cursor: pointer;
-      font-size: 9px;
-      fill: var(--magenta);
-      font-family: var(--font-pixel);
-      dominant-baseline: middle;
-      text-anchor: middle;
+    /* ===== CONNECTION GROUP (hover to show delete, click line to delete) ===== */
+    .conn-group { cursor: pointer; }
+    .conn-hit   { stroke: transparent; stroke-width: 20; pointer-events: stroke; fill: none; }
+    .conn-del-group { visibility: hidden; pointer-events: none; }
+    .conn-group:hover .conn-del-group { visibility: visible; }
+    .conn-del-bg { fill: var(--bg-dark); stroke: var(--magenta); stroke-width: 1.5; }
+    .conn-del-txt {
+      fill: var(--magenta); font-size: 11px;
+      text-anchor: middle; dominant-baseline: central;
     }
-    .conn-del:hover { fill: var(--white); }
-    .conn-del-bg {
-      pointer-events: all;
-      cursor: pointer;
-      fill: var(--bg-dark);
-      stroke: var(--magenta);
-      stroke-width: 1;
+    /* Highlight partner items on hover */
+    .match-item.highlight {
+      border-color: var(--magenta) !important;
+      box-shadow: 0 0 10px rgba(255,0,204,0.45) !important;
     }
 
     /* ===== SET NAVIGATION ===== */
@@ -423,6 +420,7 @@
     function renderLines(correctSet) {
       const svg = document.getElementById('matchSvg');
       svg.innerHTML = '';
+      const ns = 'http://www.w3.org/2000/svg';
 
       connections.forEach(key => {
         const [a, b] = key.split('|');
@@ -432,38 +430,47 @@
 
         const posA = getDotPos(elA);
         const posB = getDotPos(elB);
-
         const mx = (posA.x + posB.x) / 2;
         const my = (posA.y + posB.y) / 2;
 
-        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        const g = document.createElementNS(ns, 'g');
+        g.setAttribute('class', !checked ? 'conn-group' : '');
+
+        // Thick invisible hit area
+        const hit = document.createElementNS(ns, 'line');
+        hit.setAttribute('x1', posA.x); hit.setAttribute('y1', posA.y);
+        hit.setAttribute('x2', posB.x); hit.setAttribute('y2', posB.y);
+        hit.setAttribute('class', 'conn-hit');
+
+        // Visible styled line
+        const line = document.createElementNS(ns, 'line');
         line.setAttribute('x1', posA.x); line.setAttribute('y1', posA.y);
         line.setAttribute('x2', posB.x); line.setAttribute('y2', posB.y);
         line.classList.add('conn-line');
-        if (correctSet) {
-          line.classList.add(correctSet.has(key) ? 'correct' : 'wrong');
-        }
-        svg.appendChild(line);
+        line.style.pointerEvents = 'none';
+        if (correctSet) line.classList.add(correctSet.has(key) ? 'correct' : 'wrong');
 
-        // Delete button (only when not checked)
+        g.appendChild(hit);
+        g.appendChild(line);
+
+        // Delete indicator — hover-triggered, only when not checked
         if (!checked) {
-          const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-          g.style.cursor = 'pointer';
-          g.addEventListener('click', () => { SFX.click(); deleteConn(key); });
-
-          const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-          bg.setAttribute('x', mx - 7); bg.setAttribute('y', my - 7);
-          bg.setAttribute('width', 14);  bg.setAttribute('height', 14);
-          bg.classList.add('conn-del-bg');
-
-          const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          const dg = document.createElementNS(ns, 'g');
+          dg.setAttribute('class', 'conn-del-group');
+          const bg = document.createElementNS(ns, 'rect');
+          bg.setAttribute('x', mx - 9); bg.setAttribute('y', my - 9);
+          bg.setAttribute('width', 18); bg.setAttribute('height', 18);
+          bg.setAttribute('rx', 3); bg.setAttribute('class', 'conn-del-bg');
+          const txt = document.createElementNS(ns, 'text');
           txt.setAttribute('x', mx); txt.setAttribute('y', my);
-          txt.classList.add('conn-del');
-          txt.textContent = '✕';
+          txt.setAttribute('class', 'conn-del-txt'); txt.textContent = '✕';
+          dg.appendChild(bg); dg.appendChild(txt);
+          g.appendChild(dg);
 
-          g.appendChild(bg); g.appendChild(txt);
-          svg.appendChild(g);
+          g.addEventListener('click', () => { SFX.click(); deleteConn(key); });
         }
+
+        svg.appendChild(g);
       });
     }
 
@@ -526,9 +533,20 @@
         colRight.appendChild(el);
       });
 
-      // Click on whole row
+      // Click on whole row + hover highlight
       document.querySelectorAll('.match-item').forEach(item => {
         item.addEventListener('click', onItemClick);
+        item.addEventListener('mouseenter', () => {
+          const id = item.dataset.id;
+          document.querySelectorAll('.match-item.highlight').forEach(el => el.classList.remove('highlight'));
+          [...connections].filter(k => k.split('|').includes(id)).forEach(key => {
+            const partnerId = key.split('|').find(k => k !== id);
+            document.querySelector(`.match-item[data-id="${partnerId}"]`)?.classList.add('highlight');
+          });
+        });
+        item.addEventListener('mouseleave', () => {
+          document.querySelectorAll('.match-item.highlight').forEach(el => el.classList.remove('highlight'));
+        });
       });
 
       updateDotColors();

@@ -194,14 +194,25 @@
     }
     .node-conn-count.has-conn { display: flex; }
     .map-line { stroke: var(--cyan); stroke-width: 2; stroke-dasharray: 6 3; fill: none; opacity: 0.85; }
-    .conn-delete-btn {
-      position: absolute; width: 20px; height: 20px; transform: translate(-50%,-50%);
-      background: var(--orange); border: 2px solid var(--white); color: var(--white);
-      font-size: 9px; cursor: pointer; display: none; align-items: center;
-      justify-content: center; border-radius: 50%; z-index: 10;
+    /* ===== CONNECTION GROUP (hover to show delete, click line to delete) ===== */
+    .conn-group { cursor: pointer; }
+    .conn-hit   { stroke: transparent; stroke-width: 20; pointer-events: stroke; fill: none; }
+    .conn-del-group { visibility: hidden; pointer-events: none; }
+    .conn-group:hover .conn-del-group { visibility: visible; }
+    .conn-del-bg  { fill: var(--bg-dark); stroke: var(--orange); stroke-width: 1.5; }
+    .conn-del-txt {
+      fill: var(--orange); font-size: 11px;
+      text-anchor: middle; dominant-baseline: central;
     }
-    .mm-admin-canvas:hover .conn-delete-btn { display: flex; }
-    .conn-delete-btn:hover { background: #ff3333; }
+    /* Highlight connected nodes/items on hover */
+    .map-node.highlight {
+      border-color: var(--magenta) !important;
+      box-shadow: 0 0 10px rgba(255,0,204,0.45) !important;
+    }
+    .mt-item.highlight {
+      border-color: var(--magenta) !important;
+      box-shadow: 0 0 10px rgba(255,0,204,0.35) !important;
+    }
     .kw-pool-sidebar {
       width: 140px; flex-shrink: 0; display: flex; flex-direction: column; gap: 6px;
     }
@@ -290,12 +301,6 @@
       pointer-events: none; overflow: visible; z-index: 2;
     }
     .mt-conn-line { stroke: var(--cyan); stroke-width: 2; stroke-dasharray: 5 3; fill: none; opacity: 0.85; }
-    .mt-conn-del-bg { fill: var(--bg-dark); stroke: var(--orange); stroke-width: 1.5; }
-    .mt-conn-del {
-      fill: var(--orange); font-size: 10px;
-      text-anchor: middle; dominant-baseline: central;
-      pointer-events: all; cursor: pointer;
-    }
 
     .mt-hint { font-size: 12px; color: var(--grey); margin-bottom: 8px; font-style: italic; }
     .mt-add-set-row { margin-bottom: 16px; }
@@ -812,6 +817,8 @@
       div.className = 'map-node'; div.dataset.kid = kw.id; div.draggable = true;
       div.innerHTML = `<div class="node-dot node-dot--top"></div><span class="node-conn-count"></span><span>${escHtml(kw.text)}</span><div class="node-dot node-dot--bottom"></div>`;
       div.addEventListener('click', e => { e.stopPropagation(); mmNodeClick(kw.id); });
+      div.addEventListener('mouseenter', () => mmHighlightAdminConn(kw.id));
+      div.addEventListener('mouseleave', mmClearHighlightAdmin);
       div.addEventListener('dragstart', e => {
         e.stopPropagation(); mmDragKid = kw.id; div.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move';
         document.querySelectorAll('#mm-canvas .map-row').forEach(r => r.classList.add('accepting'));
@@ -861,7 +868,6 @@
       const canvas = document.getElementById('mm-canvas');
       const svg    = document.getElementById('mm-svg');
       svg.innerHTML = '';
-      canvas.querySelectorAll('.conn-delete-btn').forEach(b => b.remove());
       const ns = 'http://www.w3.org/2000/svg';
       mmConnections.forEach(key => {
         const [kA, kB] = mmPair(key);
@@ -870,16 +876,33 @@
         const upper = rowA <= rowB ? kA : kB, lower = rowA <= rowB ? kB : kA;
         const p1 = mmGetDotPos(upper, 'bottom'), p2 = mmGetDotPos(lower, 'top');
         if (!p1 || !p2) return;
+        const mx = (p1.x+p2.x)/2, my = (p1.y+p2.y)/2;
+
+        const g = document.createElementNS(ns, 'g');
+        g.setAttribute('class', 'conn-group');
+
+        const hit = document.createElementNS(ns, 'line');
+        hit.setAttribute('x1',p1.x); hit.setAttribute('y1',p1.y);
+        hit.setAttribute('x2',p2.x); hit.setAttribute('y2',p2.y);
+        hit.setAttribute('class','conn-hit');
+
         const line = document.createElementNS(ns, 'line');
         line.setAttribute('x1',p1.x); line.setAttribute('y1',p1.y);
         line.setAttribute('x2',p2.x); line.setAttribute('y2',p2.y);
-        line.setAttribute('class','map-line'); svg.appendChild(line);
-        const btn = document.createElement('button');
-        btn.className = 'conn-delete-btn'; btn.textContent = '✕';
-        btn.style.left = ((p1.x+p2.x)/2) + 'px'; btn.style.top = ((p1.y+p2.y)/2) + 'px';
-        btn.addEventListener('click', e => { e.stopPropagation(); mmConnections.delete(key); mmRefreshConn(); });
-        canvas.appendChild(btn);
+        line.setAttribute('class','map-line'); line.style.pointerEvents = 'none';
+
+        const dg = document.createElementNS(ns, 'g'); dg.setAttribute('class','conn-del-group');
+        const bg = document.createElementNS(ns, 'rect');
+        bg.setAttribute('x',mx-9); bg.setAttribute('y',my-9); bg.setAttribute('width',18); bg.setAttribute('height',18); bg.setAttribute('rx',3); bg.setAttribute('class','conn-del-bg');
+        const txt = document.createElementNS(ns, 'text');
+        txt.setAttribute('x',mx); txt.setAttribute('y',my); txt.setAttribute('class','conn-del-txt'); txt.textContent='✕';
+        dg.appendChild(bg); dg.appendChild(txt);
+
+        g.appendChild(hit); g.appendChild(line); g.appendChild(dg);
+        g.addEventListener('click', e => { e.stopPropagation(); mmConnections.delete(key); mmRefreshConn(); });
+        svg.appendChild(g);
       });
+      // Update connection count badges
       const counts = {};
       mmConnections.forEach(k => { const [a,b]=mmPair(k); counts[a]=(counts[a]||0)+1; counts[b]=(counts[b]||0)+1; });
       canvas.querySelectorAll('.map-node').forEach(n => {
@@ -887,6 +910,19 @@
         const cnt = counts[n.dataset.kid] || 0;
         if (badge) { badge.textContent = cnt; badge.classList.toggle('has-conn', cnt > 0); }
       });
+    }
+
+    function mmHighlightAdminConn(kid) {
+      document.querySelectorAll('#mm-canvas .map-node.highlight').forEach(n => n.classList.remove('highlight'));
+      mmConnections.forEach(key => {
+        if (key.split('|').includes(kid)) {
+          const partner = key.split('|').find(k => k !== kid);
+          document.querySelector(`#mm-canvas .map-node[data-kid="${partner}"]`)?.classList.add('highlight');
+        }
+      });
+    }
+    function mmClearHighlightAdmin() {
+      document.querySelectorAll('#mm-canvas .map-node.highlight').forEach(n => n.classList.remove('highlight'));
     }
 
     function mmBuildSave() {
@@ -1081,6 +1117,17 @@
         el.appendChild(dot); el.appendChild(inp); el.appendChild(del);
       }
       el.addEventListener('click', e => { e.stopPropagation(); mtItemClick(item.id, side, si); });
+      el.addEventListener('mouseenter', () => {
+        document.querySelectorAll('.mt-item.highlight').forEach(el => el.classList.remove('highlight'));
+        const conns = mtConns[si] || new Set();
+        [...conns].filter(k => k.split('|').includes(item.id)).forEach(key => {
+          const partnerId = key.split('|').find(k => k !== item.id);
+          document.querySelector(`[data-mid="${partnerId}"]`)?.classList.add('highlight');
+        });
+      });
+      el.addEventListener('mouseleave', () => {
+        document.querySelectorAll('.mt-item.highlight').forEach(el => el.classList.remove('highlight'));
+      });
       return el;
     }
 
@@ -1102,23 +1149,32 @@
         const [a, b] = key.split('|');
         const pA = mtGetDotPos(a, si), pB = mtGetDotPos(b, si); if (!pA || !pB) return;
         const mx = (pA.x+pB.x)/2, my = (pA.y+pB.y)/2;
+
+        const g = document.createElementNS(ns, 'g');
+        g.setAttribute('class', 'conn-group');
+
+        const hit = document.createElementNS(ns, 'line');
+        hit.setAttribute('x1',pA.x); hit.setAttribute('y1',pA.y);
+        hit.setAttribute('x2',pB.x); hit.setAttribute('y2',pB.y);
+        hit.setAttribute('class','conn-hit');
+
         const line = document.createElementNS(ns, 'line');
         line.setAttribute('x1',pA.x); line.setAttribute('y1',pA.y);
         line.setAttribute('x2',pB.x); line.setAttribute('y2',pB.y);
-        line.setAttribute('class','mt-conn-line'); svg.appendChild(line);
-        const g = document.createElementNS(ns, 'g');
-        g.style.cssText = 'cursor:pointer;pointer-events:all;';
+        line.setAttribute('class','mt-conn-line'); line.style.pointerEvents = 'none';
+
+        const dg = document.createElementNS(ns, 'g'); dg.setAttribute('class','conn-del-group');
+        const bg = document.createElementNS(ns, 'rect');
+        bg.setAttribute('x',mx-9); bg.setAttribute('y',my-9); bg.setAttribute('width',18); bg.setAttribute('height',18); bg.setAttribute('rx',3); bg.setAttribute('class','conn-del-bg');
+        const txt = document.createElementNS(ns, 'text');
+        txt.setAttribute('x',mx); txt.setAttribute('y',my); txt.setAttribute('class','conn-del-txt'); txt.textContent='✕';
+        dg.appendChild(bg); dg.appendChild(txt);
+
+        g.appendChild(hit); g.appendChild(line); g.appendChild(dg);
         g.addEventListener('click', e => {
           e.stopPropagation(); mtConns[si].delete(key); mtRenderLines(si); mtUpdateColors(si);
         });
-        const bg = document.createElementNS(ns, 'rect');
-        bg.setAttribute('x', mx-8); bg.setAttribute('y', my-8);
-        bg.setAttribute('width', 16); bg.setAttribute('height', 16);
-        bg.setAttribute('rx', 3); bg.setAttribute('class', 'mt-conn-del-bg');
-        const txt = document.createElementNS(ns, 'text');
-        txt.setAttribute('x', mx); txt.setAttribute('y', my);
-        txt.setAttribute('class', 'mt-conn-del'); txt.textContent = '✕';
-        g.appendChild(bg); g.appendChild(txt); svg.appendChild(g);
+        svg.appendChild(g);
       });
       mtUpdateColors(si);
     }
