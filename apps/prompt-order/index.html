@@ -327,22 +327,18 @@
       parts.forEach((part, idx) => {
         const card = document.createElement('div');
         card.className = 'po-card';
+        card.draggable = true;
         if (results) card.classList.add(results.partResults[idx] ? 'po-correct' : 'po-wrong');
 
         const handle = document.createElement('span');
         handle.className = 'po-handle';
         handle.innerHTML = '&#8801;';
 
-        const badge = document.createElement('span');
-        badge.className = `po-badge po-badge--${part.type}`;
-        badge.textContent = TYPE_LABELS[part.type] || part.type;
-
         const text = document.createElement('span');
         text.className = 'po-text';
         text.textContent = part.text;
 
         card.appendChild(handle);
-        card.appendChild(badge);
         card.appendChild(text);
         makeDraggable(card, idx);
         container.appendChild(card);
@@ -363,13 +359,16 @@
     //  DRAG AND DROP
     // ================================================================
     function makeDraggable(card, idx) {
+      card.dataset.idx = idx;
       card.addEventListener('dragstart', e => {
         dragSrcIdx = idx;
         card.classList.add('dragging');
         e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', idx);
       });
       card.addEventListener('dragend', () => {
-        card.classList.remove('dragging');
+        dragSrcIdx = null;
+        document.querySelectorAll('.po-card.dragging').forEach(c => c.classList.remove('dragging'));
         document.querySelectorAll('.po-card.drag-over').forEach(c => c.classList.remove('drag-over'));
       });
       card.addEventListener('dragover', e => {
@@ -378,17 +377,19 @@
         document.querySelectorAll('.po-card.drag-over').forEach(c => c.classList.remove('drag-over'));
         card.classList.add('drag-over');
       });
-      card.addEventListener('dragleave', () => card.classList.remove('drag-over'));
+      card.addEventListener('dragleave', e => {
+        if (!card.contains(e.relatedTarget)) card.classList.remove('drag-over');
+      });
       card.addEventListener('drop', e => {
         e.preventDefault();
-        if (dragSrcIdx === null || dragSrcIdx === idx) return;
+        const src = dragSrcIdx;
+        card.classList.remove('drag-over');
+        if (src === null || src === idx) return;
         SFX.click();
         const arr = draftOrders[currentQ];
-        const [item] = arr.splice(dragSrcIdx, 1);
+        const [item] = arr.splice(src, 1);
         arr.splice(idx, 0, item);
-        // Clear check result for this Q if user re-arranges
         if (checkResults[currentQ]) { delete checkResults[currentQ]; }
-        dragSrcIdx = null;
         renderCards();
         updateDots();
       });
