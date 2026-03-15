@@ -399,6 +399,19 @@
       .fn-grid-icon { font-size: 22px; }
       .fn-answer-bar { gap: 8px; padding: 8px 10px; }
       .fn-write-input { width: 200px; }
+      .fn-header__title { font-size: clamp(13px, 3vw, 18px); }
+    }
+    @media (max-width: 420px) {
+      .fn-layout { grid-template-columns: 110px 1fr; }
+      .fn-tree-name { font-size: 8px; }
+      .fn-grid-item { width: 54px; padding: 6px 2px 4px; }
+      .fn-grid-icon { font-size: 18px; }
+      .fn-grid-name { font-size: 7px; }
+      .fn-write-input { width: 140px; }
+      .fn-answer-bar { padding: 6px 8px; gap: 6px; min-height: 48px; }
+      .fn-q-label { min-width: 36px; }
+      .result-banner { padding: 20px 16px; width: 88vw; box-sizing: border-box; }
+      .fn-header { padding: 8px 10px; }
     }
   </style>
 </head>
