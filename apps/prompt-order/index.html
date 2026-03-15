@@ -186,7 +186,7 @@
   <!-- MAIN -->
   <div class="game-page">
     <div class="po-title-row">
-      <h1 class="po-page-title" id="pageTitle">🐜 Sắp xếp Prompt</h1>
+      <h1 class="po-page-title" id="pageTitle">🐜 PROMPT ORDER</h1>
       <span class="po-score" id="scoreDisplay">SCORE: — / —</span>
     </div>
     <div class="po-q-header">
@@ -217,7 +217,7 @@
   <div class="result-banner" id="resultBanner">
     <div class="result-banner__score" id="resultScore"></div>
     <div class="result-banner__msg" id="resultMsg"></div>
-    <button class="result-banner__btn" id="resultContinueBtn">▶ TIẾP TỤC</button>
+    <button class="result-banner__btn" id="resultContinueBtn">▶ CONTINUE</button>
   </div>
 
   <script>
@@ -258,7 +258,7 @@
     // ================================================================
     async function initGame() {
       document.title = `${GAME_EMOJI} — PIXELVERSE`;
-      document.getElementById('pageTitle').textContent = `${GAME_EMOJI} Sắp xếp Prompt`;
+      document.getElementById('pageTitle').textContent = `${GAME_EMOJI} PROMPT ORDER`;
 
       await loadData();
 

@@ -976,7 +976,7 @@
       const placedKids = Object.keys(placements);
       if (placedKids.length < gameData.keywords.length) {
         const missing = gameData.keywords.length - placedKids.length;
-        showToast(`Hãy đặt tất cả từ khóa trước! (còn ${missing} từ)`);
+        showToast(`PLACE ALL KEYWORDS FIRST! (${missing} left)`);
         return;
       }
 
@@ -985,7 +985,7 @@
       connections.forEach(key => { const [a, b] = cpair(key); connectedSet.add(a); connectedSet.add(b); });
       const unconnected = gameData.keywords.filter(kw => !connectedSet.has(kw.id));
       if (unconnected.length > 0) {
-        showToast(`${unconnected.length} nút chưa được kết nối!`);
+        showToast(`${unconnected.length} NODES NOT CONNECTED!`);
         return;
       }
 
