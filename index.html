@@ -126,6 +126,9 @@
       letter-spacing: 0;
     }
 
+    /* Remove glow from app cards */
+    .app-card { box-shadow: none !important; border-color: var(--grey); border: 2px solid var(--grey) !important; }
+
   </style>
 </head>
 <body>
@@ -134,7 +137,7 @@
   <nav class="navbar">
     <a href="index.html" class="navbar__logo">◈ PIXELVERSE</a>
     <ul class="navbar__links">
-      <li><a href="index.html" class="active" title="Home">🏠</a></li>
+      <li><a href="index.html" class="active" title="Home">◈</a></li>
       <li>
         <button class="navbar__grid-btn" id="gamesBtn" title="Games">
           <span class="navbar__grid-btn__dots">
@@ -210,10 +213,7 @@
       <article class="app-card pixel-box app-card--cyan" onclick="SFX.navigate();location.href='apps/pros-cons/index.html'">
         <div class="app-card__icon">🐺</div>
         <h3 class="app-card__title font-vi-h">Đoán Ưu/Nhược</h3>
-        <p class="app-card__desc font-vi">
-          Kéo thả thẻ ưu điểm và nhược điểm vào đúng chủ đề tương ứng.
-          Thử thách khả năng phân tích và tư duy phản biện của bạn!
-        </p>
+        <p class="app-card__desc font-vi">Kéo thả thẻ vào đúng ô. Phân tích ưu/nhược điểm.</p>
         <span class="app-card__btn">▶ PLAY</span>
       </article>
 
