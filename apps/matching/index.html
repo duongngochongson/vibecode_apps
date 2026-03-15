@@ -384,11 +384,11 @@
       if (saved) {
         try { return JSON.parse(saved); } catch(e) {}
       }
-      // 2. admin/admin_matching.json (source of truth on GitHub)
+      // 2. data/admin_content.json (source of truth on GitHub)
       if (!_cachedMatchingJson) {
         try {
-          const r = await fetch('../../admin/admin_matching.json');
-          if (r.ok) _cachedMatchingJson = await r.json();
+          const r = await fetch('../../data/admin_content.json');
+          if (r.ok) { const d = await r.json(); _cachedMatchingJson = d.matching; }
         } catch(e) {}
       }
       if (_cachedMatchingJson) return JSON.parse(JSON.stringify(_cachedMatchingJson));

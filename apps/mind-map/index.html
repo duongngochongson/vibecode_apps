@@ -507,7 +507,7 @@
       const saved = localStorage.getItem('mindMap');
       if (saved) { try { return JSON.parse(saved)[0]; } catch(e) {} }
       if (!_cachedJson) {
-        try { const r = await fetch('../../admin/admin_mind_map.json'); if (r.ok) _cachedJson = await r.json(); } catch(e) {}
+        try { const r = await fetch('../../data/admin_content.json'); if (r.ok) { const d = await r.json(); _cachedJson = d.mindMap; } } catch(e) {}
       }
       if (_cachedJson) return _cachedJson[0];
       return (window.MIND_MAP_DATA || [])[0] || null;

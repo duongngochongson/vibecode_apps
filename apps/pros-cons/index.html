@@ -457,11 +457,11 @@
       if (saved) {
         try { return JSON.parse(saved); } catch(e) {}
       }
-      // 2. admin/admin_pros_cons.json (source of truth on GitHub)
+      // 2. data/admin_content.json (source of truth on GitHub)
       if (!_cachedJsonData) {
         try {
-          const res = await fetch('../../admin/admin_pros_cons.json');
-          if (res.ok) _cachedJsonData = await res.json();
+          const res = await fetch('../../data/admin_content.json');
+          if (res.ok) { const d = await res.json(); _cachedJsonData = d.prosCons; }
         } catch(e) {}
       }
       if (_cachedJsonData) return _cachedJsonData;

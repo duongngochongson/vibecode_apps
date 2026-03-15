@@ -603,7 +603,11 @@
     async function initPC() {
       const saved = localStorage.getItem('prosCons');
       if (saved) { try { pcData = JSON.parse(saved); } catch(e) {} }
-      // Fallback: use bundled game data (window.PROS_CONS_DATA from pros-cons.js)
+      // Fallback: data/admin_content.json (source of truth)
+      if (!pcData.length) {
+        try { const r = await fetch('../../data/admin_content.json'); if (r.ok) { const d = await r.json(); pcData = d.prosCons || []; } } catch(e) {}
+      }
+      // Last resort: bundled game data (window.PROS_CONS_DATA from pros-cons.js)
       if (!pcData.length && window.PROS_CONS_DATA) pcData = JSON.parse(JSON.stringify(window.PROS_CONS_DATA));
       renderPC();
       document.getElementById('pc-add').addEventListener('click', () => {
@@ -671,7 +675,11 @@
     async function initMM() {
       const saved = localStorage.getItem('mindMap');
       if (saved) { try { mmData = JSON.parse(saved)[0]; } catch(e) {} }
-      // Fallback: use bundled game data (window.MIND_MAP_DATA from mind-map.js)
+      // Fallback: data/admin_content.json (source of truth)
+      if (!mmData) {
+        try { const r = await fetch('../../data/admin_content.json'); if (r.ok) { const d = await r.json(); mmData = (d.mindMap || [])[0] || null; } } catch(e) {}
+      }
+      // Last resort: bundled game data (window.MIND_MAP_DATA from mind-map.js)
       if (!mmData && window.MIND_MAP_DATA?.[0]) mmData = JSON.parse(JSON.stringify(window.MIND_MAP_DATA[0]));
       if (!mmData) mmData = { id: Date.now(), title: 'Sơ đồ 1', rowCount: 3, keywords: [], connections: [] };
       mmPlacements = {};
@@ -941,7 +949,11 @@
     async function initMT() {
       const saved = localStorage.getItem('matching');
       if (saved) { try { mtData = JSON.parse(saved); } catch(e) {} }
-      // Fallback: use bundled game data (window.MATCHING_DATA from matching.js)
+      // Fallback: data/admin_content.json (source of truth)
+      if (!mtData.length) {
+        try { const r = await fetch('../../data/admin_content.json'); if (r.ok) { const d = await r.json(); mtData = d.matching || []; } } catch(e) {}
+      }
+      // Last resort: bundled game data (window.MATCHING_DATA from matching.js)
       if (!mtData.length && window.MATCHING_DATA) mtData = JSON.parse(JSON.stringify(window.MATCHING_DATA));
       // Load connections into mtConns (only on init, not on rebuild)
       mtData.forEach((s, si) => {
