@@ -202,5 +202,63 @@
         { "from": "L4", "to": "R4" }
       ]
     }
+  ],
+  "mece": [
+    {
+      "id": 1,
+      "topic": "Phương tiện giao thông",
+      "topicConcept": "Các phương tiện con người sử dụng để di chuyển từ nơi này đến nơi khác.",
+      "categories": [
+        { "name": "Đường bộ", "concept": "Xe máy, ô tô, xe đạp, xe buýt..." },
+        { "name": "Đường thủy", "concept": "Tàu, thuyền, ca nô..." },
+        { "name": "Đường hàng không", "concept": "Máy bay, trực thăng..." }
+      ],
+      "answer": "mece"
+    },
+    {
+      "id": 2,
+      "topic": "Loại trái cây",
+      "topicConcept": "",
+      "categories": [
+        { "name": "Trái cây nhiệt đới", "concept": "Xoài, dừa, chuối..." },
+        { "name": "Trái cây ôn đới", "concept": "Táo, lê, nho..." },
+        { "name": "Trái cây họ cam", "concept": "Cam, quýt, bưởi..." }
+      ],
+      "answer": "not_me"
+    },
+    {
+      "id": 3,
+      "topic": "Cấp học tại Việt Nam",
+      "topicConcept": "Hệ thống giáo dục phổ thông Việt Nam.",
+      "categories": [
+        { "name": "Tiểu học", "concept": "Lớp 1–5" },
+        { "name": "Trung học cơ sở", "concept": "Lớp 6–9" }
+      ],
+      "answer": "not_ce"
+    },
+    {
+      "id": 4,
+      "topic": "Trạng thái vật chất",
+      "topicConcept": "Các dạng tồn tại của vật chất trong tự nhiên.",
+      "categories": [
+        { "name": "Rắn", "concept": "Có hình dạng và thể tích cố định" },
+        { "name": "Lỏng", "concept": "Có thể tích cố định, không có hình dạng cố định" },
+        { "name": "Khí", "concept": "Không có hình dạng và thể tích cố định" },
+        { "name": "Nước", "concept": "H₂O — có thể tồn tại ở cả 3 trạng thái" }
+      ],
+      "answer": "not_mece"
+    },
+    {
+      "id": 5,
+      "topic": "Nhóm máu hệ ABO",
+      "topicConcept": "Phân loại máu người theo kháng nguyên trên bề mặt hồng cầu.",
+      "categories": [
+        { "name": "Nhóm A", "concept": "Có kháng nguyên A" },
+        { "name": "Nhóm B", "concept": "Có kháng nguyên B" },
+        { "name": "Nhóm AB", "concept": "Có cả kháng nguyên A và B" },
+        { "name": "Nhóm O", "concept": "Không có kháng nguyên A hoặc B" }
+      ],
+      "answer": "mece"
+    }
   ]
 }

@@ -336,6 +336,7 @@
       <a href="../file-naming/" class="navbar__game-item" title="Đặt Tên File">🐟</a>
       <a href="../prompt-order/" class="navbar__game-item" title="Sắp xếp Prompt">🐜</a>
       <a href="../calculator/" class="navbar__game-item" title="Máy Tính">🐬</a>
+      <a href="../mece/" class="navbar__game-item" title="MECE">🦊</a>
     </div>
   </div>
 
@@ -473,6 +474,21 @@
         </div>
       </div>
 
+      <!-- MECE -->
+      <div class="game-block">
+        <button class="game-header" onclick="toggleSection('mece')">
+          <span class="game-header-left"><span>🦊</span><span>MECE</span></span>
+          <span class="game-arrow" id="arrow-mece">▶</span>
+        </button>
+        <div class="game-content" id="content-mece">
+          <div id="mece-list"></div>
+          <div class="add-btn-row">
+            <button class="add-btn" id="mece-add" title="Thêm câu hỏi">+</button>
+            <span>Thêm câu hỏi</span>
+          </div>
+        </div>
+      </div>
+
     </div><!-- /game-sections -->
 
     <!-- GLOBAL BAR BOTTOM -->
@@ -562,12 +578,14 @@
         promptOrder: poData,
         prosCons:    pcData,
         mindMap:     [mmBuildSave()],
-        matching:    buildMTData()
+        matching:    buildMTData(),
+        mece:        meceData
       };
       localStorage.setItem('promptOrder', JSON.stringify(content.promptOrder));
       localStorage.setItem('prosCons',    JSON.stringify(content.prosCons));
       localStorage.setItem('mindMap',     JSON.stringify(content.mindMap));
       localStorage.setItem('matching',    JSON.stringify(content.matching));
+      localStorage.setItem('mece',        JSON.stringify(content.mece));
       gLastJson = JSON.stringify(content, null, 2);
       enableGlobal();
       flashMsg('✓ Đã lưu!');
@@ -627,7 +645,7 @@
 
     function initAll() {
       fetch('../../data/admin_content.json').then(r => r.ok ? r.json() : null).then(d => { if (d) rawFileNaming = d.fileNaming || {}; }).catch(() => {});
-      initPC(); initMM(); initMT(); initPO();
+      initPC(); initMM(); initMT(); initPO(); initMECE();
     }
 
     // ================================================================
@@ -1322,6 +1340,133 @@
         row.appendChild(sel); row.appendChild(ta); row.appendChild(del);
         container.appendChild(row);
         autoResize(ta);
+      });
+    }
+
+    // ================================================================
+    //  MECE
+    // ================================================================
+    let meceData = [];
+    const MECE_ANSWER_OPTIONS = [
+      { value: 'mece',     label: '✓ MECE (đúng)' },
+      { value: 'not_me',   label: '✗ Sai ME' },
+      { value: 'not_ce',   label: '✗ Sai CE' },
+      { value: 'not_mece', label: '✗ Sai MECE' }
+    ];
+
+    async function initMECE() {
+      const saved = localStorage.getItem('mece');
+      if (saved) { try { meceData = JSON.parse(saved); } catch(e) {} }
+      if (!meceData.length) {
+        try { const r = await fetch('../../data/admin_content.json'); if (r.ok) { const d = await r.json(); meceData = d.mece || []; } } catch(e) {}
+      }
+      renderMECE();
+      document.getElementById('mece-add').addEventListener('click', () => {
+        meceData.push({ id: Date.now(), topic: '', topicConcept: '', categories: [{ name: '', concept: '' }], answer: 'mece' });
+        renderMECE();
+      });
+    }
+
+    function renderMECE() {
+      const list = document.getElementById('mece-list');
+      list.innerHTML = '';
+      meceData.forEach((item, idx) => {
+        const div = document.createElement('div');
+        div.className = 'entry-card';
+
+        // Header
+        div.innerHTML = `
+          <div class="entry-head">
+            <span class="entry-num">CÂU HỎI ${idx + 1}</span>
+            <button class="entry-remove mece-del-q" title="Xóa câu">✕</button>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Chủ đề</label>
+            <input class="field-input" data-mece="${idx}" data-f="topic" value="${escHtml(item.topic)}" placeholder="Tên chủ đề" />
+          </div>
+          <div class="field-group">
+            <label class="field-label">Khái niệm chủ đề (tùy chọn)</label>
+            <textarea class="field-textarea" data-mece="${idx}" data-f="topicConcept" placeholder="Giải thích ngắn (có thể bỏ trống)">${escHtml(item.topicConcept || '')}</textarea>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Danh mục phân loại</label>
+            <div id="mece-cats-${idx}"></div>
+            <div class="add-btn-row" style="margin-top:6px">
+              <button class="add-btn mece-add-cat" data-idx="${idx}" title="Thêm danh mục">+</button>
+              <span>Thêm danh mục</span>
+            </div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Đáp án</label>
+            <select class="field-input mece-answer-sel" data-idx="${idx}" style="width:200px;cursor:pointer"></select>
+          </div>`;
+
+        // Delete question
+        div.querySelector('.mece-del-q').addEventListener('click', () => { meceData.splice(idx, 1); renderMECE(); });
+
+        // Input bindings
+        div.querySelectorAll('[data-mece]').forEach(el => {
+          el.addEventListener('input', () => {
+            const i = +el.dataset.mece, f = el.dataset.f;
+            meceData[i][f] = el.value;
+          });
+        });
+
+        // Add category button
+        div.querySelector('.mece-add-cat').addEventListener('click', () => {
+          meceData[idx].categories.push({ name: '', concept: '' });
+          renderMECE();
+        });
+
+        // Answer select
+        const sel = div.querySelector('.mece-answer-sel');
+        MECE_ANSWER_OPTIONS.forEach(opt => {
+          const o = document.createElement('option');
+          o.value = opt.value; o.textContent = opt.label;
+          if (opt.value === item.answer) o.selected = true;
+          sel.appendChild(o);
+        });
+        sel.addEventListener('change', () => { meceData[idx].answer = sel.value; });
+
+        list.appendChild(div);
+
+        // Render categories
+        renderMECECats(idx);
+      });
+    }
+
+    function renderMECECats(idx) {
+      const container = document.getElementById(`mece-cats-${idx}`);
+      if (!container) return;
+      container.innerHTML = '';
+      (meceData[idx].categories || []).forEach((cat, ci) => {
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex;gap:8px;align-items:center;margin-bottom:6px';
+
+        const nameInput = document.createElement('input');
+        nameInput.className = 'field-input';
+        nameInput.style.cssText = 'flex:1';
+        nameInput.placeholder = 'Tên danh mục';
+        nameInput.value = cat.name;
+        nameInput.addEventListener('input', () => { meceData[idx].categories[ci].name = nameInput.value; });
+
+        const conceptInput = document.createElement('input');
+        conceptInput.className = 'field-input';
+        conceptInput.style.cssText = 'flex:1';
+        conceptInput.placeholder = 'Khái niệm (tùy chọn)';
+        conceptInput.value = cat.concept || '';
+        conceptInput.addEventListener('input', () => { meceData[idx].categories[ci].concept = conceptInput.value; });
+
+        const del = document.createElement('button');
+        del.className = 'entry-remove';
+        del.title = 'Xóa danh mục'; del.textContent = '✕';
+        del.style.cssText = 'flex-shrink:0';
+        del.addEventListener('click', () => { meceData[idx].categories.splice(ci, 1); renderMECE(); });
+
+        row.appendChild(nameInput);
+        row.appendChild(conceptInput);
+        row.appendChild(del);
+        container.appendChild(row);
       });
     }
 
