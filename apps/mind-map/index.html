@@ -375,19 +375,15 @@
       display: none;
       position: fixed;
       inset: 0;
-      z-index: 300;
-      background: rgba(5,5,15,0.96);
+      z-index: 500;
       overflow-y: auto;
-      padding: 2rem 1rem;
+      background: var(--bg-dark);
     }
     .admin-panel.open { display: block; }
     .admin-panel__inner {
       max-width: 980px;
       margin: 0 auto;
-      background: var(--bg-card);
-      border: 3px solid var(--yellow);
-      box-shadow: 0 0 30px rgba(255,230,0,0.2);
-      padding: 28px 24px;
+      padding: 28px 24px 60px;
     }
     .admin-panel__title {
       font-family: var(--font-vi-heading);
@@ -497,54 +493,28 @@
     .admin-bar-btn--import:hover { background: var(--magenta); color: var(--bg-dark); }
     .admin-bar-btn--close  { color: var(--grey); border-color: var(--grey); margin-left: auto; }
     .admin-bar-btn--close:hover  { color: var(--white); border-color: var(--white); }
-    .admin-status { font-size: 13px; color: var(--green); min-height: 18px; margin-top: 8px; letter-spacing: 1px; }
-    .admin-export-box, .admin-import-box { display: none; margin-top: 14px; }
-    .admin-export-box label, .admin-import-box label {
-      font-family: var(--font-pixel);
-      font-size: 7px;
-      color: var(--yellow);
-      letter-spacing: 1px;
-      display: block;
-      margin-bottom: 6px;
+    /* ===== ADMIN ACTION BAR ===== */
+    .admin-action-bar { display: flex; gap: 10px; margin-top: 24px; }
+    .admin-action-btn {
+      flex: 1; padding: 12px 8px;
+      font-family: 'Montserrat', sans-serif; font-size: 15px; font-weight: 600;
+      border: 2px solid; background: transparent; cursor: pointer; transition: all 0.15s;
     }
-    .admin-import-box label { color: var(--magenta); }
-    .admin-export-ta, .admin-import-ta {
-      font-family: monospace;
-      font-size: 11px;
-      background: var(--bg-dark);
-      border: 2px solid var(--yellow);
-      color: var(--white);
-      padding: 10px;
-      width: 100%;
-      min-height: 100px;
-      resize: vertical;
-      box-sizing: border-box;
+    .admin-action-btn--save  { border-color: var(--yellow); color: var(--yellow); }
+    .admin-action-btn--save:hover  { background: var(--yellow); color: var(--bg-dark); }
+    .admin-action-btn--copy { border-color: var(--grey); color: var(--grey); opacity: .35; pointer-events: none; }
+    .admin-action-btn--dl   { border-color: var(--grey); color: var(--grey); opacity: .35; pointer-events: none; }
+    .admin-action-btn--copy.enabled { border-color: var(--cyan);  color: var(--cyan);  opacity: 1; pointer-events: auto; }
+    .admin-action-btn--copy.enabled:hover { background: var(--cyan);  color: var(--bg-dark); }
+    .admin-action-btn--dl.enabled   { border-color: var(--green); color: var(--green); opacity: 1; pointer-events: auto; }
+    .admin-action-btn--dl.enabled:hover   { background: var(--green); color: var(--bg-dark); }
+    .admin-json-ta {
+      display: none; width: 100%; margin-top: 14px; box-sizing: border-box;
+      background: var(--bg-card2); border: 1px solid var(--grey);
+      color: var(--white); font-family: 'Courier New', monospace !important;
+      font-size: 13px !important; padding: 12px; height: 180px; resize: vertical;
     }
-    .admin-import-ta { border-color: var(--magenta); }
-    .admin-copy-btn {
-      font-family: var(--font-pixel);
-      font-size: 7px;
-      margin-top: 6px;
-      padding: 7px 12px;
-      border: 2px solid var(--yellow);
-      background: transparent;
-      color: var(--yellow);
-      cursor: pointer;
-    }
-    .admin-copy-btn:hover { background: var(--yellow); color: var(--bg-dark); }
-    .admin-copy-btn--dl { border-color: var(--cyan); color: var(--cyan); }
-    .admin-copy-btn--dl:hover { background: var(--cyan); color: var(--bg-dark); }
-    .admin-import-apply {
-      font-family: var(--font-pixel);
-      font-size: 7px;
-      margin-top: 6px;
-      padding: 7px 12px;
-      border: 2px solid var(--magenta);
-      background: transparent;
-      color: var(--magenta);
-      cursor: pointer;
-    }
-    .admin-import-apply:hover { background: var(--magenta); color: var(--bg-dark); }
+    .admin-json-ta.visible { display: block; }
 
     /* ===== RESPONSIVE ===== */
     @media (max-width: 768px) {
@@ -645,29 +615,12 @@
         </div>
       </div>
 
-      <div class="admin-bar">
-        <button class="admin-bar-btn admin-bar-btn--save"   id="adminSaveBtn">💾 SAVE</button>
-        <button class="admin-bar-btn admin-bar-btn--export" id="adminExportBtn">⬇ EXPORT</button>
-        <button class="admin-bar-btn admin-bar-btn--import" id="adminImportBtn">⬆ IMPORT</button>
-        <button class="admin-bar-btn admin-bar-btn--close"  id="adminCloseBtn">✕ CLOSE</button>
+      <div class="admin-action-bar">
+        <button class="admin-action-btn admin-action-btn--save" id="adminSaveBtn">💾 SAVE</button>
+        <button class="admin-action-btn admin-action-btn--copy" id="adminCopyBtn">📋 COPY</button>
+        <button class="admin-action-btn admin-action-btn--dl"   id="adminDownloadBtn">⬇ DOWNLOAD</button>
       </div>
-
-      <div class="admin-status" id="adminStatus"></div>
-
-      <div class="admin-export-box" id="adminExportBox">
-        <label>Download or copy → paste into <strong style="color:var(--cyan)">admin/admin_mind_map.json</strong>:</label>
-        <textarea class="admin-export-ta" id="adminExportTa" readonly></textarea>
-        <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;">
-          <button class="admin-copy-btn admin-copy-btn--dl" id="adminDownloadBtn">⬇ DOWNLOAD FILE</button>
-          <button class="admin-copy-btn" id="adminCopyBtn">📋 COPY</button>
-        </div>
-      </div>
-
-      <div class="admin-import-box" id="adminImportBox">
-        <label>Paste JSON to load into editor:</label>
-        <textarea class="admin-import-ta" id="adminImportTa" placeholder='[{"id":1,"title":"...","rowCount":3,"keywords":[...],"connections":[...]}]'></textarea>
-        <button class="admin-import-apply" id="adminImportApply">▶ APPLY</button>
-      </div>
+      <textarea class="admin-json-ta" id="adminJsonTa" readonly></textarea>
     </div>
   </div>
 
@@ -1355,16 +1308,12 @@
       renderAdminKeywordList();
       renderAdminCanvas();
       document.getElementById('adminPanel').classList.add('open');
-      document.getElementById('adminExportBox').style.display = 'none';
-      document.getElementById('adminImportBox').style.display = 'none';
-      document.getElementById('adminStatus').textContent = '';
+      document.getElementById('adminJsonTa').classList.remove('visible');
+      document.getElementById('adminCopyBtn').classList.remove('enabled');
+      document.getElementById('adminDownloadBtn').classList.remove('enabled');
     }
 
     initAdminAuth({ onLogin: openAdminPanel });
-
-    document.getElementById('adminCloseBtn').addEventListener('click', () => {
-      document.getElementById('adminPanel').classList.remove('open');
-    });
 
     // Admin canvas: deselect on background click
     document.getElementById('adminMapCanvas').addEventListener('click', () => clearAdminSelection());
@@ -1522,66 +1471,46 @@
 
     document.getElementById('adminSaveBtn').addEventListener('click', () => {
       if (adminData.keywords.some(kw => !kw.text.trim())) {
-        setAdminStatus('⚠ Keywords cannot be empty!', 'orange'); return;
+        const btn = document.getElementById('adminSaveBtn');
+        btn.textContent = '⚠ KEYWORDS EMPTY!';
+        setTimeout(() => btn.textContent = '💾 SAVE', 2000);
+        return;
       }
       const saved = buildAdminSaveData();
       localStorage.setItem('mindMap', JSON.stringify([saved]));
       gameData = JSON.parse(JSON.stringify(saved));
-      setAdminStatus('✓ SAVED! Hit Play Again to apply.', 'green');
-    });
-
-    document.getElementById('adminExportBtn').addEventListener('click', () => {
-      const box = document.getElementById('adminExportBox');
-      box.style.display = box.style.display === 'none' ? 'block' : 'none';
-      if (box.style.display === 'block') {
-        document.getElementById('adminExportTa').value = JSON.stringify([buildAdminSaveData()], null, 2);
-      }
-    });
-
-    document.getElementById('adminDownloadBtn').addEventListener('click', () => {
-      const blob = new Blob([document.getElementById('adminExportTa').value], { type: 'application/json' });
-      const url  = URL.createObjectURL(blob);
-      const a = Object.assign(document.createElement('a'), { href: url, download: 'admin_mind_map.json' });
-      document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-      const btn = document.getElementById('adminDownloadBtn');
-      btn.textContent = '✓ DOWNLOADED!';
-      setTimeout(() => btn.textContent = '⬇ DOWNLOAD FILE', 2000);
+      const json = JSON.stringify([saved], null, 2);
+      const ta = document.getElementById('adminJsonTa');
+      ta.value = json; ta.classList.add('visible');
+      document.getElementById('adminCopyBtn').classList.add('enabled');
+      document.getElementById('adminDownloadBtn').classList.add('enabled');
+      const btn = document.getElementById('adminSaveBtn');
+      btn.textContent = '✓ SAVED!';
+      setTimeout(() => btn.textContent = '💾 SAVE', 2000);
     });
 
     document.getElementById('adminCopyBtn').addEventListener('click', () => {
-      const ta = document.getElementById('adminExportTa');
-      ta.select();
-      navigator.clipboard?.writeText(ta.value).catch(() => document.execCommand('copy'));
+      const ta = document.getElementById('adminJsonTa');
+      navigator.clipboard?.writeText(ta.value).catch(() => { ta.select(); document.execCommand('copy'); });
       const btn = document.getElementById('adminCopyBtn');
       btn.textContent = '✓ COPIED!';
       setTimeout(() => btn.textContent = '📋 COPY', 2000);
     });
 
-    document.getElementById('adminImportBtn').addEventListener('click', () => {
-      const box = document.getElementById('adminImportBox');
-      box.style.display = box.style.display === 'none' ? 'block' : 'none';
-    });
-
-    document.getElementById('adminImportApply').addEventListener('click', () => {
-      try {
-        const parsed = JSON.parse(document.getElementById('adminImportTa').value);
-        if (!Array.isArray(parsed) || !parsed[0]) throw new Error('invalid');
-        adminData = parsed[0];
-        adminPlacements = {};
-        adminData.keywords.forEach(kw => {
-          if (kw.correctRow !== null && kw.correctRow !== undefined) adminPlacements[kw.id] = kw.correctRow;
-        });
-        adminConnections = new Set((adminData.connections || []).map(c => ck(c.from, c.to)));
-        document.getElementById('adminRowCountDisplay').textContent = adminData.rowCount;
-        renderAdminKeywordList(); renderAdminCanvas();
-        setAdminStatus('✓ IMPORTED! Hit SAVE to apply.', 'cyan');
-      } catch { setAdminStatus('✕ Invalid JSON!', 'orange'); }
+    document.getElementById('adminDownloadBtn').addEventListener('click', () => {
+      const json = document.getElementById('adminJsonTa').value;
+      const blob = new Blob([json], { type: 'application/json' });
+      const url  = URL.createObjectURL(blob);
+      const a = Object.assign(document.createElement('a'), { href: url, download: 'admin_mind_map.json' });
+      document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+      const btn = document.getElementById('adminDownloadBtn');
+      btn.textContent = '✓ DOWNLOADED!';
+      setTimeout(() => btn.textContent = '⬇ DOWNLOAD', 2000);
     });
 
     function setAdminStatus(msg, color) {
-      const el = document.getElementById('adminStatus');
-      el.textContent = msg;
-      el.style.color = `var(--${color})`;
+      // retained for internal use (canvas validation, etc.)
+      console.log(`[admin] ${color}: ${msg}`);
     }
 
     // ================================================================

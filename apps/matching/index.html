@@ -300,17 +300,7 @@
       letter-spacing: 2px;
       margin-bottom: 20px;
     }
-    .admin-panel__close {
-      position: absolute;
-      top: 28px; right: 24px;
-      background: transparent;
-      border: 2px solid var(--yellow);
-      color: var(--yellow);
-      font-family: var(--font-pixel);
-      font-size: 8px;
-      padding: 4px 10px;
-      cursor: pointer;
-    }
+    /* close button removed */
     .admin-set-card {
       border: 2px solid rgba(255,255,255,0.1);
       padding: 12px;
@@ -405,22 +395,28 @@
       font-size: 8px;
       padding: 2px 4px;
     }
-    .admin-save-btn {
-      width: 100%;
-      background: var(--yellow);
-      color: var(--bg-dark);
-      border: none;
-      font-family: var(--font-pixel);
-      font-size: 9px;
-      letter-spacing: 2px;
-      padding: 10px;
-      cursor: pointer;
-      margin-top: 16px;
-      transition: box-shadow 0.15s;
+    /* ===== ADMIN ACTION BAR ===== */
+    .admin-action-bar { display: flex; gap: 10px; margin-top: 24px; }
+    .admin-action-btn {
+      flex: 1; padding: 12px 8px;
+      font-family: 'Montserrat', sans-serif; font-size: 15px; font-weight: 600;
+      border: 2px solid; background: transparent; cursor: pointer; transition: all 0.15s;
     }
-    .admin-save-btn:hover { box-shadow: 0 0 14px var(--yellow); }
-    .admin-download-btn { background: transparent; border: 2px solid var(--cyan); color: var(--cyan); margin-top: 8px; }
-    .admin-download-btn:hover { background: var(--cyan); color: var(--bg-dark); box-shadow: 0 0 14px var(--cyan); }
+    .admin-action-btn--save  { border-color: var(--yellow); color: var(--yellow); }
+    .admin-action-btn--save:hover  { background: var(--yellow); color: var(--bg-dark); }
+    .admin-action-btn--copy { border-color: var(--grey); color: var(--grey); opacity: .35; pointer-events: none; }
+    .admin-action-btn--dl   { border-color: var(--grey); color: var(--grey); opacity: .35; pointer-events: none; }
+    .admin-action-btn--copy.enabled { border-color: var(--cyan);  color: var(--cyan);  opacity: 1; pointer-events: auto; }
+    .admin-action-btn--copy.enabled:hover { background: var(--cyan);  color: var(--bg-dark); }
+    .admin-action-btn--dl.enabled   { border-color: var(--green); color: var(--green); opacity: 1; pointer-events: auto; }
+    .admin-action-btn--dl.enabled:hover   { background: var(--green); color: var(--bg-dark); }
+    .admin-json-ta {
+      display: none; width: 100%; margin-top: 14px; box-sizing: border-box;
+      background: var(--bg-card2); border: 1px solid var(--grey);
+      color: var(--white); font-family: 'Courier New', monospace !important;
+      font-size: 13px !important; padding: 12px; height: 180px; resize: vertical;
+    }
+    .admin-json-ta.visible { display: block; }
     .admin-add-set-btn {
       width: 100%;
       background: transparent;
@@ -540,13 +536,16 @@
   <div class="admin-panel" id="adminPanel">
     <div class="admin-panel__inner">
       <div class="admin-panel__title" id="adminPanelTitle">⚙ ADMIN — 🐿️ NỐI TỪ</div>
-      <button class="admin-panel__close" id="adminClose">✕ CLOSE</button>
 
       <button class="admin-add-set-btn" id="adminAddSetBtn">＋ ADD SET</button>
       <div id="adminSetList"></div>
 
-      <button class="admin-save-btn" id="adminSaveBtn">💾 SAVE</button>
-      <button class="admin-save-btn admin-download-btn" id="adminDownloadBtn">⬇ DOWNLOAD JSON</button>
+      <div class="admin-action-bar">
+        <button class="admin-action-btn admin-action-btn--save" id="adminSaveBtn">💾 SAVE</button>
+        <button class="admin-action-btn admin-action-btn--copy" id="adminCopyBtn">📋 COPY</button>
+        <button class="admin-action-btn admin-action-btn--dl"   id="adminDownloadBtn">⬇ DOWNLOAD</button>
+      </div>
+      <textarea class="admin-json-ta" id="adminJsonTa" readonly></textarea>
     </div>
   </div>
 
@@ -1185,7 +1184,6 @@
 
     document.getElementById('adminSaveBtn').addEventListener('click', () => {
       SFX.correct();
-      // Convert adminConns back to connections format
       adminData.forEach((set, si) => {
         const conns = adminConns[si] || new Set();
         set.connections = [...conns].map(key => {
@@ -1195,24 +1193,35 @@
         });
       });
       localStorage.setItem(STORAGE_KEY, JSON.stringify(adminData));
-      showToast('Đã lưu!');
       gameData = JSON.parse(JSON.stringify(adminData));
-      setConnections = {};
-      currentSet = 0;
-      buildGame();
+      setConnections = {}; currentSet = 0; buildGame();
+      const json = JSON.stringify(adminData, null, 2);
+      const ta = document.getElementById('adminJsonTa');
+      ta.value = json; ta.classList.add('visible');
+      document.getElementById('adminCopyBtn').classList.add('enabled');
+      document.getElementById('adminDownloadBtn').classList.add('enabled');
+      const btn = document.getElementById('adminSaveBtn');
+      btn.textContent = '✓ SAVED!';
+      setTimeout(() => btn.textContent = '💾 SAVE', 2000);
+    });
+
+    document.getElementById('adminCopyBtn').addEventListener('click', () => {
+      const ta = document.getElementById('adminJsonTa');
+      navigator.clipboard?.writeText(ta.value).catch(() => { ta.select(); document.execCommand('copy'); });
+      const btn = document.getElementById('adminCopyBtn');
+      btn.textContent = '✓ COPIED!';
+      setTimeout(() => btn.textContent = '📋 COPY', 2000);
     });
 
     document.getElementById('adminDownloadBtn').addEventListener('click', () => {
-      const json = JSON.stringify(adminData, null, 2);
+      const json = document.getElementById('adminJsonTa').value;
       const blob = new Blob([json], { type: 'application/json' });
       const url  = URL.createObjectURL(blob);
-      const a    = document.createElement('a');
-      a.href = url; a.download = 'admin_matching.json';
-      document.body.appendChild(a); a.click();
-      document.body.removeChild(a); URL.revokeObjectURL(url);
+      const a = Object.assign(document.createElement('a'), { href: url, download: 'admin_matching.json' });
+      document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
       const btn = document.getElementById('adminDownloadBtn');
       btn.textContent = '✓ DOWNLOADED!';
-      setTimeout(() => btn.textContent = '⬇ DOWNLOAD JSON', 2000);
+      setTimeout(() => btn.textContent = '⬇ DOWNLOAD', 2000);
     });
 
     // ================================================================
@@ -1244,9 +1253,10 @@
       });
       buildAdminUI();
       adminPanel.classList.add('open');
+      document.getElementById('adminJsonTa').classList.remove('visible');
+      document.getElementById('adminCopyBtn').classList.remove('enabled');
+      document.getElementById('adminDownloadBtn').classList.remove('enabled');
     }
-
-    document.getElementById('adminClose').addEventListener('click', () => adminPanel.classList.remove('open'));
 
     initAdminAuth({ onLogin: openAdminPanel });
 
