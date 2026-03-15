@@ -6,7 +6,6 @@
   <title>🐺 — PIXELVERSE</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' fill='%2300fff5'>◈</text></svg>">
   <link rel="stylesheet" href="../../css/style.css" />
-  <script src="../../data/pros-cons.js"></script>
   <script src="../../js/sfx.js"></script>
   <style>
     /* ===== PAGE LAYOUT ===== */
@@ -465,8 +464,7 @@
         } catch(e) {}
       }
       if (_cachedJsonData) return _cachedJsonData;
-      // 3. Built-in fallback
-      return window.PROS_CONS_DATA || [];
+      return [];
     }
 
     // dragging state

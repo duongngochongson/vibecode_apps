@@ -6,7 +6,6 @@
   <title>🐿️ — PIXELVERSE</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' fill='%2300fff5'>◈</text></svg>">
   <link rel="stylesheet" href="../../css/style.css" />
-  <script src="../../data/matching.js"></script>
   <script src="../../js/sfx.js"></script>
   <style>
     /* ===== PAGE LAYOUT ===== */
@@ -392,8 +391,6 @@
         } catch(e) {}
       }
       if (_cachedMatchingJson) return JSON.parse(JSON.stringify(_cachedMatchingJson));
-      // 3. Built-in fallback
-      if (window.MATCHING_DATA) return JSON.parse(JSON.stringify(window.MATCHING_DATA));
       return [];
     }
 

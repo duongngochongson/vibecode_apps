@@ -7,10 +7,6 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙</text></svg>">
   <link rel="stylesheet" href="../../css/style.css" />
   <script src="../../js/sfx.js"></script>
-  <!-- Game data scripts — used as fallback when localStorage is empty -->
-  <script src="../../data/pros-cons.js"></script>
-  <script src="../../data/mind-map.js"></script>
-  <script src="../../data/matching.js"></script>
   <style>
     * { font-family: 'Montserrat', sans-serif; }
 
@@ -607,8 +603,6 @@
       if (!pcData.length) {
         try { const r = await fetch('../../data/admin_content.json'); if (r.ok) { const d = await r.json(); pcData = d.prosCons || []; } } catch(e) {}
       }
-      // Last resort: bundled game data (window.PROS_CONS_DATA from pros-cons.js)
-      if (!pcData.length && window.PROS_CONS_DATA) pcData = JSON.parse(JSON.stringify(window.PROS_CONS_DATA));
       renderPC();
       document.getElementById('pc-add').addEventListener('click', () => {
         const id = Date.now();
@@ -679,8 +673,6 @@
       if (!mmData) {
         try { const r = await fetch('../../data/admin_content.json'); if (r.ok) { const d = await r.json(); mmData = (d.mindMap || [])[0] || null; } } catch(e) {}
       }
-      // Last resort: bundled game data (window.MIND_MAP_DATA from mind-map.js)
-      if (!mmData && window.MIND_MAP_DATA?.[0]) mmData = JSON.parse(JSON.stringify(window.MIND_MAP_DATA[0]));
       if (!mmData) mmData = { id: Date.now(), title: 'Sơ đồ 1', rowCount: 3, keywords: [], connections: [] };
       mmPlacements = {};
       mmData.keywords.forEach(kw => { if (kw.correctRow != null) mmPlacements[kw.id] = kw.correctRow; });
@@ -953,8 +945,6 @@
       if (!mtData.length) {
         try { const r = await fetch('../../data/admin_content.json'); if (r.ok) { const d = await r.json(); mtData = d.matching || []; } } catch(e) {}
       }
-      // Last resort: bundled game data (window.MATCHING_DATA from matching.js)
-      if (!mtData.length && window.MATCHING_DATA) mtData = JSON.parse(JSON.stringify(window.MATCHING_DATA));
       // Load connections into mtConns (only on init, not on rebuild)
       mtData.forEach((s, si) => {
         if (!mtConns[si]) mtConns[si] = new Set(s.connections.map(c => mtCk(c.from, c.to)));

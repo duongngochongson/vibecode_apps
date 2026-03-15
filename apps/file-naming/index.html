@@ -6,7 +6,6 @@
   <title>🐟 — PIXELVERSE</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' fill='%2300fff5'>◈</text></svg>">
   <link rel="stylesheet" href="../../css/style.css" />
-  <script src="../../data/file-naming.js"></script>
   <script src="../../js/sfx.js"></script>
   <style>
     /* ===== 3-PANEL LAYOUT ===== */
@@ -946,7 +945,11 @@
     // ================================================================
     //  INIT
     // ================================================================
-    function initGame() {
+    async function initGame() {
+      try {
+        const r = await fetch('../../data/admin_content.json');
+        if (r.ok) { const d = await r.json(); window.FILE_NAMING_TREE = d.fileNaming; }
+      } catch(e) {}
       document.title = `${GAME_EMOJI} — PIXELVERSE`;
       document.getElementById('gameTitle').textContent = `${GAME_EMOJI} Đặt Tên File`;
       tree = buildTree();
