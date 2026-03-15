@@ -10,13 +10,14 @@
   <style>
     * { font-family: 'Montserrat', sans-serif; }
 
-    .admin-page { max-width: 860px; margin: 0 auto; padding: 40px 20px 100px; }
+    .admin-page { max-width: 860px; margin: 0 auto; padding: 32px 20px 100px; }
 
     /* ===== AUTH ===== */
     .auth-section { text-align: center; padding: 48px 0 32px; }
     .auth-title {
-      font-family: var(--font-pixel);
-      font-size: 13px; color: var(--yellow);
+      font-family: 'Merriweather', serif;
+      font-size: 20px; font-weight: 700;
+      color: var(--yellow);
       text-shadow: 0 0 14px var(--yellow);
       letter-spacing: 3px; margin-bottom: 32px;
     }
@@ -34,11 +35,42 @@
     }
     .auth-btn:hover { box-shadow: 0 0 16px rgba(255,230,0,0.5); }
     .auth-error { color: var(--orange); margin-top: 10px; font-size: 14px; min-height: 20px; }
-    .auth-ok { font-size: 13px; color: var(--green); margin-top: 10px; }
+    .auth-ok { font-size: 14px; color: var(--green); margin-top: 10px; }
+
+    /* ===== GLOBAL ACTION BAR ===== */
+    .g-bar {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 0;
+      border-bottom: 2px solid var(--grey);
+      margin-bottom: 0;
+      flex-wrap: wrap;
+    }
+    .g-bar.visible { display: flex; }
+    .g-bar--bot { border-bottom: none; border-top: 2px solid var(--grey); margin-top: 0; }
+    .g-btn {
+      width: 44px; height: 44px; font-size: 20px;
+      border: 2px solid; background: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .g-save { border-color: var(--yellow); color: var(--yellow); }
+    .g-save:hover { background: var(--yellow); color: var(--bg-dark); }
+    .g-copy, .g-dl { border-color: var(--grey); color: var(--grey); opacity: .35; pointer-events: none; }
+    .g-copy.on { border-color: var(--cyan);  color: var(--cyan);  opacity: 1; pointer-events: auto; }
+    .g-copy.on:hover { background: var(--cyan);  color: var(--bg-dark); }
+    .g-dl.on   { border-color: var(--green); color: var(--green); opacity: 1; pointer-events: auto; }
+    .g-dl.on:hover   { background: var(--green); color: var(--bg-dark); }
+    .g-msg { font-size: 13px; color: var(--green); min-width: 80px; }
+    .g-logout {
+      margin-left: auto;
+      padding: 8px 16px; background: none; border: 1px solid var(--grey);
+      color: var(--grey); font-size: 13px; cursor: pointer;
+    }
+    .g-logout:hover { border-color: var(--orange); color: var(--orange); }
 
     /* ===== GAME SECTIONS (ACCORDION) ===== */
-    .game-sections { display: none; border-top: 2px solid var(--grey); }
-    .game-sections.visible { display: block; }
+    .game-sections { border-top: 2px solid var(--grey); }
 
     .game-block { border-bottom: 2px solid var(--grey); }
     .game-header {
@@ -52,11 +84,10 @@
     .game-arrow { font-size: 12px; color: var(--grey); transition: transform 0.15s; }
     .game-content { display: none; padding: 4px 0 32px; }
     .game-content.open { display: block; }
-    .game-content.open .game-arrow { transform: rotate(90deg); }
 
     /* ===== FORM FIELDS ===== */
     .field-group { margin-bottom: 14px; }
-    .field-label { display: block; font-size: 13px; color: var(--grey); margin-bottom: 5px; letter-spacing: 0.3px; }
+    .field-label { display: block; font-size: 13px; color: var(--grey); margin-bottom: 5px; }
     .field-input, .field-textarea {
       width: 100%; padding: 10px 12px; box-sizing: border-box;
       background: var(--bg-card2); border: 1px solid var(--grey);
@@ -73,61 +104,46 @@
       padding: 16px 16px 12px; margin-bottom: 12px;
     }
     .entry-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-    .entry-num { font-size: 11px; color: var(--magenta); letter-spacing: 2px; font-family: var(--font-pixel); }
+    .entry-num { font-size: 12px; color: var(--magenta); letter-spacing: 2px; }
     .entry-remove {
-      background: none; border: 1px solid var(--orange);
-      color: var(--orange); font-size: 13px; padding: 3px 10px; cursor: pointer;
+      background: none; border: none;
+      color: var(--orange); font-size: 18px; padding: 2px 6px; cursor: pointer;
     }
-    .entry-remove:hover { background: var(--orange); color: var(--bg-dark); }
+    .entry-remove:hover { color: #ff4444; }
 
     .add-btn {
       background: none; border: 2px solid var(--green);
-      color: var(--green); font-size: 15px; font-weight: 600;
-      padding: 9px 18px; cursor: pointer; margin-bottom: 16px;
+      color: var(--green); font-size: 20px; font-weight: 600;
+      width: 36px; height: 36px; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center;
     }
     .add-btn:hover { background: var(--green); color: var(--bg-dark); }
-
-    /* ===== ACTION BAR ===== */
-    .action-bar-3 { display: flex; gap: 10px; margin-top: 24px; }
-    .abt {
-      flex: 1; padding: 12px 8px; font-size: 15px; font-weight: 600;
-      border: 2px solid; background: none; cursor: pointer;
+    .add-btn-row {
+      display: flex; align-items: center; gap: 8px;
+      margin-top: 6px; font-size: 13px; color: var(--grey);
     }
-    .abt-save  { border-color: var(--yellow); color: var(--yellow); }
-    .abt-save:hover  { background: var(--yellow);  color: var(--bg-dark); }
-    .abt-copy, .abt-dl { border-color: var(--grey); color: var(--grey); opacity: .3; pointer-events: none; }
-    .abt-copy.on { border-color: var(--cyan);  color: var(--cyan);  opacity: 1; pointer-events: auto; }
-    .abt-copy.on:hover { background: var(--cyan);  color: var(--bg-dark); }
-    .abt-dl.on   { border-color: var(--green); color: var(--green); opacity: 1; pointer-events: auto; }
-    .abt-dl.on:hover   { background: var(--green); color: var(--bg-dark); }
 
-    .json-out {
-      display: none; width: 100%; box-sizing: border-box; margin-top: 14px;
-      background: var(--bg-card2); border: 1px solid var(--grey);
-      color: var(--white); font-family: 'Courier New', monospace;
-      font-size: 13px; padding: 12px; resize: none; overflow: hidden; min-height: 80px;
-    }
-    .json-out.visible { display: block; }
-
-    /* ===== MIND-MAP CANVAS ===== */
-    .mm-section-label {
-      font-family: var(--font-pixel); font-size: 7px;
-      color: var(--cyan); letter-spacing: 2px; margin: 18px 0 10px;
+    /* ===== SECTION LABEL ===== */
+    .sec-label {
+      font-size: 11px; letter-spacing: 2px;
+      color: var(--cyan); margin: 18px 0 10px;
       border-bottom: 1px solid var(--grey); padding-bottom: 6px;
+      text-transform: uppercase;
     }
+
+    /* ===== MIND-MAP ===== */
     .mm-kw-entry {
       display: flex; align-items: center; gap: 10px;
       background: var(--bg-card2); padding: 8px 10px;
       border: 1px solid var(--grey); margin-bottom: 6px;
     }
-    .mm-kw-num { font-family: var(--font-pixel); font-size: 6px; color: var(--grey); min-width: 22px; }
+    .mm-kw-num { font-size: 11px; color: var(--grey); min-width: 22px; }
     .mm-remove-kw {
-      background: none; border: 1px solid var(--orange);
-      color: var(--orange); font-size: 11px; padding: 3px 7px; cursor: pointer;
+      background: none; border: none;
+      color: var(--orange); font-size: 16px; padding: 2px 6px; cursor: pointer;
     }
     .mm-row-ctrl {
-      display: flex; align-items: center; gap: 8px; margin-top: 10px;
-      font-size: 14px; color: var(--grey);
+      display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--grey);
     }
     .mm-row-btn {
       background: none; border: 2px solid var(--grey); color: var(--white);
@@ -144,21 +160,21 @@
     }
     .mm-admin-svg {
       position: absolute; top: 0; left: 0;
-      width: 100%; height: 100%; pointer-events: none; overflow: visible;
+      width: 100%; height: 100%; pointer-events: none; overflow: visible; z-index: 2;
     }
     .map-row {
       display: flex; align-items: center; gap: 8px; min-height: 52px;
       border: 2px solid rgba(255,255,255,0.08); padding: 6px 8px;
-      margin-bottom: 6px; background: rgba(0,0,0,0.25);
+      margin-bottom: 6px; background: rgba(0,0,0,0.25); position: relative; z-index: 1;
     }
     .map-row.accepting { border-color: rgba(0,255,245,0.35); }
     .map-row.drag-over { border-color: var(--cyan); box-shadow: inset 0 0 18px rgba(0,255,245,0.12); }
-    .row-label { font-family: var(--font-pixel); font-size: 6px; color: var(--grey); min-width: 22px; }
+    .row-label { font-size: 11px; color: var(--grey); min-width: 22px; }
     .row-nodes { display: flex; flex-wrap: wrap; gap: 6px; flex: 1; }
     .map-node {
       position: relative; padding: 8px 14px 8px 10px;
       border: 2px solid var(--cyan); background: var(--bg-card);
-      cursor: pointer; font-size: 13px; user-select: none;
+      cursor: pointer; font-size: 13px; user-select: none; z-index: 1;
     }
     .map-node:hover { border-color: var(--white); }
     .map-node.selected { border-color: var(--yellow); box-shadow: 0 0 14px rgba(255,230,0,0.5); }
@@ -172,7 +188,7 @@
     .map-node.selected .node-dot { background: var(--yellow); box-shadow: 0 0 8px rgba(255,230,0,0.8); transform: translateX(-50%) scale(1.3); }
     .node-conn-count {
       position: absolute; top: -7px; left: -7px; background: var(--yellow);
-      color: var(--bg-dark); font-family: var(--font-pixel); font-size: 5px;
+      color: var(--bg-dark); font-size: 9px;
       width: 14px; height: 14px; display: none; align-items: center;
       justify-content: center; border-radius: 50%;
     }
@@ -189,10 +205,7 @@
     .kw-pool-sidebar {
       width: 140px; flex-shrink: 0; display: flex; flex-direction: column; gap: 6px;
     }
-    .kw-pool-hdr {
-      font-family: var(--font-pixel); font-size: 7px;
-      color: var(--magenta); letter-spacing: 2px;
-    }
+    .kw-pool-hdr { font-size: 11px; color: var(--magenta); letter-spacing: 2px; }
     .kw-pool {
       display: flex; flex-direction: column; gap: 6px; min-height: 60px;
       padding: 10px; background: var(--bg-card2); border: 2px dashed var(--grey);
@@ -204,91 +217,144 @@
     }
     .kw-chip:hover { border-color: var(--white); }
     .kw-chip.dragging { opacity: 0.35; }
-    .pool-empty { font-family: var(--font-pixel); font-size: 6px; color: var(--green); letter-spacing: 1px; }
+    .pool-empty { font-size: 11px; color: var(--green); letter-spacing: 1px; }
 
-    /* ===== MATCHING ===== */
+    /* ===== MATCHING — INTEGRATED EDITOR ===== */
     .mt-set-card {
       background: rgba(255,255,255,0.03); border-left: 3px solid var(--cyan);
       padding: 16px; margin-bottom: 16px;
     }
     .mt-set-title-row {
-      display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
+      display: flex; align-items: center; gap: 8px; margin-bottom: 14px;
     }
-    .mt-set-title-row span { font-size: 11px; color: var(--cyan); font-family: var(--font-pixel); letter-spacing: 1px; }
+    .mt-set-title-row .set-label { font-size: 12px; color: var(--cyan); letter-spacing: 1px; white-space: nowrap; }
     .mt-set-title-row input {
       flex: 1; padding: 7px 10px; background: var(--bg-card2);
-      border: 1px solid var(--grey); color: var(--white); font-size: 14px;
+      border: 1px solid var(--grey); color: var(--white); font-size: 14px; outline: none;
     }
+    .mt-set-title-row input:focus { border-color: var(--yellow); }
     .mt-del-set-btn {
-      background: none; border: 1px solid var(--orange);
-      color: var(--orange); font-size: 13px; padding: 4px 10px; cursor: pointer;
+      background: none; border: none;
+      color: var(--orange); font-size: 18px; padding: 2px 6px; cursor: pointer;
     }
-    .mt-del-set-btn:hover { background: var(--orange); color: var(--bg-dark); }
-    .mt-cols { display: flex; gap: 16px; margin-bottom: 14px; max-width: 700px; }
-    .mt-col { flex: 1; min-width: 0; }
-    .mt-col-label { font-size: 11px; color: var(--grey); letter-spacing: 1px; margin-bottom: 8px; font-family: var(--font-pixel); }
-    .mt-kw-row { display: flex; gap: 6px; margin-bottom: 6px; }
-    .mt-kw-row input { flex: 1; padding: 7px 10px; background: var(--bg-card2); border: 1px solid var(--grey); color: var(--white); font-size: 14px; min-width: 0; }
-    .mt-del-btn { background: none; border: 1px solid var(--orange); color: var(--orange); width: 28px; cursor: pointer; font-size: 12px; flex-shrink: 0; }
-    .mt-del-btn:hover { background: var(--orange); color: var(--bg-dark); }
-    .mt-add-item-btn { background: none; border: 1px solid var(--green); color: var(--green); font-size: 18px; padding: 3px 12px; cursor: pointer; }
-    .mt-add-item-btn:hover { background: var(--green); color: var(--bg-dark); }
-    .mt-conn-label { font-size: 12px; color: var(--grey); margin-bottom: 8px; }
-    .mt-arena {
-      position: relative; display: flex; gap: 0; max-width: 600px;
-      background: rgba(0,0,0,0.2); padding: 10px;
+    .mt-del-set-btn:hover { color: #ff4444; }
+
+    /* Integrated columns */
+    .mt-body {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 32px 1fr;
+      gap: 0;
+      margin-bottom: 8px;
     }
-    .mt-arena-col { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0; }
-    .mt-arena-left { align-items: flex-end; }
-    .mt-arena-right { align-items: flex-start; }
-    .mt-arena-mid { width: 40px; flex-shrink: 0; }
-    .mt-arena-item {
-      position: relative; padding: 8px 18px 8px 10px; font-size: 13px;
-      border: 2px solid var(--grey); background: var(--bg-card2);
-      cursor: pointer; max-width: 220px; word-break: break-word;
+    .mt-col { display: flex; flex-direction: column; gap: 5px; }
+    .mt-col-hdr { font-size: 11px; color: var(--grey); letter-spacing: 1px; margin-bottom: 6px; text-align: center; }
+    .mt-item {
+      display: flex; align-items: stretch;
+      border: 2px solid rgba(255,255,255,0.12); background: var(--bg-card2);
+      cursor: pointer; min-height: 40px; position: relative; z-index: 1;
+      transition: border-color 0.1s;
     }
-    .mt-arena-left  .mt-arena-item { padding: 8px 20px 8px 10px; }
-    .mt-arena-right .mt-arena-item { padding: 8px 10px 8px 20px; }
-    .mt-arena-item:hover { border-color: var(--white); }
-    .mt-arena-item.pending { border-color: var(--yellow); box-shadow: 0 0 8px rgba(255,230,0,0.4); }
-    .mt-arena-item.connected { border-color: var(--cyan); }
-    .mt-dot {
-      position: absolute; top: 50%; transform: translateY(-50%);
-      width: 10px; height: 10px; background: var(--grey); border-radius: 50%;
+    .mt-item:hover { border-color: rgba(255,255,255,0.35); }
+    .mt-item.pending  { border-color: var(--yellow); box-shadow: 0 0 8px rgba(255,230,0,0.35); }
+    .mt-item.connected { border-color: var(--cyan); }
+    .mt-item .mt-inp {
+      flex: 1; padding: 8px 10px; background: transparent; border: none;
+      color: var(--white); font-size: 14px; outline: none; cursor: text; min-width: 0;
     }
-    .mt-arena-left  .mt-dot { right: -6px; }
-    .mt-arena-right .mt-dot { left: -6px; }
-    .mt-arena-item.pending   .mt-dot { background: var(--yellow); }
-    .mt-arena-item.connected .mt-dot { background: var(--cyan); }
-    .mt-arena-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
-    .conn-line { stroke: var(--cyan); stroke-width: 2; stroke-dasharray: 5 3; fill: none; opacity: 0.8; }
-    .conn-del-bg { fill: var(--bg-dark); stroke: var(--orange); stroke-width: 1; }
-    .conn-del { fill: var(--orange); font-size: 10px; text-anchor: middle; dominant-baseline: central; pointer-events: all; cursor: pointer; }
+    .mt-item .mt-dot {
+      width: 12px; height: 12px; background: var(--grey); border-radius: 50%;
+      flex-shrink: 0; align-self: center; margin: 0 5px;
+    }
+    .mt-item.pending  .mt-dot { background: var(--yellow); }
+    .mt-item.connected .mt-dot { background: var(--cyan); }
+    .mt-item .mt-del {
+      background: none; border: none; color: var(--grey);
+      font-size: 14px; width: 26px; cursor: pointer; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .mt-item .mt-del:hover { color: var(--orange); }
+    /* Left col: [✕] [input] [●dot] */
+    .mt-col-l .mt-item { flex-direction: row; }
+    /* Right col: [●dot] [input] [✕] */
+    .mt-col-r .mt-item { flex-direction: row-reverse; }
+
+    .mt-col-add {
+      display: flex; justify-content: center; margin-top: 4px;
+    }
+
+    /* SVG overlay — covers entire mt-body including gap column */
+    .mt-svg {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none; overflow: visible; z-index: 2;
+    }
+    .mt-conn-line { stroke: var(--cyan); stroke-width: 2; stroke-dasharray: 5 3; fill: none; opacity: 0.85; }
+    .mt-conn-del-bg { fill: var(--bg-dark); stroke: var(--orange); stroke-width: 1.5; }
+    .mt-conn-del {
+      fill: var(--orange); font-size: 10px;
+      text-anchor: middle; dominant-baseline: central;
+      pointer-events: all; cursor: pointer;
+    }
+
+    .mt-hint { font-size: 12px; color: var(--grey); margin-bottom: 8px; font-style: italic; }
+    .mt-add-set-row { margin-bottom: 16px; }
   </style>
 </head>
 <body>
+
   <!-- NAVBAR -->
   <nav class="navbar">
-    <a href="../../index.html" class="navbar__logo">◈ PIXELVERSE</a>
+    <div></div>
+    <a class="navbar__logo" href="../../">◈ PIXELVERSE</a>
     <ul class="navbar__links">
-      <li><a href="../../index.html" title="Home">🏠</a></li>
+      <li><a href="../../" title="Trang chủ">🏠</a></li>
+      <li>
+        <button class="navbar__grid-btn" id="gamesBtn" title="Games">
+          <span class="navbar__grid-btn__dots">
+            <span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span>
+            <span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span>
+            <span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span>
+          </span>
+        </button>
+      </li>
+      <li><a class="navbar__admin-btn active" href="./" title="Admin">⚙</a></li>
     </ul>
   </nav>
+
+  <!-- GAMES POPUP -->
+  <div class="navbar__games-popup" id="gamesPopup">
+    <div class="navbar__games-list">
+      <a href="../pros-cons/" class="navbar__game-item" title="Đoán Ưu / Nhược">🐺</a>
+      <a href="../mind-map/" class="navbar__game-item" title="Sơ đồ Tư Duy">🐙</a>
+      <a href="../matching/" class="navbar__game-item" title="Nối Từ">🐿️</a>
+      <a href="../file-naming/" class="navbar__game-item" title="Đặt Tên File">🐟</a>
+    </div>
+  </div>
 
   <main class="admin-page">
 
     <!-- AUTH -->
     <div class="auth-section" id="authSection">
-      <div class="auth-title">⚙ ADMIN</div>
+      <div class="auth-title">⚙ ADMIN SETTING</div>
       <div class="auth-form">
         <input type="password" id="authPw" class="auth-input" placeholder="password" autocomplete="current-password" />
-        <button id="authBtn" class="auth-btn">▶ ENTER</button>
+        <button id="authBtn" class="auth-btn">▶ Vào</button>
       </div>
       <div id="authError" class="auth-error"></div>
     </div>
 
+    <!-- GLOBAL BAR TOP -->
+    <div class="g-bar g-bar--top" id="gBarTop">
+      <button class="g-btn g-save" id="gSaveT" title="Lưu tất cả">💾</button>
+      <button class="g-btn g-copy" id="gCopyT" title="Sao chép JSON">📋</button>
+      <button class="g-btn g-dl"   id="gDlT"   title="Tải xuống JSON">⬇</button>
+      <span class="g-msg" id="gMsgT"></span>
+      <button class="g-logout" id="logoutBtnT">Đăng xuất</button>
+    </div>
+
     <!-- GAME SECTIONS -->
-    <div class="game-sections" id="gameSections">
+    <div class="game-sections" id="gameSections" style="display:none">
 
       <!-- PROS-CONS -->
       <div class="game-block">
@@ -298,13 +364,10 @@
         </button>
         <div class="game-content" id="content-pc">
           <div id="pc-list"></div>
-          <button class="add-btn" id="pc-add">＋ ADD TOPIC</button>
-          <div class="action-bar-3">
-            <button class="abt abt-save" id="pc-save">💾 SAVE</button>
-            <button class="abt abt-copy" id="pc-copy">📋 COPY</button>
-            <button class="abt abt-dl"   id="pc-dl">⬇ DOWNLOAD</button>
+          <div class="add-btn-row">
+            <button class="add-btn" id="pc-add" title="Thêm chủ đề">+</button>
+            <span>Thêm chủ đề</span>
           </div>
-          <textarea class="json-out" id="pc-json" readonly></textarea>
         </div>
       </div>
 
@@ -315,33 +378,30 @@
           <span class="game-arrow" id="arrow-mm">▶</span>
         </button>
         <div class="game-content" id="content-mm">
-          <div class="mm-section-label">▸ KEYWORDS</div>
+          <div class="sec-label">▸ Từ khóa</div>
           <div id="mm-kw-list"></div>
-          <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;">
-            <button class="add-btn" style="margin-bottom:0" id="mm-add-kw">＋ ADD KEYWORD</button>
+          <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:6px;">
+            <div class="add-btn-row">
+              <button class="add-btn" id="mm-add-kw" title="Thêm từ khóa">+</button>
+              <span>Thêm từ khóa</span>
+            </div>
             <div class="mm-row-ctrl">
-              <span style="font-size:12px;letter-spacing:1px;color:var(--grey)">ROWS:</span>
+              <span style="font-size:12px;letter-spacing:1px">Số hàng:</span>
               <button class="mm-row-btn" id="mm-row-minus">−</button>
               <span id="mm-row-count" style="color:var(--white);min-width:18px;text-align:center">3</span>
               <button class="mm-row-btn" id="mm-row-plus">+</button>
             </div>
           </div>
-          <div class="mm-section-label" style="margin-top:24px">▸ DESIGN MAP <small style="color:var(--grey);font-size:10px">drag to rows · click 2 nodes to connect</small></div>
+          <div class="sec-label" style="margin-top:24px">▸ Bố cục sơ đồ <small style="color:var(--grey);font-size:11px">kéo vào hàng · bấm 2 node để nối</small></div>
           <div class="mm-canvas-wrap">
             <div class="mm-admin-canvas" id="mm-canvas">
               <svg class="mm-admin-svg" id="mm-svg"></svg>
             </div>
             <div class="kw-pool-sidebar">
-              <div class="kw-pool-hdr">▸ UNPLACED</div>
+              <div class="kw-pool-hdr">▸ CHƯA ĐẶT</div>
               <div class="kw-pool" id="mm-pool"></div>
             </div>
           </div>
-          <div class="action-bar-3">
-            <button class="abt abt-save" id="mm-save">💾 SAVE</button>
-            <button class="abt abt-copy" id="mm-copy">📋 COPY</button>
-            <button class="abt abt-dl"   id="mm-dl">⬇ DOWNLOAD</button>
-          </div>
-          <textarea class="json-out" id="mm-json" readonly></textarea>
         </div>
       </div>
 
@@ -352,14 +412,14 @@
           <span class="game-arrow" id="arrow-mt">▶</span>
         </button>
         <div class="game-content" id="content-mt">
-          <button class="add-btn" id="mt-add-set">＋ ADD SET</button>
-          <div id="mt-set-list"></div>
-          <div class="action-bar-3">
-            <button class="abt abt-save" id="mt-save">💾 SAVE</button>
-            <button class="abt abt-copy" id="mt-copy">📋 COPY</button>
-            <button class="abt abt-dl"   id="mt-dl">⬇ DOWNLOAD</button>
+          <p class="mt-hint">Bấm vào ô từ khóa để chọn, bấm ô khác cột để tạo kết nối. Bấm lại để bỏ chọn.</p>
+          <div class="mt-add-set-row">
+            <div class="add-btn-row">
+              <button class="add-btn" id="mt-add-set" title="Thêm bộ đề">+</button>
+              <span>Thêm bộ đề</span>
+            </div>
           </div>
-          <textarea class="json-out" id="mt-json" readonly></textarea>
+          <div id="mt-set-list"></div>
         </div>
       </div>
 
@@ -377,7 +437,17 @@
         </div>
       </div>
 
+    </div><!-- /game-sections -->
+
+    <!-- GLOBAL BAR BOTTOM -->
+    <div class="g-bar g-bar--bot" id="gBarBot">
+      <button class="g-btn g-save" id="gSaveB" title="Lưu tất cả">💾</button>
+      <button class="g-btn g-copy" id="gCopyB" title="Sao chép JSON">📋</button>
+      <button class="g-btn g-dl"   id="gDlB"   title="Tải xuống JSON">⬇</button>
+      <span class="g-msg" id="gMsgB"></span>
+      <button class="g-logout" id="logoutBtnB">Đăng xuất</button>
     </div>
+
   </main>
 
   <script>
@@ -387,9 +457,7 @@
     const ADMIN_PW = 'admin123';
 
     function checkAuth() {
-      if (localStorage.getItem('adminLoggedIn') === '1') {
-        showSections();
-      }
+      if (localStorage.getItem('adminLoggedIn') === '1') showSections();
     }
 
     document.getElementById('authBtn').addEventListener('click', doAuth);
@@ -407,12 +475,81 @@
       }
     }
 
+    function doLogout() {
+      localStorage.removeItem('adminLoggedIn');
+      location.reload();
+    }
+
     function showSections() {
       document.getElementById('authSection').innerHTML =
-        '<div class="auth-title" style="margin-bottom:0">⚙ ADMIN</div>' +
+        '<div class="auth-title" style="margin-bottom:0">⚙ ADMIN SETTING</div>' +
         '<div class="auth-ok">✓ Đã đăng nhập</div>';
-      document.getElementById('gameSections').classList.add('visible');
+      document.getElementById('gameSections').style.display = 'block';
+      document.getElementById('gBarTop').classList.add('visible');
+      document.getElementById('gBarBot').classList.add('visible');
+      document.getElementById('logoutBtnT').addEventListener('click', doLogout);
+      document.getElementById('logoutBtnB').addEventListener('click', doLogout);
       initAll();
+    }
+
+    // ================================================================
+    //  GLOBAL ACTION BAR
+    // ================================================================
+    let gLastJson = '';
+
+    function enableGlobal() {
+      ['gCopyT','gCopyB'].forEach(id => document.getElementById(id).classList.add('on'));
+      ['gDlT','gDlB'].forEach(id => document.getElementById(id).classList.add('on'));
+    }
+
+    function flashMsg(msg) {
+      ['gMsgT','gMsgB'].forEach(id => {
+        const el = document.getElementById(id);
+        el.textContent = msg;
+        setTimeout(() => el.textContent = '', 2500);
+      });
+    }
+
+    document.getElementById('gSaveT').addEventListener('click', globalSave);
+    document.getElementById('gSaveB').addEventListener('click', globalSave);
+
+    document.getElementById('gCopyT').addEventListener('click', () => doCopy('gCopyT'));
+    document.getElementById('gCopyB').addEventListener('click', () => doCopy('gCopyB'));
+    document.getElementById('gDlT').addEventListener('click', doDownload);
+    document.getElementById('gDlB').addEventListener('click', doDownload);
+
+    function globalSave() {
+      const content = {
+        prosCons: pcData,
+        mindMap:  [mmBuildSave()],
+        matching: buildMTData()
+      };
+      localStorage.setItem('prosCons', JSON.stringify(content.prosCons));
+      localStorage.setItem('mindMap',  JSON.stringify(content.mindMap));
+      localStorage.setItem('matching', JSON.stringify(content.matching));
+      gLastJson = JSON.stringify(content, null, 2);
+      enableGlobal();
+      flashMsg('✓ Đã lưu!');
+    }
+
+    function doCopy(btnId) {
+      if (!gLastJson) return;
+      navigator.clipboard?.writeText(gLastJson).catch(() => {
+        const ta = document.createElement('textarea');
+        ta.value = gLastJson; document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta);
+      });
+      const btn = document.getElementById(btnId);
+      const orig = btn.textContent;
+      btn.textContent = '✓'; setTimeout(() => btn.textContent = orig, 2000);
+    }
+
+    function doDownload() {
+      if (!gLastJson) return;
+      const blob = new Blob([gLastJson], { type: 'application/json' });
+      const url  = URL.createObjectURL(blob);
+      const a = Object.assign(document.createElement('a'), { href: url, download: 'admin_content.json' });
+      document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
     }
 
     // ================================================================
@@ -430,6 +567,8 @@
       content.classList.toggle('open', !isOpen);
       arrow.style.transform = isOpen ? '' : 'rotate(90deg)';
       openSec = isOpen ? null : id;
+      if (id === 'mm' && !isOpen) requestAnimationFrame(() => mmRefreshConn());
+      if (id === 'mt' && !isOpen) requestAnimationFrame(() => { mtData.forEach((_, si) => mtRenderLines(si)); });
     }
 
     // ================================================================
@@ -438,45 +577,12 @@
     function escHtml(s) {
       return (s || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
-    function flashBtn(id, msg, restore) {
-      const btn = document.getElementById(id);
-      const orig = restore || btn.textContent;
-      btn.textContent = msg;
-      setTimeout(() => btn.textContent = orig, 2000);
-    }
     function autoResize(ta) {
-      ta.style.height = 'auto';
-      ta.style.height = ta.scrollHeight + 'px';
+      ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px';
     }
     document.addEventListener('input', e => {
       if (e.target.tagName === 'TEXTAREA' && !e.target.readOnly) autoResize(e.target);
     });
-    function enableOutput(prefix, json) {
-      const ta = document.getElementById(prefix + '-json');
-      ta.value = json; ta.classList.add('visible');
-      autoResize(ta);
-      document.getElementById(prefix + '-copy').classList.add('on');
-      document.getElementById(prefix + '-dl').classList.add('on');
-    }
-    function resetOutput(prefix) {
-      document.getElementById(prefix + '-json').classList.remove('visible');
-      document.getElementById(prefix + '-copy').classList.remove('on');
-      document.getElementById(prefix + '-dl').classList.remove('on');
-    }
-    function setupOutput(prefix, filename) {
-      document.getElementById(prefix + '-copy').addEventListener('click', () => {
-        const ta = document.getElementById(prefix + '-json');
-        navigator.clipboard?.writeText(ta.value).catch(() => { ta.select(); document.execCommand('copy'); });
-        flashBtn(prefix + '-copy', '✓ COPIED!', '📋 COPY');
-      });
-      document.getElementById(prefix + '-dl').addEventListener('click', () => {
-        const blob = new Blob([document.getElementById(prefix + '-json').value], { type: 'application/json' });
-        const url  = URL.createObjectURL(blob);
-        const a = Object.assign(document.createElement('a'), { href: url, download: filename });
-        document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-        flashBtn(prefix + '-dl', '✓ DOWNLOADED!', '⬇ DOWNLOAD');
-      });
-    }
 
     function initAll() { initPC(); initMM(); initMT(); }
 
@@ -488,39 +594,30 @@
     async function initPC() {
       const saved = localStorage.getItem('prosCons');
       if (saved) { try { pcData = JSON.parse(saved); } catch(e) {} }
-      else {
-        try { const r = await fetch('../../admin/admin_pros_cons.json'); if (r.ok) pcData = await r.json(); } catch(e) {}
+      if (!pcData.length) {
+        try {
+          const r = await fetch('../../data/admin_content.json');
+          if (r.ok) { const d = await r.json(); if (d.prosCons) pcData = d.prosCons; }
+        } catch(e) {}
       }
       renderPC();
-      setupOutput('pc', 'admin_pros_cons.json');
       document.getElementById('pc-add').addEventListener('click', () => {
         const id = Date.now();
         pcData.push({ id, topic: '', passage: '', pro: { id: 'p'+id, text: '' }, con: { id: 'c'+id, text: '' } });
         renderPC();
-      });
-      document.getElementById('pc-save').addEventListener('click', () => {
-        for (const item of pcData) {
-          if (!item.topic.trim() || !item.pro.text.trim() || !item.con.text.trim()) {
-            flashBtn('pc-save', '⚠ FILL ALL!'); return;
-          }
-        }
-        localStorage.setItem('prosCons', JSON.stringify(pcData));
-        enableOutput('pc', JSON.stringify(pcData, null, 2));
-        flashBtn('pc-save', '✓ SAVED!', '💾 SAVE');
       });
     }
 
     function renderPC() {
       const list = document.getElementById('pc-list');
       list.innerHTML = '';
-      resetOutput('pc');
       pcData.forEach((item, idx) => {
         const div = document.createElement('div');
         div.className = 'entry-card';
         div.innerHTML = `
           <div class="entry-head">
-            <span class="entry-num">TOPIC ${idx+1}</span>
-            <button class="entry-remove" onclick="pcRemove(${idx})">✕ REMOVE</button>
+            <span class="entry-num">CHỦ ĐỀ ${idx+1}</span>
+            <button class="entry-remove" title="Xóa">✕</button>
           </div>
           <div class="field-group">
             <label class="field-label">Tên chủ đề</label>
@@ -538,30 +635,30 @@
             <label class="field-label">Nhược điểm</label>
             <input class="field-input" data-pc="${idx}" data-f="con" value="${escHtml(item.con.text)}" />
           </div>`;
+        div.querySelector('.entry-remove').addEventListener('click', () => { pcData.splice(idx, 1); renderPC(); });
+        div.querySelectorAll('[data-pc]').forEach(el => {
+          el.addEventListener('input', () => {
+            const i = +el.dataset.pc, f = el.dataset.f;
+            if (f === 'topic')   pcData[i].topic = el.value;
+            if (f === 'passage') pcData[i].passage = el.value;
+            if (f === 'pro')     pcData[i].pro.text = el.value;
+            if (f === 'con')     pcData[i].con.text = el.value;
+            if (el.tagName === 'TEXTAREA') autoResize(el);
+          });
+        });
+        div.querySelectorAll('textarea').forEach(ta => autoResize(ta));
         list.appendChild(div);
       });
-      list.querySelectorAll('[data-pc]').forEach(el => {
-        el.addEventListener('input', () => {
-          const i = +el.dataset.pc, f = el.dataset.f;
-          if (f === 'topic')   pcData[i].topic = el.value;
-          if (f === 'passage') pcData[i].passage = el.value;
-          if (f === 'pro')     pcData[i].pro.text = el.value;
-          if (f === 'con')     pcData[i].con.text = el.value;
-          if (el.tagName === 'TEXTAREA') autoResize(el);
-        });
-      });
-      list.querySelectorAll('textarea').forEach(ta => autoResize(ta));
     }
-    function pcRemove(idx) { pcData.splice(idx, 1); renderPC(); }
 
     // ================================================================
     //  MIND-MAP
     // ================================================================
-    let mmData = null;
-    let mmPlacements    = {};
-    let mmConnections   = new Set();
-    let mmDragKid       = null;
-    let mmSelectedNode  = null;
+    let mmData         = null;
+    let mmPlacements   = {};
+    let mmConnections  = new Set();
+    let mmDragKid      = null;
+    let mmSelectedNode = null;
     const MM_SEP = '|';
     function mmCk(a, b)  { return a < b ? `${a}${MM_SEP}${b}` : `${b}${MM_SEP}${a}`; }
     function mmPair(k)   { return k.split(MM_SEP); }
@@ -570,19 +667,18 @@
       const saved = localStorage.getItem('mindMap');
       if (saved) { try { mmData = JSON.parse(saved)[0]; } catch(e) {} }
       if (!mmData) {
-        try { const r = await fetch('../../admin/admin_mind_map.json'); if (r.ok) mmData = (await r.json())[0]; } catch(e) {}
+        try {
+          const r = await fetch('../../data/admin_content.json');
+          if (r.ok) { const d = await r.json(); if (d.mindMap?.[0]) mmData = d.mindMap[0]; }
+        } catch(e) {}
       }
       if (!mmData) mmData = { id: Date.now(), title: 'Sơ đồ 1', rowCount: 3, keywords: [], connections: [] };
       mmPlacements = {};
-      mmData.keywords.forEach(kw => {
-        if (kw.correctRow != null) mmPlacements[kw.id] = kw.correctRow;
-      });
+      mmData.keywords.forEach(kw => { if (kw.correctRow != null) mmPlacements[kw.id] = kw.correctRow; });
       mmConnections = new Set(mmData.connections.map(c => mmCk(c.from, c.to)));
       document.getElementById('mm-row-count').textContent = mmData.rowCount;
       mmRenderKwList();
       mmRenderCanvas();
-      setupOutput('mm', 'admin_mind_map.json');
-
       document.getElementById('mm-add-kw').addEventListener('click', () => {
         mmData.keywords.push({ id: 'k' + Date.now(), text: '', correctRow: null });
         mmRenderKwList(); mmRenderPool();
@@ -592,15 +688,6 @@
       document.getElementById('mm-row-minus').addEventListener('click', () => mmChangeRows(-1));
       document.getElementById('mm-row-plus').addEventListener('click',  () => mmChangeRows(1));
       document.getElementById('mm-canvas').addEventListener('click', () => mmClearSel());
-      document.getElementById('mm-save').addEventListener('click', () => {
-        if (mmData.keywords.some(kw => !kw.text.trim())) {
-          flashBtn('mm-save', '⚠ EMPTY KEYWORDS!'); return;
-        }
-        const saved = mmBuildSave();
-        localStorage.setItem('mindMap', JSON.stringify([saved]));
-        enableOutput('mm', JSON.stringify([saved], null, 2));
-        flashBtn('mm-save', '✓ SAVED!', '💾 SAVE');
-      });
       window.addEventListener('resize', () => mmRefreshConn());
     }
 
@@ -629,7 +716,7 @@
         div.innerHTML = `
           <span class="mm-kw-num">${String(idx+1).padStart(2,'0')}</span>
           <input class="field-input" style="flex:1" value="${escHtml(kw.text)}" />
-          <button class="mm-remove-kw">✕</button>`;
+          <button class="mm-remove-kw" title="Xóa">✕</button>`;
         const inp = div.querySelector('.field-input');
         inp.addEventListener('input', () => {
           mmData.keywords[idx].text = inp.value;
@@ -651,14 +738,12 @@
       const canvas = document.getElementById('mm-canvas');
       canvas.querySelectorAll('.map-row').forEach(r => r.remove());
       for (let i = 0; i < mmData.rowCount; i++) canvas.insertBefore(mmMakeRow(i), document.getElementById('mm-svg'));
-
       const poolEl = document.getElementById('mm-pool');
       const newPool = poolEl.cloneNode(false);
       poolEl.replaceWith(newPool);
       newPool.addEventListener('dragover', e => { if (mmDragKid) e.preventDefault(); });
       newPool.addEventListener('drop', e => {
-        e.preventDefault();
-        if (!mmDragKid) return;
+        e.preventDefault(); if (!mmDragKid) return;
         const kid = mmDragKid;
         mmConnections.forEach(k => { const [a,b] = mmPair(k); if (a===kid||b===kid) mmConnections.delete(k); });
         delete mmPlacements[kid];
@@ -677,26 +762,23 @@
       row.addEventListener('dragover', e => { if (mmDragKid) { e.preventDefault(); row.classList.add('drag-over'); } });
       row.addEventListener('dragleave', e => { if (!row.contains(e.relatedTarget)) row.classList.remove('drag-over'); });
       row.addEventListener('drop', e => {
-        e.preventDefault(); row.classList.remove('drag-over');
-        if (!mmDragKid) return;
+        e.preventDefault(); row.classList.remove('drag-over'); if (!mmDragKid) return;
         mmPlacements[mmDragKid] = idx;
         mmConnections.forEach(k => {
           const [a,b] = mmPair(k);
           if (mmPlacements[a]!==undefined && mmPlacements[b]!==undefined && mmPlacements[a]===mmPlacements[b]) mmConnections.delete(k);
         });
-        mmDragKid = null;
-        mmRenderPool(); mmRenderPlaced(); mmRefreshConn();
+        mmDragKid = null; mmRenderPool(); mmRenderPlaced(); mmRefreshConn();
       });
       return row;
     }
 
     function mmRenderPool() {
-      const pool = document.getElementById('mm-pool');
-      pool.innerHTML = '';
+      const pool = document.getElementById('mm-pool'); pool.innerHTML = '';
       const placed = new Set(Object.keys(mmPlacements));
       mmData.keywords.forEach(kw => { if (!placed.has(kw.id)) pool.appendChild(mmMakeChip(kw)); });
       if (mmData.keywords.length > 0 && placed.size === mmData.keywords.length) {
-        const e = document.createElement('div'); e.className = 'pool-empty'; e.textContent = 'ALL PLACED!'; pool.appendChild(e);
+        const e = document.createElement('div'); e.className = 'pool-empty'; e.textContent = 'ĐÃ ĐẶT HẾT ✓'; pool.appendChild(e);
       }
     }
 
@@ -769,8 +851,7 @@
     function mmGetDotPos(kid, dotType) {
       const canvas = document.getElementById('mm-canvas');
       const svg    = document.getElementById('mm-svg');
-      const nodeEl = canvas.querySelector(`.map-node[data-kid="${kid}"]`);
-      if (!nodeEl) return null;
+      const nodeEl = canvas.querySelector(`.map-node[data-kid="${kid}"]`); if (!nodeEl) return null;
       const dotEl  = nodeEl.querySelector(`.node-dot--${dotType}`); if (!dotEl) return null;
       const sr = svg.getBoundingClientRect(), dr = dotEl.getBoundingClientRect();
       return { x: dr.left + dr.width/2 - sr.left, y: dr.top + dr.height/2 - sr.top };
@@ -792,15 +873,13 @@
         const line = document.createElementNS(ns, 'line');
         line.setAttribute('x1',p1.x); line.setAttribute('y1',p1.y);
         line.setAttribute('x2',p2.x); line.setAttribute('y2',p2.y);
-        line.setAttribute('class','map-line');
-        svg.appendChild(line);
+        line.setAttribute('class','map-line'); svg.appendChild(line);
         const btn = document.createElement('button');
         btn.className = 'conn-delete-btn'; btn.textContent = '✕';
         btn.style.left = ((p1.x+p2.x)/2) + 'px'; btn.style.top = ((p1.y+p2.y)/2) + 'px';
         btn.addEventListener('click', e => { e.stopPropagation(); mmConnections.delete(key); mmRefreshConn(); });
         canvas.appendChild(btn);
       });
-      // update conn count badges
       const counts = {};
       mmConnections.forEach(k => { const [a,b]=mmPair(k); counts[a]=(counts[a]||0)+1; counts[b]=(counts[b]||0)+1; });
       canvas.querySelectorAll('.map-node').forEach(n => {
@@ -819,11 +898,11 @@
     }
 
     // ================================================================
-    //  MATCHING
+    //  MATCHING — INTEGRATED EDITOR
     // ================================================================
     let mtData    = [];
-    let mtConns   = {};
-    let mtPending = null;
+    let mtConns   = {};   // { [si]: Set<"idA|idB"> } — PERSISTED across UI rebuilds
+    let mtPending = null; // { id, side, si }
 
     function mtCk(a, b) { return a < b ? `${a}|${b}` : `${b}|${a}`; }
 
@@ -831,137 +910,214 @@
       const saved = localStorage.getItem('matching');
       if (saved) { try { mtData = JSON.parse(saved); } catch(e) {} }
       if (!mtData.length) {
-        try { const r = await fetch('../../admin/admin_matching.json'); if (r.ok) mtData = await r.json(); } catch(e) {}
+        try {
+          const r = await fetch('../../data/admin_content.json');
+          if (r.ok) { const d = await r.json(); if (d.matching) mtData = d.matching; }
+        } catch(e) {}
       }
-      mtData.forEach((s, si) => { mtConns[si] = new Set(s.connections.map(c => mtCk(c.from, c.to))); });
+      // Load connections into mtConns (only on init, not on rebuild)
+      mtData.forEach((s, si) => {
+        if (!mtConns[si]) mtConns[si] = new Set(s.connections.map(c => mtCk(c.from, c.to)));
+      });
       mtBuildUI();
-      setupOutput('mt', 'admin_matching.json');
       document.getElementById('mt-add-set').addEventListener('click', () => {
         const si = mtData.length, id = Date.now();
-        mtData.push({ id, title: `Bộ ${si+1}`, leftItems: [{ id:`L${id}a`, text:'' }], rightItems: [{ id:`R${id}b`, text:'' }], connections: [] });
+        mtData.push({
+          id, title: `Bộ ${si+1}`,
+          leftItems:  [{ id: `L${id}a`, text: '' }],
+          rightItems: [{ id: `R${id}b`, text: '' }],
+          connections: []
+        });
         mtConns[si] = new Set();
         mtBuildUI();
       });
-      document.getElementById('mt-save').addEventListener('click', () => {
-        mtData.forEach((set, si) => {
-          const conns = mtConns[si] || new Set();
-          set.connections = [...conns].map(key => {
-            const [a, b] = key.split('|');
-            return set.leftItems.some(it => it.id === a) ? { from: a, to: b } : { from: b, to: a };
-          });
+    }
+
+    function buildMTData() {
+      // Build final mtData with connections from mtConns (in-memory)
+      return mtData.map((set, si) => {
+        const conns = mtConns[si] || new Set();
+        const connections = [...conns].map(key => {
+          const [a, b] = key.split('|');
+          return set.leftItems.some(it => it.id === a) ? { from: a, to: b } : { from: b, to: a };
         });
-        localStorage.setItem('matching', JSON.stringify(mtData));
-        enableOutput('mt', JSON.stringify(mtData, null, 2));
-        flashBtn('mt-save', '✓ SAVED!', '💾 SAVE');
+        return { ...set, connections };
       });
     }
 
     function mtBuildUI() {
       const list = document.getElementById('mt-set-list');
-      list.innerHTML = ''; mtPending = null;
-      resetOutput('mt');
+      list.innerHTML = '';
+      mtPending = null;
+      // Ensure mtConns entries exist for all sets
+      mtData.forEach((s, si) => {
+        if (!mtConns[si]) mtConns[si] = new Set(s.connections.map(c => mtCk(c.from, c.to)));
+      });
       mtData.forEach((set, si) => {
-        if (!mtConns[si]) mtConns[si] = new Set(set.connections.map(c => mtCk(c.from, c.to)));
-        const card = document.createElement('div'); card.className = 'mt-set-card';
+        const card = document.createElement('div');
+        card.className = 'mt-set-card';
 
         // Title row
         const tr = document.createElement('div'); tr.className = 'mt-set-title-row';
-        tr.innerHTML = `<span>BỘ ${si+1}:</span>`;
+        const lbl = document.createElement('span'); lbl.className = 'set-label'; lbl.textContent = `BỘ ${si+1}:`;
         const ti = document.createElement('input'); ti.value = set.title || '';
         ti.addEventListener('input', () => { mtData[si].title = ti.value; });
-        const db = document.createElement('button'); db.className = 'mt-del-set-btn'; db.textContent = '✕ XÓA';
+        const db = document.createElement('button'); db.className = 'mt-del-set-btn'; db.title = 'Xóa bộ đề'; db.textContent = '✕';
         db.addEventListener('click', () => {
-          mtData.splice(si, 1); mtConns = {};
-          mtData.forEach((s, i) => { mtConns[i] = new Set(s.connections.map(c => mtCk(c.from, c.to))); });
+          mtData.splice(si, 1);
+          // Rebuild mtConns with correct indices
+          const newConns = {};
+          mtData.forEach((s, i) => { newConns[i] = mtConns[i > si ? i + 1 : i] || new Set(s.connections.map(c => mtCk(c.from, c.to))); });
+          mtConns = newConns;
           mtBuildUI();
         });
-        tr.appendChild(ti); tr.appendChild(db); card.appendChild(tr);
+        tr.appendChild(lbl); tr.appendChild(ti); tr.appendChild(db);
+        card.appendChild(tr);
 
-        // Columns
-        const cols = document.createElement('div'); cols.className = 'mt-cols';
-        ['left','right'].forEach(side => {
-          const col = document.createElement('div'); col.className = 'mt-col';
-          const lbl = document.createElement('div'); lbl.className = 'mt-col-label';
-          lbl.textContent = side === 'left' ? 'CỘT TRÁI' : 'CỘT PHẢI';
-          col.appendChild(lbl);
-          const items = side === 'left' ? set.leftItems : set.rightItems;
-          items.forEach((item, ii) => {
-            const row = document.createElement('div'); row.className = 'mt-kw-row';
-            const inp = document.createElement('input'); inp.value = item.text;
-            inp.addEventListener('input', () => { items[ii].text = inp.value; mtBuildArena(si); });
-            const del = document.createElement('button'); del.className = 'mt-del-btn'; del.textContent = '✕';
-            del.addEventListener('click', () => { items.splice(ii, 1); mtBuildUI(); });
-            row.appendChild(inp); row.appendChild(del); col.appendChild(row);
-          });
-          const add = document.createElement('button'); add.className = 'mt-add-item-btn'; add.textContent = '＋';
-          add.addEventListener('click', () => {
-            const newId = side==='left' ? `L${Date.now()}` : `R${Date.now()}`;
-            items.push({ id: newId, text: '' }); mtBuildUI();
-          });
-          col.appendChild(add); cols.appendChild(col);
+        // Integrated columns + SVG body
+        const body = document.createElement('div');
+        body.className = 'mt-body'; body.id = `mt-body-${si}`;
+
+        const colL = document.createElement('div');
+        colL.className = 'mt-col mt-col-l'; colL.id = `mt-colL-${si}`;
+        const colHdrL = document.createElement('div'); colHdrL.className = 'mt-col-hdr'; colHdrL.textContent = 'Cột trái';
+        colL.appendChild(colHdrL);
+        set.leftItems.forEach((item, ii) => colL.appendChild(mtMakeItem(item, 'left', si, ii)));
+        const addL = document.createElement('div'); addL.className = 'mt-col-add';
+        const addLBtn = document.createElement('button'); addLBtn.className = 'add-btn'; addLBtn.title = 'Thêm ô trái'; addLBtn.textContent = '+';
+        addLBtn.addEventListener('click', () => {
+          mtData[si].leftItems.push({ id: `L${Date.now()}`, text: '' });
+          mtRebuildSet(si);
         });
-        card.appendChild(cols);
+        addL.appendChild(addLBtn); colL.appendChild(addL);
 
-        // Connection arena
-        const cl = document.createElement('div'); cl.className = 'mt-conn-label'; cl.textContent = 'KẾT NỐI ĐÚNG — bấm để nối / xóa nối:'; card.appendChild(cl);
-        const arena = document.createElement('div'); arena.className = 'mt-arena'; arena.id = `mt-arena-${si}`;
-        const lc = document.createElement('div'); lc.className = 'mt-arena-col mt-arena-left';
-        set.leftItems.forEach(item => { lc.appendChild(mtMakeItem(item, 'left', si)); });
-        const mc = document.createElement('div'); mc.className = 'mt-arena-mid';
-        const rc = document.createElement('div'); rc.className = 'mt-arena-col mt-arena-right';
-        set.rightItems.forEach(item => { rc.appendChild(mtMakeItem(item, 'right', si)); });
-        const sw = document.createElement('div');
-        sw.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;';
-        const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-        svg.id = `mt-svg-${si}`; svg.className = 'mt-arena-svg'; sw.appendChild(svg);
-        arena.appendChild(lc); arena.appendChild(mc); arena.appendChild(rc); arena.appendChild(sw);
-        card.appendChild(arena); list.appendChild(card);
+        const colMid = document.createElement('div'); colMid.className = 'mt-mid';
+
+        const colR = document.createElement('div');
+        colR.className = 'mt-col mt-col-r'; colR.id = `mt-colR-${si}`;
+        const colHdrR = document.createElement('div'); colHdrR.className = 'mt-col-hdr'; colHdrR.textContent = 'Cột phải';
+        colR.appendChild(colHdrR);
+        set.rightItems.forEach((item, ii) => colR.appendChild(mtMakeItem(item, 'right', si, ii)));
+        const addR = document.createElement('div'); addR.className = 'mt-col-add';
+        const addRBtn = document.createElement('button'); addRBtn.className = 'add-btn'; addRBtn.title = 'Thêm ô phải'; addRBtn.textContent = '+';
+        addRBtn.addEventListener('click', () => {
+          mtData[si].rightItems.push({ id: `R${Date.now()}`, text: '' });
+          mtRebuildSet(si);
+        });
+        addR.appendChild(addRBtn); colR.appendChild(addR);
+
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.classList.add('mt-svg'); svg.id = `mt-svg-${si}`;
+
+        body.appendChild(colL); body.appendChild(colMid); body.appendChild(colR); body.appendChild(svg);
+        card.appendChild(body);
+        list.appendChild(card);
       });
       requestAnimationFrame(() => { mtData.forEach((_, si) => mtRenderLines(si)); });
     }
 
-    function mtMakeItem(item, side, si) {
-      const el = document.createElement('div'); el.className = 'mt-arena-item';
-      el.dataset.mid = item.id; el.dataset.mside = side; el.dataset.msi = si;
+    // Rebuild just one set's columns (preserves connections for that set)
+    function mtRebuildSet(si) {
+      const set = mtData[si];
+      const colL = document.getElementById(`mt-colL-${si}`);
+      const colR = document.getElementById(`mt-colR-${si}`);
+      if (!colL || !colR) { mtBuildUI(); return; }
+      // Rebuild left col
+      colL.innerHTML = '';
+      const colHdrL = document.createElement('div'); colHdrL.className = 'mt-col-hdr'; colHdrL.textContent = 'Cột trái';
+      colL.appendChild(colHdrL);
+      set.leftItems.forEach((item, ii) => colL.appendChild(mtMakeItem(item, 'left', si, ii)));
+      const addL = document.createElement('div'); addL.className = 'mt-col-add';
+      const addLBtn = document.createElement('button'); addLBtn.className = 'add-btn'; addLBtn.title = 'Thêm ô trái'; addLBtn.textContent = '+';
+      addLBtn.addEventListener('click', () => { mtData[si].leftItems.push({ id: `L${Date.now()}`, text: '' }); mtRebuildSet(si); });
+      addL.appendChild(addLBtn); colL.appendChild(addL);
+      // Rebuild right col
+      colR.innerHTML = '';
+      const colHdrR = document.createElement('div'); colHdrR.className = 'mt-col-hdr'; colHdrR.textContent = 'Cột phải';
+      colR.appendChild(colHdrR);
+      set.rightItems.forEach((item, ii) => colR.appendChild(mtMakeItem(item, 'right', si, ii)));
+      const addR = document.createElement('div'); addR.className = 'mt-col-add';
+      const addRBtn = document.createElement('button'); addRBtn.className = 'add-btn'; addRBtn.title = 'Thêm ô phải'; addRBtn.textContent = '+';
+      addRBtn.addEventListener('click', () => { mtData[si].rightItems.push({ id: `R${Date.now()}`, text: '' }); mtRebuildSet(si); });
+      addR.appendChild(addRBtn); colR.appendChild(addR);
+      requestAnimationFrame(() => mtRenderLines(si));
+    }
+
+    function mtMakeItem(item, side, si, ii) {
+      const el = document.createElement('div');
+      el.className = 'mt-item';
+      el.dataset.mid   = item.id;
+      el.dataset.mside = side;
+      el.dataset.msi   = si;
+
+      const del = document.createElement('button');
+      del.className = 'mt-del'; del.title = 'Xóa'; del.textContent = '✕';
+      del.addEventListener('click', e => {
+        e.stopPropagation();
+        const items = side === 'left' ? mtData[si].leftItems : mtData[si].rightItems;
+        const id = item.id;
+        items.splice(ii, 1);
+        // Remove any connections involving this item
+        if (mtConns[si]) {
+          mtConns[si].forEach(key => { if (key.split('|').includes(id)) mtConns[si].delete(key); });
+        }
+        mtRebuildSet(si);
+      });
+
+      const inp = document.createElement('input');
+      inp.className = 'mt-inp'; inp.value = item.text;
+      inp.addEventListener('click', e => e.stopPropagation()); // don't trigger item selection
+      inp.addEventListener('input', () => {
+        const items = side === 'left' ? mtData[si].leftItems : mtData[si].rightItems;
+        items[ii].text = inp.value;
+      });
+
       const dot = document.createElement('div'); dot.className = 'mt-dot';
-      const sp  = document.createElement('span'); sp.textContent = item.text || item.id;
-      if (side === 'left') { el.appendChild(sp); el.appendChild(dot); }
-      else { el.appendChild(dot); el.appendChild(sp); }
+      dot.addEventListener('click', e => { e.stopPropagation(); mtItemClick(item.id, side, si); });
+
+      if (side === 'left') {
+        el.appendChild(del); el.appendChild(inp); el.appendChild(dot);
+      } else {
+        el.appendChild(dot); el.appendChild(inp); el.appendChild(del);
+      }
       el.addEventListener('click', e => { e.stopPropagation(); mtItemClick(item.id, side, si); });
       return el;
     }
 
-    function mtBuildArena(si) {
-      // Rebuild just the arena SVG lines after text edits
-      requestAnimationFrame(() => mtRenderLines(si));
-    }
-
     function mtGetDotPos(itemId, si) {
-      const arena = document.getElementById(`mt-arena-${si}`); if (!arena) return null;
-      const dotEl = arena.querySelector(`[data-mid="${itemId}"] .mt-dot`); if (!dotEl) return null;
-      const ar = arena.getBoundingClientRect(), dr = dotEl.getBoundingClientRect();
-      return { x: dr.left + dr.width/2 - ar.left, y: dr.top + dr.height/2 - ar.top };
+      const body  = document.getElementById(`mt-body-${si}`); if (!body) return null;
+      const svg   = document.getElementById(`mt-svg-${si}`);  if (!svg)  return null;
+      const itemEl = body.querySelector(`[data-mid="${itemId}"]`); if (!itemEl) return null;
+      const dotEl  = itemEl.querySelector('.mt-dot'); if (!dotEl) return null;
+      const sr = svg.getBoundingClientRect(), dr = dotEl.getBoundingClientRect();
+      return { x: dr.left + dr.width/2 - sr.left, y: dr.top + dr.height/2 - sr.top };
     }
 
     function mtRenderLines(si) {
       const svg = document.getElementById(`mt-svg-${si}`); if (!svg) return;
       svg.innerHTML = '';
       const conns = mtConns[si] || new Set();
+      const ns = 'http://www.w3.org/2000/svg';
       conns.forEach(key => {
         const [a, b] = key.split('|');
         const pA = mtGetDotPos(a, si), pB = mtGetDotPos(b, si); if (!pA || !pB) return;
         const mx = (pA.x+pB.x)/2, my = (pA.y+pB.y)/2;
-        const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+        const line = document.createElementNS(ns, 'line');
         line.setAttribute('x1',pA.x); line.setAttribute('y1',pA.y);
         line.setAttribute('x2',pB.x); line.setAttribute('y2',pB.y);
-        line.setAttribute('class','conn-line'); svg.appendChild(line);
-        const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+        line.setAttribute('class','mt-conn-line'); svg.appendChild(line);
+        const g = document.createElementNS(ns, 'g');
         g.style.cssText = 'cursor:pointer;pointer-events:all;';
-        g.addEventListener('click', e => { e.stopPropagation(); mtConns[si].delete(key); mtRenderLines(si); mtUpdateColors(si); });
-        const bg = document.createElementNS('http://www.w3.org/2000/svg','rect');
-        bg.setAttribute('x',mx-7); bg.setAttribute('y',my-7); bg.setAttribute('width',14); bg.setAttribute('height',14); bg.setAttribute('class','conn-del-bg');
-        const txt = document.createElementNS('http://www.w3.org/2000/svg','text');
-        txt.setAttribute('x',mx); txt.setAttribute('y',my); txt.setAttribute('class','conn-del'); txt.textContent = '✕';
+        g.addEventListener('click', e => {
+          e.stopPropagation(); mtConns[si].delete(key); mtRenderLines(si); mtUpdateColors(si);
+        });
+        const bg = document.createElementNS(ns, 'rect');
+        bg.setAttribute('x', mx-8); bg.setAttribute('y', my-8);
+        bg.setAttribute('width', 16); bg.setAttribute('height', 16);
+        bg.setAttribute('rx', 3); bg.setAttribute('class', 'mt-conn-del-bg');
+        const txt = document.createElementNS(ns, 'text');
+        txt.setAttribute('x', mx); txt.setAttribute('y', my);
+        txt.setAttribute('class', 'mt-conn-del'); txt.textContent = '✕';
         g.appendChild(bg); g.appendChild(txt); svg.appendChild(g);
       });
       mtUpdateColors(si);
@@ -973,19 +1129,23 @@
         const id = item.dataset.mid;
         const hasPend = mtPending && +mtPending.si === si && mtPending.id === id;
         const hasConn = [...conns].some(k => k.split('|').includes(id));
-        item.classList.toggle('pending', hasPend);
+        item.classList.toggle('pending',   hasPend);
         item.classList.toggle('connected', hasConn && !hasPend);
       });
     }
 
     function mtItemClick(id, side, si) {
       if (!mtPending) { mtPending = { id, side, si }; mtUpdateColors(si); return; }
+      // Different set: move pending
       if (+mtPending.si !== si) {
-        const prev = mtPending.si; mtPending = { id, side, si };
+        const prev = +mtPending.si; mtPending = { id, side, si };
         mtUpdateColors(prev); mtUpdateColors(si); return;
       }
+      // Same item: deselect
       if (mtPending.id === id) { mtPending = null; mtUpdateColors(si); return; }
+      // Same side: move pending to this item
       if (mtPending.side === side) { mtPending = { id, side, si }; mtUpdateColors(si); return; }
+      // Different sides: toggle connection
       const leftId  = side === 'right' ? mtPending.id : id;
       const rightId = side === 'right' ? id : mtPending.id;
       const key = mtCk(leftId, rightId);
@@ -993,6 +1153,22 @@
       if (mtConns[si].has(key)) mtConns[si].delete(key); else mtConns[si].add(key);
       mtPending = null; mtRenderLines(si);
     }
+
+    // ================================================================
+    //  NAVBAR GAMES POPUP
+    // ================================================================
+    const gamesBtn   = document.getElementById('gamesBtn');
+    const gamesPopup = document.getElementById('gamesPopup');
+    gamesBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      gamesPopup.classList.toggle('open');
+      if (gamesPopup.classList.contains('open')) {
+        const r = gamesBtn.getBoundingClientRect();
+        gamesPopup.style.left = (r.left + r.width / 2) + 'px';
+        gamesPopup.style.top  = (r.bottom + 6) + 'px';
+      }
+    });
+    document.addEventListener('click', () => gamesPopup.classList.remove('open'));
 
     // ================================================================
     //  BOOT
