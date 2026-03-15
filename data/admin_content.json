@@ -860,37 +860,47 @@
       "keywords": [
         {
           "id": "k1",
-          "text": "Mạng xã hội",
+          "text": "Dự án khóa học KNS",
           "correctRow": 0
         },
         {
           "id": "k2",
-          "text": "Kết nối",
+          "text": "Kỹ năng thuyết trình",
           "correctRow": 1
         },
         {
           "id": "k3",
-          "text": "Giải trí",
+          "text": "Kỹ năng lưu trữ và tìm kiếm",
           "correctRow": 1
         },
         {
           "id": "k4",
-          "text": "Facebook",
-          "correctRow": 2
+          "text": "Kỹ năng vẽ",
+          "correctRow": 1
         },
         {
           "id": "k5",
-          "text": "TikTok",
+          "text": "Lưu trữ",
           "correctRow": 2
         },
         {
           "id": "k6",
-          "text": "Nhắn tin",
+          "text": "Tìm kiếm",
           "correctRow": 2
         },
         {
           "id": "k7",
-          "text": "Video ngắn",
+          "text": "Thẩm mỹ",
+          "correctRow": 2
+        },
+        {
+          "id": "k1773583426535",
+          "text": "Công cụ",
+          "correctRow": 2
+        },
+        {
+          "id": "k1773583427667",
+          "text": "Tư duy vẽ",
           "correctRow": 2
         }
       ],
@@ -904,12 +914,8 @@
           "to": "k3"
         },
         {
-          "from": "k2",
+          "from": "k1",
           "to": "k4"
-        },
-        {
-          "from": "k2",
-          "to": "k6"
         },
         {
           "from": "k3",
@@ -917,7 +923,19 @@
         },
         {
           "from": "k3",
+          "to": "k6"
+        },
+        {
+          "from": "k4",
           "to": "k7"
+        },
+        {
+          "from": "k1773583426535",
+          "to": "k4"
+        },
+        {
+          "from": "k1773583427667",
+          "to": "k4"
         }
       ]
     }
