@@ -644,13 +644,17 @@ section {
 /* Medium phones and up */
 @media (max-width: 640px) {
   .navbar { padding: 0 1rem; }
-  .navbar__logo { font-size: 9px; }
+  .navbar__logo { font-size: 9px; letter-spacing: 1px; }
   .navbar__links { gap: 0.5rem; }
   .navbar__links a { font-size: 7px; padding: 5px 7px; }
   .hero { padding: 50px 1rem 40px; min-height: 50vh; }
+  .hero__badge { font-size: 6px; padding: 5px 10px; letter-spacing: 2px; }
+  .hero__subtitle { font-size: 13px; }
   .section-title { font-size: 11px; }
   .apps-grid { grid-template-columns: 1fr; }
   .apps-section { padding: 28px 1rem 60px; }
+  .result-banner { padding: 20px 16px; }
+  .result-banner__score { font-size: clamp(12px, 4vw, 22px); }
 }
 
 /* Small phones */
@@ -671,9 +675,25 @@ section {
   }
 
   .hero { padding: 36px 1rem 28px; }
+  .hero__badge { font-size: 5px; }
+  .hero__subtitle { font-size: 12px; }
+  .hero__cta { font-size: 9px; padding: 12px 20px; }
   .apps-section { padding: 20px 1rem 48px; }
   .apps-grid { gap: 16px; }
 
   .app-card { padding: 20px 16px; gap: 12px; }
   .app-card__icon { font-size: 28px; }
+
+  /* Action buttons */
+  .action-btn { font-size: 8px; padding: 10px 16px; }
+}
+
+/* Ultra-small phones */
+@media (max-width: 360px) {
+  .navbar { padding: 0 0.75rem; }
+  .navbar__logo { font-size: 8px; letter-spacing: 0; }
+  .navbar__links { gap: 0; }
+  .navbar__game-item { width: 40px; height: 40px; font-size: 28px; }
+  .apps-grid { gap: 12px; }
+  .app-card { padding: 16px 12px; }
 }

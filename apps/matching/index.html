@@ -272,6 +272,25 @@
     }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 600px) {
+      .game-page { padding: 16px 1rem 60px; }
+      .match-arena { grid-template-columns: 1fr 24px 1fr; }
+      .match-item { font-size: 9px; padding: 6px 8px; min-height: 40px; }
+      .match-col--left .match-item { padding-right: 20px; }
+      .match-col--right .match-item { padding-left: 20px; }
+      .status-bar { gap: 1rem; font-size: 8px; }
+      .set-nav { gap: 8px; font-size: 8px; }
+      .action-bar { gap: 10px; }
+    }
+    @media (max-width: 400px) {
+      .match-arena { grid-template-columns: 1fr 16px 1fr; }
+      .match-item { font-size: 8px; padding: 5px 6px; }
+      .match-col--left .match-item { padding-right: 18px; }
+      .match-col--right .match-item { padding-left: 18px; }
+      .dot { width: 12px; height: 12px; }
+    }
+
   </style>
 </head>
 <body>

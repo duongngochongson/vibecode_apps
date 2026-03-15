@@ -151,6 +151,21 @@
 
     /* ===== EMPTY STATE ===== */
     .po-empty { text-align: center; padding: 60px 20px; color: var(--grey); font-size: 11px; letter-spacing: 1px; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 480px) {
+      .game-page { padding: 20px 1rem 100px; }
+      .po-title-row { flex-direction: column; align-items: flex-start; gap: 4px; margin-bottom: 14px; }
+      .po-card { padding: 10px 10px; }
+      .po-text { font-size: 11px; }
+      .po-badge { font-size: 7px; padding: 2px 5px; }
+      .fn-answer-bar { padding: 8px 10px; gap: 8px; }
+      .result-banner { padding: 24px 20px; width: 88vw; box-sizing: border-box; }
+    }
+    @media (max-width: 360px) {
+      .fn-answer-bar { flex-wrap: nowrap; overflow-x: auto; }
+      .po-page-title { font-size: 13px; }
+    }
   </style>
 </head>
 <body>
