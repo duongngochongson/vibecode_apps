@@ -7,6 +7,7 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' fill='%2300fff5'>◈</text></svg>">
   <link rel="stylesheet" href="css/style.css" />
   <script src="js/sfx.js"></script>
+  <script src="js/game-visibility.js" data-json="data/admin_content.json"></script>
   <style>
     /* ===== HOME-SPECIFIC STYLES ===== */
 
@@ -153,14 +154,14 @@
   <!-- ===== GAMES POPUP ===== -->
   <div class="navbar__games-popup" id="gamesPopup">
     <div class="navbar__games-list">
-      <a href="apps/pros-cons/index.html" class="navbar__game-item">🐺</a>
-      <a href="apps/mind-map/index.html" class="navbar__game-item">🐙</a>
-      <a href="apps/matching/index.html" class="navbar__game-item">🐿️</a>
-      <a href="apps/file-naming/index.html" class="navbar__game-item">🐟</a>
-      <a href="apps/prompt-order/index.html" class="navbar__game-item">🐜</a>
-      <a href="apps/calculator/index.html" class="navbar__game-item">🐬</a>
-      <a href="apps/mece/index.html" class="navbar__game-item">🦊</a>
-      <a href="apps/noticeboard/index.html" class="navbar__game-item">🐝</a>
+      <a href="apps/pros-cons/index.html"   class="navbar__game-item" data-game="pros-cons">🐺</a>
+      <a href="apps/mind-map/index.html"    class="navbar__game-item" data-game="mind-map">🐙</a>
+      <a href="apps/matching/index.html"    class="navbar__game-item" data-game="matching">🐿️</a>
+      <a href="apps/file-naming/index.html" class="navbar__game-item" data-game="file-naming">🐟</a>
+      <a href="apps/prompt-order/index.html" class="navbar__game-item" data-game="prompt-order">🐜</a>
+      <a href="apps/calculator/index.html"  class="navbar__game-item" data-game="calculator">🐬</a>
+      <a href="apps/mece/index.html"        class="navbar__game-item" data-game="mece">🦊</a>
+      <a href="apps/noticeboard/index.html" class="navbar__game-item" data-game="noticeboard">🐝</a>
     </div>
   </div>
 
@@ -210,7 +211,7 @@
     <div class="apps-grid">
 
       <!-- Card 1: Đoán Ưu/Nhược (LIVE) -->
-      <article class="app-card pixel-box app-card--cyan" onclick="SFX.navigate();location.href='apps/pros-cons/index.html'">
+      <article class="app-card pixel-box app-card--cyan" data-game="pros-cons" onclick="SFX.navigate();location.href='apps/pros-cons/index.html'">
         <div class="app-card__icon">🐺</div>
         <h3 class="app-card__title font-vi-h">Đoán Ưu/Nhược</h3>
         <p class="app-card__desc font-vi">Kéo thả thẻ vào đúng ô. Phân tích ưu/nhược điểm.</p>
@@ -218,7 +219,7 @@
       </article>
 
       <!-- Card 2: Sơ đồ Tư Duy -->
-      <article class="app-card pixel-box app-card--magenta" onclick="SFX.navigate();location.href='apps/mind-map/index.html'" style="cursor:pointer">
+      <article class="app-card pixel-box app-card--magenta" data-game="mind-map" onclick="SFX.navigate();location.href='apps/mind-map/index.html'" style="cursor:pointer">
         <div class="app-card__icon">🐙</div>
         <h3 class="app-card__title font-vi-h">Sơ đồ Tư Duy</h3>
         <p class="app-card__desc">Kéo thả từ khóa, nối quan hệ, hoàn thiện sơ đồ</p>
@@ -226,7 +227,7 @@
       </article>
 
       <!-- Card 3: Nối Từ (Matching) -->
-      <article class="app-card pixel-box app-card--green" onclick="SFX.navigate();location.href='apps/matching/index.html'">
+      <article class="app-card pixel-box app-card--green" data-game="matching" onclick="SFX.navigate();location.href='apps/matching/index.html'">
         <div class="app-card__icon">🐿️</div>
         <h3 class="app-card__title font-vi-h">Nối Từ</h3>
         <p class="app-card__desc font-vi">Nối các từ khóa ở hai cột với nhau theo mối quan hệ đúng.</p>
@@ -234,7 +235,7 @@
       </article>
 
       <!-- Card 4: Đặt Tên File -->
-      <article class="app-card pixel-box app-card--yellow" onclick="SFX.navigate();location.href='apps/file-naming/index.html'">
+      <article class="app-card pixel-box app-card--yellow" data-game="file-naming" onclick="SFX.navigate();location.href='apps/file-naming/index.html'">
         <div class="app-card__icon">🐟</div>
         <h3 class="app-card__title font-vi-h">Đặt Tên File</h3>
         <p class="app-card__desc font-vi">Điền đường dẫn và kéo hành tinh vào đúng thư mục trong cây vũ trụ.</p>
@@ -242,7 +243,7 @@
       </article>
 
       <!-- Card 5: Sắp xếp Prompt -->
-      <article class="app-card pixel-box app-card--cyan" onclick="SFX.navigate();location.href='apps/prompt-order/index.html'">
+      <article class="app-card pixel-box app-card--cyan" data-game="prompt-order" onclick="SFX.navigate();location.href='apps/prompt-order/index.html'">
         <div class="app-card__icon">🐜</div>
         <h3 class="app-card__title font-vi-h">Sắp xếp Prompt</h3>
         <p class="app-card__desc font-vi">Kéo thả các thành phần prompt AI vào đúng thứ tự chuẩn.</p>
@@ -250,7 +251,7 @@
       </article>
 
       <!-- Card 6: Máy Tính -->
-      <article class="app-card pixel-box app-card--magenta" onclick="SFX.navigate();location.href='apps/calculator/index.html'">
+      <article class="app-card pixel-box app-card--magenta" data-game="calculator" onclick="SFX.navigate();location.href='apps/calculator/index.html'">
         <div class="app-card__icon">🐬</div>
         <h3 class="app-card__title font-vi-h">Máy Tính</h3>
         <p class="app-card__desc font-vi">Công cụ tính toán nhanh với giao diện pixel. Hỗ trợ bấm và gõ phím.</p>
@@ -258,7 +259,7 @@
       </article>
 
       <!-- Card 7: MECE -->
-      <article class="app-card pixel-box app-card--green" onclick="SFX.navigate();location.href='apps/mece/index.html'">
+      <article class="app-card pixel-box app-card--green" data-game="mece" onclick="SFX.navigate();location.href='apps/mece/index.html'">
         <div class="app-card__icon">🦊</div>
         <h3 class="app-card__title font-vi-h">MECE</h3>
         <p class="app-card__desc font-vi">Phân loại đúng MECE hay không? Rèn tư duy phân tích logic!</p>
@@ -266,7 +267,7 @@
       </article>
 
       <!-- Card 8: Bảng Thông Báo -->
-      <article class="app-card pixel-box app-card--yellow" onclick="SFX.navigate();location.href='apps/noticeboard/index.html'">
+      <article class="app-card pixel-box app-card--yellow" data-game="noticeboard" onclick="SFX.navigate();location.href='apps/noticeboard/index.html'">
         <div class="app-card__icon">🐝</div>
         <h3 class="app-card__title font-vi-h">Bảng Thông Báo</h3>
         <p class="app-card__desc font-vi">Đọc thông báo và thông tin quan trọng. Copy toàn bộ hoặc bôi đen để sao chép.</p>

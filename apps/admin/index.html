@@ -305,6 +305,29 @@
     .mt-hint { font-size: 12px; color: var(--grey); margin-bottom: 8px; font-style: italic; }
     .mt-add-set-row { margin-bottom: 16px; }
 
+    /* ===== GAME TOGGLES ===== */
+    .game-toggle-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 13px 0; border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .game-toggle-row:last-child { border-bottom: none; }
+    .game-toggle-label { display: flex; align-items: center; gap: 10px; font-size: 16px; }
+    .toggle-switch { position: relative; width: 48px; height: 26px; flex-shrink: 0; }
+    .toggle-switch input { display: none; }
+    .toggle-slider {
+      position: absolute; inset: 0; cursor: pointer;
+      background: var(--grey); border: 2px solid var(--grey);
+      transition: all 0.15s steps(2);
+    }
+    .toggle-slider::after {
+      content: ''; position: absolute;
+      width: 14px; height: 14px; background: var(--bg-dark);
+      top: 4px; left: 4px; transition: transform 0.15s steps(2);
+    }
+    .toggle-switch input:checked + .toggle-slider { background: var(--green); border-color: var(--green); }
+    .toggle-switch input:checked + .toggle-slider::after { transform: translateX(22px); }
+    .toggle-off-label { font-size: 11px; color: var(--orange); margin-left: 8px; }
+
     /* ===== RESPONSIVE ===== */
     @media (max-width: 600px) {
       .admin-page { padding: 20px 12px 80px; }
@@ -381,6 +404,20 @@
 
     <!-- GAME SECTIONS -->
     <div class="game-sections" id="gameSections" style="display:none">
+
+      <!-- GAME SETTINGS -->
+      <div class="game-block">
+        <button class="game-header" onclick="toggleSection('settings')">
+          <span class="game-header-left"><span>⚙</span><span>Cài đặt Games</span></span>
+          <span class="game-arrow" id="arrow-settings">▶</span>
+        </button>
+        <div class="game-content" id="content-settings">
+          <p style="color:var(--grey);font-size:13px;margin-bottom:16px;line-height:1.6">
+            Bật/tắt hiển thị game trên trang chủ và menu điều hướng. Sau khi thay đổi, nhấn 💾 Lưu rồi tải xuống JSON để deploy.
+          </p>
+          <div id="game-toggles"></div>
+        </div>
+      </div>
 
       <!-- PROS-CONS -->
       <div class="game-block">
@@ -607,6 +644,7 @@
 
     function globalSave() {
       const content = {
+        enabledGames: enabledGames,
         fileNaming:  rawFileNaming,
         promptOrder: poData,
         prosCons:    pcData,
@@ -615,6 +653,7 @@
         mece:        meceData,
         noticeboard: nbData
       };
+      localStorage.setItem('enabledGames', JSON.stringify(content.enabledGames));
       localStorage.setItem('promptOrder',  JSON.stringify(content.promptOrder));
       localStorage.setItem('prosCons',     JSON.stringify(content.prosCons));
       localStorage.setItem('mindMap',      JSON.stringify(content.mindMap));
@@ -680,7 +719,7 @@
 
     function initAll() {
       fetch('../../data/admin_content.json').then(r => r.ok ? r.json() : null).then(d => { if (d) rawFileNaming = d.fileNaming || {}; }).catch(() => {});
-      initPC(); initMM(); initMT(); initPO(); initMECE(); initNB();
+      initSettings(); initPC(); initMM(); initMT(); initPO(); initMECE(); initNB();
     }
 
     // ================================================================
@@ -1522,6 +1561,64 @@
     document.addEventListener('click', () => gamesPopup.classList.remove('open'));
 
     // ================================================================
+    // ================================================================
+    //  GAME SETTINGS (enable/disable)
+    // ================================================================
+    const GAMES_LIST = [
+      { id: 'pros-cons',    label: 'Đoán Ưu / Nhược',  emoji: '🐺' },
+      { id: 'mind-map',     label: 'Sơ đồ Tư Duy',     emoji: '🐙' },
+      { id: 'matching',     label: 'Nối Từ',             emoji: '🐿️' },
+      { id: 'file-naming',  label: 'Đặt Tên File',       emoji: '🐟' },
+      { id: 'prompt-order', label: 'Sắp xếp Prompt',     emoji: '🐜' },
+      { id: 'calculator',   label: 'Máy Tính',            emoji: '🐬' },
+      { id: 'mece',         label: 'MECE',                emoji: '🦊' },
+      { id: 'noticeboard',  label: 'Bảng Thông Báo',     emoji: '🐝' },
+    ];
+
+    let enabledGames = {};
+
+    async function initSettings() {
+      try {
+        const saved = localStorage.getItem('enabledGames');
+        if (saved) enabledGames = JSON.parse(saved);
+      } catch(e) {}
+
+      if (!Object.keys(enabledGames).length) {
+        // Default all enabled, then try loading from JSON
+        GAMES_LIST.forEach(g => { enabledGames[g.id] = true; });
+        try {
+          const r = await fetch('../../data/admin_content.json');
+          if (r.ok) { const d = await r.json(); if (d.enabledGames) enabledGames = d.enabledGames; }
+        } catch(e) {}
+      }
+      renderSettings();
+    }
+
+    function renderSettings() {
+      const container = document.getElementById('game-toggles');
+      container.innerHTML = '';
+      GAMES_LIST.forEach(game => {
+        const isOn = enabledGames[game.id] !== false;
+        const row = document.createElement('div');
+        row.className = 'game-toggle-row';
+        row.innerHTML = `
+          <span class="game-toggle-label">
+            <span>${game.emoji}</span>
+            <span>${game.label}</span>
+            ${!isOn ? '<span class="toggle-off-label">ĐANG TẮT</span>' : ''}
+          </span>
+          <label class="toggle-switch">
+            <input type="checkbox" data-game-id="${game.id}" ${isOn ? 'checked' : ''}>
+            <span class="toggle-slider"></span>
+          </label>`;
+        row.querySelector('input').addEventListener('change', function() {
+          enabledGames[this.dataset.gameId] = this.checked;
+          renderSettings(); // re-render to update ĐANG TẮT label
+        });
+        container.appendChild(row);
+      });
+    }
+
     // ================================================================
     //  NOTICEBOARD
     // ================================================================

@@ -1,4 +1,14 @@
 {
+  "enabledGames": {
+    "pros-cons":    true,
+    "mind-map":     true,
+    "matching":     true,
+    "file-naming":  true,
+    "prompt-order": true,
+    "calculator":   true,
+    "mece":         true,
+    "noticeboard":  true
+  },
   "fileNaming": {
     "root": "VuTru",
     "th": [
