@@ -510,7 +510,7 @@
       <!-- NOTICEBOARD -->
       <div class="game-block">
         <button class="game-header" onclick="toggleSection('nb')">
-          <span class="game-header-left"><span>📋</span><span>Bảng Thông Báo</span></span>
+          <span class="game-header-left"><span>🐝</span><span>Bảng Thông Báo</span></span>
           <span class="game-arrow" id="arrow-nb">▶</span>
         </button>
         <div class="game-content" id="content-nb">
@@ -1560,7 +1560,7 @@
           </div>
           <div class="field-group">
             <label class="field-label">Nội dung (link URL sẽ tự động thành đường dẫn)</label>
-            <textarea class="field-textarea" data-nb="${idx}" data-f="body">${escHtml(item.body)}</textarea>
+            <textarea class="field-textarea" data-nb="${idx}" data-f="body" style="min-height:140px">${escHtml(item.body)}</textarea>
           </div>`;
         div.querySelector('.entry-remove').addEventListener('click', () => { nbData.splice(idx, 1); renderNB(); });
         div.querySelectorAll('[data-nb]').forEach(el => {
