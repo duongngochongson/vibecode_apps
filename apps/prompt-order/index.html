@@ -18,7 +18,7 @@
       display: flex; align-items: center;
       margin-bottom: 14px;
     }
-    .po-header__back { flex-shrink: 0; }
+    .po-header__back { align-self: flex-start; }
     .po-header__center {
       flex: 1; display: flex; flex-direction: column;
       align-items: center; gap: 10px;
@@ -274,8 +274,8 @@
   <div class="game-page">
 
     <div class="po-header">
-      <a href="../../index.html" class="page-header__back po-header__back">◀ HOME</a>
       <div class="po-header__center">
+        <a href="../../index.html" class="page-header__back po-header__back">◀ HOME</a>
         <div class="po-title-row">
           <h1 class="po-page-title" id="pageTitle">🐜 PROMPT ORDER</h1>
           <span class="po-score" id="scoreDisplay">SCORE: — / —</span>
