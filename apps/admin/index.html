@@ -507,6 +507,21 @@
         </div>
       </div>
 
+      <!-- NOTICEBOARD -->
+      <div class="game-block">
+        <button class="game-header" onclick="toggleSection('nb')">
+          <span class="game-header-left"><span>📋</span><span>Bảng Thông Báo</span></span>
+          <span class="game-arrow" id="arrow-nb">▶</span>
+        </button>
+        <div class="game-content" id="content-nb">
+          <div id="nb-list"></div>
+          <div class="add-btn-row">
+            <button class="add-btn" id="nb-add" title="Thêm thông báo">+</button>
+            <span>Thêm thông báo</span>
+          </div>
+        </div>
+      </div>
+
     </div><!-- /game-sections -->
 
     <!-- GLOBAL BAR BOTTOM -->
@@ -597,13 +612,15 @@
         prosCons:    pcData,
         mindMap:     [mmBuildSave()],
         matching:    buildMTData(),
-        mece:        meceData
+        mece:        meceData,
+        noticeboard: nbData
       };
-      localStorage.setItem('promptOrder', JSON.stringify(content.promptOrder));
-      localStorage.setItem('prosCons',    JSON.stringify(content.prosCons));
-      localStorage.setItem('mindMap',     JSON.stringify(content.mindMap));
-      localStorage.setItem('matching',    JSON.stringify(content.matching));
-      localStorage.setItem('mece',        JSON.stringify(content.mece));
+      localStorage.setItem('promptOrder',  JSON.stringify(content.promptOrder));
+      localStorage.setItem('prosCons',     JSON.stringify(content.prosCons));
+      localStorage.setItem('mindMap',      JSON.stringify(content.mindMap));
+      localStorage.setItem('matching',     JSON.stringify(content.matching));
+      localStorage.setItem('mece',         JSON.stringify(content.mece));
+      localStorage.setItem('noticeboard',  JSON.stringify(content.noticeboard));
       gLastJson = JSON.stringify(content, null, 2);
       enableGlobal();
       flashMsg('✓ Đã lưu!');
@@ -663,7 +680,7 @@
 
     function initAll() {
       fetch('../../data/admin_content.json').then(r => r.ok ? r.json() : null).then(d => { if (d) rawFileNaming = d.fileNaming || {}; }).catch(() => {});
-      initPC(); initMM(); initMT(); initPO(); initMECE();
+      initPC(); initMM(); initMT(); initPO(); initMECE(); initNB();
     }
 
     // ================================================================
@@ -1503,6 +1520,61 @@
       }
     });
     document.addEventListener('click', () => gamesPopup.classList.remove('open'));
+
+    // ================================================================
+    // ================================================================
+    //  NOTICEBOARD
+    // ================================================================
+    let nbData = [];
+
+    async function initNB() {
+      const saved = localStorage.getItem('noticeboard');
+      if (saved) { try { nbData = JSON.parse(saved); } catch(e) {} }
+      if (!nbData.length) {
+        try {
+          const r = await fetch('../../data/admin_content.json');
+          if (r.ok) { const d = await r.json(); nbData = d.noticeboard || []; }
+        } catch(e) {}
+      }
+      renderNB();
+      document.getElementById('nb-add').addEventListener('click', () => {
+        nbData.push({ id: Date.now(), title: '', body: '' });
+        renderNB();
+      });
+    }
+
+    function renderNB() {
+      const list = document.getElementById('nb-list');
+      list.innerHTML = '';
+      nbData.forEach((item, idx) => {
+        const div = document.createElement('div');
+        div.className = 'entry-card';
+        div.innerHTML = `
+          <div class="entry-head">
+            <span class="entry-num">THÔNG BÁO ${idx + 1}</span>
+            <button class="entry-remove" title="Xóa">✕</button>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Tiêu đề</label>
+            <input class="field-input" data-nb="${idx}" data-f="title" value="${escHtml(item.title)}" />
+          </div>
+          <div class="field-group">
+            <label class="field-label">Nội dung (link URL sẽ tự động thành đường dẫn)</label>
+            <textarea class="field-textarea" data-nb="${idx}" data-f="body">${escHtml(item.body)}</textarea>
+          </div>`;
+        div.querySelector('.entry-remove').addEventListener('click', () => { nbData.splice(idx, 1); renderNB(); });
+        div.querySelectorAll('[data-nb]').forEach(el => {
+          el.addEventListener('input', () => {
+            const i = +el.dataset.nb, f = el.dataset.f;
+            if (f === 'title') nbData[i].title = el.value;
+            if (f === 'body')  nbData[i].body  = el.value;
+            if (el.tagName === 'TEXTAREA') autoResize(el);
+          });
+        });
+        div.querySelectorAll('textarea').forEach(ta => autoResize(ta));
+        list.appendChild(div);
+      });
+    }
 
     // ================================================================
     //  BOOT

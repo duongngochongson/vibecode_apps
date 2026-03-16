@@ -1205,5 +1205,17 @@
       ],
       "answer": "mece"
     }
+  ],
+  "noticeboard": [
+    {
+      "id": 1,
+      "title": "Chào mừng đến PIXELVERSE",
+      "body": "Đây là bảng thông báo của PIXELVERSE. Các thông tin quan trọng, tài nguyên học tập và đường dẫn hữu ích sẽ được đăng tại đây.\n\nHãy bấm 📋 COPY để sao chép nội dung, hoặc bôi đen văn bản để copy thủ công."
+    },
+    {
+      "id": 2,
+      "title": "Tài nguyên về Prompt Engineering",
+      "body": "Một số nguồn tham khảo hữu ích:\n\n• Hướng dẫn chính thức của Anthropic: https://docs.anthropic.com\n• OpenAI Prompt Engineering Guide: https://platform.openai.com/docs/guides/prompt-engineering\n\nCác đường link trên sẽ mở trong tab mới khi bấm vào."
+    }
   ]
 }
