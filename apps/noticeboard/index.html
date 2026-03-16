@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📋 — PIXELVERSE</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' fill='%2300fff5'>◈</text></svg>">
+  <link rel="stylesheet" href="../../css/style.css" />
+  <script src="../../js/sfx.js"></script>
+  <style>
+    /* ===== PAGE LAYOUT ===== */
+    .game-page {
+      position: relative; z-index: 2;
+      max-width: 860px; margin: 0 auto;
+      padding: 32px 1.5rem 60px;
+    }
+
+    /* ===== HEADER ===== */
+    .nb-header {
+      display: flex; align-items: center;
+      margin-bottom: 28px; gap: 12px;
+    }
+    .nb-header__title {
+      flex: 1; text-align: center;
+      font-family: var(--font-vi-heading);
+      font-size: clamp(18px, 4vw, 28px);
+      font-weight: 900; color: var(--yellow);
+      margin: 0; letter-spacing: 1px;
+    }
+    .nb-copy-all-btn {
+      font-family: var(--font-pixel); font-size: 7px;
+      letter-spacing: 1px; padding: 7px 14px;
+      background: transparent; border: 2px solid var(--yellow);
+      color: var(--yellow); cursor: pointer;
+      transition: all 0.1s steps(1); white-space: nowrap; flex-shrink: 0;
+    }
+    .nb-copy-all-btn:hover { background: var(--yellow); color: var(--bg-dark); }
+
+    /* ===== NOTICE CARD ===== */
+    .notice-card {
+      background: var(--bg-card);
+      padding: 20px 24px;
+      margin-bottom: 16px;
+    }
+    .notice-card__head {
+      display: flex; align-items: flex-start;
+      justify-content: space-between; gap: 12px;
+      margin-bottom: 12px;
+    }
+    .notice-card__title {
+      font-size: clamp(15px, 3vw, 19px);
+      color: var(--yellow); margin: 0;
+      line-height: 1.4;
+    }
+    .notice-card__copy-btn {
+      font-family: var(--font-pixel); font-size: 6px;
+      letter-spacing: 1px; padding: 5px 10px;
+      background: transparent; border: 1px solid var(--grey);
+      color: var(--grey); cursor: pointer;
+      transition: all 0.1s steps(1); white-space: nowrap; flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .notice-card__copy-btn:hover { border-color: var(--yellow); color: var(--yellow); }
+    .notice-card__body {
+      font-family: var(--font-vi-body);
+      font-size: 14px; line-height: 1.85;
+      color: var(--white);
+      white-space: pre-wrap; user-select: text;
+      word-break: break-word;
+    }
+    .notice-card__body a {
+      color: var(--cyan); text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .notice-card__body a:hover { text-shadow: 0 0 8px var(--cyan); }
+
+    /* ===== EMPTY STATE ===== */
+    .nb-empty {
+      text-align: center; padding: 60px 20px;
+      color: var(--grey); font-family: var(--font-pixel);
+      font-size: 8px; letter-spacing: 2px; line-height: 2;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 480px) {
+      .game-page { padding: 20px 1rem 40px; }
+      .notice-card { padding: 14px 16px; }
+      .nb-header { margin-bottom: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar">
+    <a href="../../index.html" class="navbar__logo">◈ PIXELVERSE</a>
+    <ul class="navbar__links">
+      <li><a href="../../index.html" title="Home">◈</a></li>
+      <li>
+        <button class="navbar__grid-btn" id="gamesBtn" title="Games">
+          <span class="navbar__grid-btn__dots">
+            <span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span>
+            <span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span>
+            <span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span>
+          </span>
+        </button>
+      </li>
+      <li><a class="navbar__admin-btn" href="../admin/">⚙</a></li>
+    </ul>
+  </nav>
+
+  <!-- ===== GAMES POPUP ===== -->
+  <div class="navbar__games-popup" id="gamesPopup">
+    <div class="navbar__games-list">
+      <a href="../pros-cons/index.html"   class="navbar__game-item">🐺</a>
+      <a href="../mind-map/index.html"    class="navbar__game-item">🐙</a>
+      <a href="../matching/index.html"    class="navbar__game-item">🐿️</a>
+      <a href="../file-naming/index.html" class="navbar__game-item">🐟</a>
+      <a href="../prompt-order/index.html" class="navbar__game-item">🐜</a>
+      <a href="../calculator/index.html"  class="navbar__game-item">🐬</a>
+      <a href="../mece/index.html"        class="navbar__game-item">🦊</a>
+      <div class="navbar__game-item navbar__game-item--active">📋</div>
+    </div>
+  </div>
+
+  <!-- ===== MAIN ===== -->
+  <main class="game-page">
+
+    <div class="nb-header">
+      <a href="../../index.html" class="page-header__back" onclick="SFX.navigate()">◀ HOME</a>
+      <h1 class="nb-header__title">📋 BẢNG THÔNG BÁO</h1>
+      <button class="nb-copy-all-btn" id="copyAllBtn">📋 COPY ALL</button>
+    </div>
+
+    <div id="noticeList"></div>
+    <div class="nb-empty" id="nbEmpty" style="display:none">
+      CHƯA CÓ THÔNG BÁO NÀO.<br>THÊM TRONG ADMIN.
+    </div>
+
+  </main>
+
+  <script>
+    // ================================================================
+    //  GAMES POPUP
+    // ================================================================
+    const gamesBtn   = document.getElementById('gamesBtn');
+    const gamesPopup = document.getElementById('gamesPopup');
+    gamesBtn.addEventListener('click', e => {
+      e.stopPropagation(); SFX.click(); gamesPopup.classList.toggle('open');
+      if (gamesPopup.classList.contains('open')) {
+        const r = gamesBtn.getBoundingClientRect();
+        gamesPopup.style.left = (r.left + r.width / 2) + 'px';
+        gamesPopup.style.top  = (r.bottom + 6) + 'px';
+      }
+    });
+    document.addEventListener('click', () => gamesPopup.classList.remove('open'));
+
+    // ================================================================
+    //  DATA LOADING
+    // ================================================================
+    let notices = [];
+
+    async function loadData() {
+      const saved = localStorage.getItem('noticeboard');
+      if (saved) { try { notices = JSON.parse(saved); } catch(e) {} }
+      if (!notices.length) {
+        try {
+          const r = await fetch('../../data/admin_content.json');
+          if (r.ok) { const d = await r.json(); notices = d.noticeboard || []; }
+        } catch(e) {}
+      }
+    }
+
+    // ================================================================
+    //  URL AUTO-DETECTION
+    // ================================================================
+    function escHtml(s) {
+      return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function linkify(text) {
+      // Escape HTML first, then replace URLs with anchor tags
+      const escaped = escHtml(text);
+      return escaped.replace(/(https?:\/\/[^\s<>"]+)/g,
+        '<a href="$1" target="_blank" rel="noopener">$1</a>');
+    }
+
+    // ================================================================
+    //  COPY HELPER
+    // ================================================================
+    function copyText(text, btn, label) {
+      navigator.clipboard?.writeText(text).catch(() => {
+        const ta = document.createElement('textarea');
+        ta.value = text; document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta);
+      });
+      const orig = btn.textContent;
+      btn.textContent = '✓ COPIED';
+      setTimeout(() => btn.textContent = orig, 2000);
+    }
+
+    // ================================================================
+    //  RENDER
+    // ================================================================
+    function render() {
+      const list  = document.getElementById('noticeList');
+      const empty = document.getElementById('nbEmpty');
+
+      if (!notices.length) {
+        list.innerHTML = '';
+        empty.style.display = '';
+        return;
+      }
+      empty.style.display = 'none';
+      list.innerHTML = '';
+
+      notices.forEach(notice => {
+        const article = document.createElement('article');
+        article.className = 'notice-card pixel-box pixel-box--yellow';
+
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'notice-card__copy-btn';
+        copyBtn.textContent = '📋 COPY';
+        copyBtn.addEventListener('click', e => {
+          e.stopPropagation();
+          SFX.click?.();
+          copyText(notice.title + '\n\n' + notice.body, copyBtn);
+        });
+
+        const head = document.createElement('div');
+        head.className = 'notice-card__head';
+
+        const title = document.createElement('h2');
+        title.className = 'notice-card__title font-vi-h';
+        title.textContent = notice.title;
+
+        head.appendChild(title);
+        head.appendChild(copyBtn);
+
+        const body = document.createElement('div');
+        body.className = 'notice-card__body';
+        body.innerHTML = linkify(notice.body);
+
+        article.appendChild(head);
+        article.appendChild(body);
+        list.appendChild(article);
+      });
+    }
+
+    // ================================================================
+    //  COPY ALL
+    // ================================================================
+    document.getElementById('copyAllBtn').addEventListener('click', function() {
+      if (!notices.length) return;
+      SFX.click?.();
+      const text = notices.map(n => n.title + '\n\n' + n.body).join('\n\n---\n\n');
+      copyText(text, this);
+    });
+
+    // ================================================================
+    //  INIT
+    // ================================================================
+    async function init() {
+      await loadData();
+      render();
+    }
+    init();
+  </script>
+
+</body>
+</html>
