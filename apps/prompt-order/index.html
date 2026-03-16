@@ -12,11 +12,19 @@
     .game-page {
       position: relative; z-index: 2;
       max-width: 1200px; margin: 0 auto;
-      padding: 28px 1.5rem 80px;
+      padding: 28px 1.5rem 40px;
+    }
+    .po-header {
+      display: flex; align-items: center;
+      margin-bottom: 14px;
+    }
+    .po-header__back { flex-shrink: 0; }
+    .po-header__center {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; gap: 10px;
     }
     .po-title-row {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 16px;
+      display: flex; align-items: center; gap: 16px;
     }
     .po-page-title {
       font-family: var(--font-pixel);
@@ -161,7 +169,7 @@
     /* ===== ACTION BUTTONS (in bottom bar) ===== */
     .action-btn {
       font-family: var(--font-pixel); font-size: 9px;
-      padding: 14px 22px; min-height: 44px;
+      padding: 8px 18px;
       border: 2px solid; background: transparent;
       cursor: pointer; letter-spacing: 1px;
       transition: all 0.1s steps(1);
@@ -186,15 +194,10 @@
       font-family: var(--font-vi-body); font-size: 15px; color: var(--white);
     }
 
-    /* ===== BOTTOM NAV BAR ===== */
+    /* ===== TOP NAV BAR ===== */
     .fn-answer-bar {
-      position: fixed; bottom: 0; left: 0; right: 0;
-      border-top: 2px solid var(--cyan);
-      box-shadow: 0 -4px 16px rgba(0,255,245,0.1);
-      padding: 10px 16px 12px;
-      background: var(--bg-mid);
       display: flex; flex-direction: column; align-items: center;
-      gap: 8px; z-index: 50;
+      gap: 6px; margin-bottom: 14px;
     }
     .fn-q-nav { display: flex; align-items: center; gap: 10px; }
     .fn-nav-btn {
@@ -224,15 +227,12 @@
       .type-row__zone .drag-card { width: 100%; }
     }
     @media (max-width: 480px) {
-      .game-page { padding: 20px 1rem 80px; }
-      .po-title-row { flex-direction: column; align-items: flex-start; gap: 4px; margin-bottom: 12px; }
+      .game-page { padding: 20px 1rem 30px; }
       .type-row { padding: 6px 8px; gap: 6px; }
-      .type-row__label { min-width: 70px; font-size: 6px; padding: 4px 6px; }
+      .type-row__label { min-width: 70px; font-size: 10px; padding: 4px 6px; }
       .drag-card { font-size: 12px; }
-      .fn-answer-bar { padding: 8px 10px; gap: 6px; }
     }
     @media (max-width: 360px) {
-      .fn-answer-bar { flex-wrap: nowrap; overflow-x: auto; }
       .type-row__label { min-width: 60px; }
     }
   </style>
@@ -273,12 +273,25 @@
   <!-- ===== MAIN ===== -->
   <div class="game-page">
 
-    <div style="text-align:center; margin-bottom:12px;">
-      <a href="../../index.html" class="page-header__back">◀ HOME</a>
-    </div>
-    <div class="po-title-row">
-      <h1 class="po-page-title" id="pageTitle">🐜 PROMPT ORDER</h1>
-      <span class="po-score" id="scoreDisplay">SCORE: — / —</span>
+    <div class="po-header">
+      <a href="../../index.html" class="page-header__back po-header__back">◀ HOME</a>
+      <div class="po-header__center">
+        <div class="po-title-row">
+          <h1 class="po-page-title" id="pageTitle">🐜 PROMPT ORDER</h1>
+          <span class="po-score" id="scoreDisplay">SCORE: — / —</span>
+        </div>
+
+        <!-- NAV: arrows + check + dots -->
+        <div class="fn-answer-bar" id="fnAnswerBar">
+          <div class="fn-q-nav">
+            <button class="fn-nav-btn" id="fnPrevQ">◀</button>
+            <button class="action-btn action-btn--check"    id="checkBtn">✓ CHECK</button>
+            <button class="action-btn action-btn--continue" id="continueBtn" style="display:none">▶ CONTINUE</button>
+            <button class="fn-nav-btn" id="fnNextQ">▶</button>
+          </div>
+          <div class="fn-dots" id="fnDots"></div>
+        </div>
+      </div>
     </div>
 
     <div class="po-q-header">
@@ -312,17 +325,6 @@
     <!-- Empty state -->
     <div id="poEmpty" class="po-empty" style="display:none">Chưa có câu hỏi nào. Thêm trong Admin.</div>
 
-  </div>
-
-  <!-- ===== BOTTOM NAV BAR ===== -->
-  <div class="fn-answer-bar" id="fnAnswerBar">
-    <div class="fn-q-nav">
-      <button class="fn-nav-btn" id="fnPrevQ">◀</button>
-      <button class="action-btn action-btn--check"    id="checkBtn">✓ CHECK</button>
-      <button class="action-btn action-btn--continue" id="continueBtn" style="display:none">▶ CONTINUE</button>
-      <button class="fn-nav-btn" id="fnNextQ">▶</button>
-    </div>
-    <div class="fn-dots" id="fnDots"></div>
   </div>
 
   <script>
