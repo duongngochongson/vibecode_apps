@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📋 — PIXELVERSE</title>
+  <title>🐝 — PIXELVERSE</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' fill='%2300fff5'>◈</text></svg>">
   <link rel="stylesheet" href="../../css/style.css" />
   <script src="../../js/sfx.js"></script>
@@ -16,25 +16,12 @@
     }
 
     /* ===== HEADER ===== */
-    .nb-header {
-      display: flex; align-items: center;
-      margin-bottom: 28px; gap: 12px;
-    }
     .nb-header__title {
-      flex: 1; text-align: center;
       font-family: var(--font-vi-heading);
       font-size: clamp(18px, 4vw, 28px);
       font-weight: 900; color: var(--yellow);
       margin: 0; letter-spacing: 1px;
     }
-    .nb-copy-all-btn {
-      font-family: var(--font-pixel); font-size: 7px;
-      letter-spacing: 1px; padding: 7px 14px;
-      background: transparent; border: 2px solid var(--yellow);
-      color: var(--yellow); cursor: pointer;
-      transition: all 0.1s steps(1); white-space: nowrap; flex-shrink: 0;
-    }
-    .nb-copy-all-btn:hover { background: var(--yellow); color: var(--bg-dark); }
 
     /* ===== NOTICE CARD ===== */
     .notice-card {
@@ -53,14 +40,14 @@
       line-height: 1.4;
     }
     .notice-card__copy-btn {
-      font-family: var(--font-pixel); font-size: 6px;
-      letter-spacing: 1px; padding: 5px 10px;
-      background: transparent; border: 1px solid var(--grey);
-      color: var(--grey); cursor: pointer;
+      font-family: var(--font-pixel); font-size: 8px;
+      letter-spacing: 1px; padding: 8px 16px;
+      background: transparent; border: 2px solid var(--yellow);
+      color: var(--yellow); cursor: pointer;
       transition: all 0.1s steps(1); white-space: nowrap; flex-shrink: 0;
       margin-top: 2px;
     }
-    .notice-card__copy-btn:hover { border-color: var(--yellow); color: var(--yellow); }
+    .notice-card__copy-btn:hover { background: var(--yellow); color: var(--bg-dark); }
     .notice-card__body {
       font-family: var(--font-vi-body);
       font-size: 14px; line-height: 1.85;
@@ -85,7 +72,7 @@
     @media (max-width: 480px) {
       .game-page { padding: 20px 1rem 40px; }
       .notice-card { padding: 14px 16px; }
-      .nb-header { margin-bottom: 20px; }
+      .page-header { margin-bottom: 20px; }
     }
   </style>
 </head>
@@ -119,17 +106,16 @@
       <a href="../prompt-order/index.html" class="navbar__game-item">🐜</a>
       <a href="../calculator/index.html"  class="navbar__game-item">🐬</a>
       <a href="../mece/index.html"        class="navbar__game-item">🦊</a>
-      <div class="navbar__game-item navbar__game-item--active">📋</div>
+      <div class="navbar__game-item navbar__game-item--active">🐝</div>
     </div>
   </div>
 
   <!-- ===== MAIN ===== -->
   <main class="game-page">
 
-    <div class="nb-header">
+    <div class="page-header">
       <a href="../../index.html" class="page-header__back" onclick="SFX.navigate()">◀ HOME</a>
-      <h1 class="nb-header__title">📋 BẢNG THÔNG BÁO</h1>
-      <button class="nb-copy-all-btn" id="copyAllBtn">📋 COPY ALL</button>
+      <h1 class="nb-header__title">🐝 BẢNG THÔNG BÁO</h1>
     </div>
 
     <div id="noticeList"></div>
@@ -246,16 +232,6 @@
         list.appendChild(article);
       });
     }
-
-    // ================================================================
-    //  COPY ALL
-    // ================================================================
-    document.getElementById('copyAllBtn').addEventListener('click', function() {
-      if (!notices.length) return;
-      SFX.click?.();
-      const text = notices.map(n => n.title + '\n\n' + n.body).join('\n\n---\n\n');
-      copyText(text, this);
-    });
 
     // ================================================================
     //  INIT
