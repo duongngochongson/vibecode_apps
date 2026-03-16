@@ -11,12 +11,12 @@
     /* ===== PAGE LAYOUT ===== */
     .game-page {
       position: relative; z-index: 2;
-      max-width: 800px; margin: 0 auto;
-      padding: 28px 1.5rem 120px;
+      max-width: 1200px; margin: 0 auto;
+      padding: 28px 1.5rem 80px;
     }
     .po-title-row {
       display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
     .po-page-title {
       font-family: var(--font-pixel);
@@ -25,82 +25,172 @@
       letter-spacing: 2px;
     }
     .po-score {
+      font-family: var(--font-pixel);
       font-size: 9px; letter-spacing: 1px;
-      color: var(--green); text-shadow: 0 0 6px var(--green);
+      color: var(--green);
     }
-
-    /* ===== QUESTION AREA ===== */
     .po-q-header {
+      font-family: var(--font-pixel);
       font-size: 9px; letter-spacing: 2px;
-      color: var(--grey); margin-bottom: 14px;
+      color: var(--grey); margin-bottom: 20px;
     }
-    .po-q-number {
-      color: var(--yellow); text-shadow: 0 0 6px var(--yellow);
-    }
-    .po-hint {
-      font-size: 9px; color: var(--grey); letter-spacing: 0.5px;
-      margin-bottom: 16px; font-style: italic;
+    .po-q-number { color: var(--yellow); }
+
+    /* ===== 2-COLUMN LAYOUT ===== */
+    .game-area {
+      display: grid;
+      grid-template-columns: 1fr 260px;
+      gap: 20px;
+      align-items: start;
     }
 
-    /* ===== CARDS ===== */
-    .po-cards {
-      display: flex; flex-direction: column; gap: 8px;
-      min-height: 60px;
+    /* ===== TYPE ROWS (left column) ===== */
+    .types-column {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
-    .po-card {
-      display: flex; align-items: flex-start; gap: 10px;
-      padding: 12px 14px;
-      border: 2px solid rgba(255,255,255,0.1);
-      background: var(--bg-card2);
-      cursor: grab; transition: border-color 0.15s, opacity 0.15s;
-      user-select: none;
+    .type-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: var(--bg-card);
+      border: 2px solid rgba(255,255,255,0.06);
+      padding: 8px 10px;
     }
-    .po-card:hover { border-color: rgba(255,255,255,0.25); }
-    .po-card.dragging { opacity: 0.4; cursor: grabbing; }
-    .po-card.drag-over { border-color: var(--yellow); box-shadow: 0 0 8px rgba(255,230,0,0.3); }
-    .po-card.po-correct { border-color: var(--green); box-shadow: 0 0 8px rgba(57,255,20,0.25); }
-    .po-card.po-wrong   { border-color: var(--magenta); box-shadow: 0 0 8px rgba(255,0,204,0.25); }
-    .po-handle {
-      font-size: 14px; color: var(--grey);
-      flex-shrink: 0; margin-top: 1px; cursor: grab;
-      letter-spacing: -2px;
+    .type-row__label {
+      font-family: var(--font-pixel);
+      font-size: 7px; letter-spacing: 1px;
+      padding: 5px 8px; border: 1px solid;
+      flex-shrink: 0; min-width: 82px; text-align: center;
+      margin-top: 2px; white-space: nowrap;
     }
-    .po-badge {
-      font-size: 8px; letter-spacing: 1.5px;
-      padding: 2px 7px; border: 1px solid;
-      flex-shrink: 0; margin-top: 2px;
-      white-space: nowrap;
-    }
-    .po-text {
-      font-size: 13px; color: var(--white); line-height: 1.55;
+    .type-row--role .type-row__label      { color: var(--cyan);    border-color: var(--cyan); }
+    .type-row--context .type-row__label   { color: var(--magenta); border-color: var(--magenta); }
+    .type-row--task .type-row__label      { color: var(--green);   border-color: var(--green); }
+    .type-row--output .type-row__label    { color: var(--yellow);  border-color: var(--yellow); }
+    .type-row--style .type-row__label     { color: #ff9966;        border-color: #ff9966; }
+    .type-row--reference .type-row__label { color: #aa88ff;        border-color: #aa88ff; }
+    .type-row--other .type-row__label     { color: var(--grey);    border-color: var(--grey); }
+
+    .type-row__zone {
       flex: 1;
+      min-height: 44px;
+      border: 2px dashed rgba(255,255,255,0.12);
+      padding: 6px;
+      display: flex; flex-wrap: wrap; gap: 6px;
+      align-content: flex-start;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .type-row__zone.drag-over {
+      border-color: var(--yellow);
+      box-shadow: 0 0 8px rgba(255,230,0,0.25);
+      background: rgba(255,230,0,0.03);
+    }
+    .type-row__zone.accepting {
+      border-color: rgba(255,230,0,0.5); border-style: solid; cursor: pointer;
+    }
+    .type-row__zone.accepting:hover { border-color: var(--yellow); }
+    .type-row__zone-empty {
+      font-family: var(--font-vi-body);
+      font-size: 11px; color: rgba(255,255,255,0.15);
+      padding: 8px 4px; pointer-events: none; user-select: none; width: 100%;
     }
 
-    /* Type badge colors */
-    .po-badge--role      { color: var(--cyan);    border-color: var(--cyan); }
-    .po-badge--context   { color: var(--magenta); border-color: var(--magenta); }
-    .po-badge--task      { color: var(--green);   border-color: var(--green); }
-    .po-badge--output    { color: var(--yellow);  border-color: var(--yellow); }
-    .po-badge--style     { color: #ff9966;        border-color: #ff9966; }
-    .po-badge--reference { color: #aa88ff;        border-color: #aa88ff; }
-    .po-badge--other     { color: var(--grey);    border-color: var(--grey); }
-
-    /* ===== CORRECT ORDER REFERENCE (shown after check) ===== */
-    .po-correct-ref {
-      margin-top: 16px; padding: 12px 14px;
-      border: 1px solid rgba(57,255,20,0.3);
-      background: rgba(57,255,20,0.04);
-      display: none;
+    /* ===== DRAGGABLE CARDS ===== */
+    .drag-card {
+      background: var(--bg-card2);
+      border: 2px solid var(--grey);
+      padding: 8px 12px;
+      font-family: var(--font-vi-body);
+      font-size: 13px; color: var(--white); line-height: 1.5;
+      cursor: grab;
+      transition: border-color 0.15s, box-shadow 0.15s, opacity 0.15s;
+      width: 100%; position: relative; user-select: none;
+      display: flex; align-items: flex-start; gap: 6px;
     }
-    .po-correct-ref.visible { display: block; }
-    .po-correct-ref__label {
-      font-size: 8px; letter-spacing: 2px; color: var(--green); margin-bottom: 8px;
-    }
-    .po-correct-ref__list {
-      font-size: 9px; color: var(--grey); letter-spacing: 0.5px; line-height: 1.8;
+    .drag-card:active { cursor: grabbing; opacity: 0.7; }
+    .drag-card:hover  { border-color: var(--white); box-shadow: 0 0 6px rgba(232,232,255,0.15); }
+    .drag-card.dragging { opacity: 0.35; }
+    .drag-card.selected {
+      border-color: var(--yellow);
+      box-shadow: 0 0 10px rgba(255,230,0,0.4);
+      background: rgba(255,230,0,0.03);
     }
 
-    /* ===== BOTTOM ANSWER BAR ===== */
+    /* Cards inside drop zones are more compact, auto-width */
+    .type-row__zone .drag-card {
+      font-size: 12px; padding: 6px 10px;
+      width: auto; flex-grow: 1; flex-shrink: 0;
+      max-width: 100%;
+    }
+
+    /* Post-check styling */
+    .drag-card.po-correct { border-color: var(--green);   box-shadow: 0 0 8px rgba(57,255,20,0.3); }
+    .drag-card.po-wrong   { border-color: var(--magenta); box-shadow: 0 0 8px rgba(255,0,204,0.3); }
+
+    /* Revealed type badge (shown after check) */
+    .drag-card__badge {
+      font-family: var(--font-pixel);
+      font-size: 6px; letter-spacing: 0.5px;
+      padding: 2px 5px; border: 1px solid;
+      flex-shrink: 0; white-space: nowrap;
+      margin-top: 1px;
+    }
+
+    /* ===== CARD POOL (right column) ===== */
+    .card-pool-section { position: sticky; top: 80px; }
+    .card-pool-header {
+      font-family: var(--font-pixel);
+      font-size: 9px; font-weight: 600; color: var(--yellow);
+      letter-spacing: 2px; margin-bottom: 10px;
+    }
+    .card-pool {
+      background: var(--bg-card);
+      border: 2px solid var(--grey);
+      padding: 10px; min-height: 100px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .card-pool.drag-over { border-color: var(--yellow); box-shadow: 0 0 8px rgba(255,230,0,0.2); }
+    .card-pool__empty {
+      font-family: var(--font-vi-body);
+      font-size: 11px; color: rgba(232,232,255,0.25);
+      text-align: center; padding: 16px 0;
+    }
+
+    /* ===== ACTION BAR ===== */
+    .action-bar {
+      display: flex; justify-content: center;
+      gap: 14px; flex-wrap: wrap; margin-top: 24px;
+    }
+    .action-btn {
+      font-family: var(--font-pixel); font-size: 9px;
+      padding: 14px 22px; min-height: 44px;
+      border: 2px solid; background: transparent;
+      cursor: pointer; letter-spacing: 1px;
+      transition: all 0.1s steps(1);
+    }
+    .action-btn--check      { color: var(--green);   border-color: var(--green); }
+    .action-btn--check:hover { background: var(--green); color: var(--bg-dark); }
+    .action-btn--continue   { color: var(--cyan);    border-color: var(--cyan); }
+    .action-btn--continue:hover { background: var(--cyan); color: var(--bg-dark); }
+
+    /* ===== RESULT BANNER ===== */
+    .result-banner {
+      display: none; text-align: center; margin-top: 24px;
+      padding: 20px 24px;
+      border: 3px solid var(--green);
+      box-shadow: 0 0 24px rgba(57,255,20,0.25);
+    }
+    .result-banner__score {
+      font-family: var(--font-pixel);
+      font-size: 10px; color: var(--green); letter-spacing: 2px; margin-bottom: 10px;
+    }
+    .result-banner__msg {
+      font-family: var(--font-vi-body); font-size: 15px; color: var(--white);
+    }
+
+    /* ===== BOTTOM NAV BAR ===== */
     .fn-answer-bar {
       position: fixed; bottom: 0; left: 0; right: 0;
       border-top: 2px solid var(--cyan);
@@ -108,8 +198,7 @@
       padding: 10px 16px;
       background: var(--bg-mid);
       display: flex; align-items: center;
-      gap: 12px; flex-wrap: wrap;
-      z-index: 50;
+      gap: 12px; flex-wrap: wrap; z-index: 50;
     }
     .fn-q-nav { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
     .fn-nav-btn {
@@ -119,14 +208,11 @@
     }
     .fn-nav-btn:hover:not(:disabled) { border-color: var(--cyan); color: var(--cyan); }
     .fn-nav-btn:disabled { opacity: 0.3; cursor: default; }
-    .fn-q-label { font-size: 9px; color: var(--yellow); letter-spacing: 1px; min-width: 50px; text-align: center; }
-    .fn-check-btn {
-      font-family: var(--font-pixel); font-size: 8px; letter-spacing: 2px;
-      padding: 8px 18px; border: none; cursor: pointer;
-      background: var(--green); color: var(--bg-dark);
-      box-shadow: 0 0 10px var(--green); transition: all 0.15s;
+    .fn-q-label {
+      font-family: var(--font-pixel);
+      font-size: 9px; color: var(--yellow); letter-spacing: 1px;
+      min-width: 50px; text-align: center;
     }
-    .fn-check-btn:hover { box-shadow: 0 0 18px var(--green); }
     .fn-dots { display: flex; gap: 5px; flex-shrink: 0; }
     .fn-dot {
       width: 10px; height: 10px; border-radius: 50%;
@@ -134,46 +220,40 @@
       transition: background 0.15s, box-shadow 0.15s;
     }
     .fn-dot.active   { background: var(--yellow); box-shadow: 0 0 5px var(--yellow); }
-    .fn-dot.answered { background: var(--green); box-shadow: 0 0 4px var(--green); }
+    .fn-dot.answered { background: var(--green);  box-shadow: 0 0 4px var(--green); }
     .fn-dot.wrong-q  { background: var(--magenta); }
-
-    /* ===== RESULT BANNER ===== */
-    .result-banner {
-      display: none; position: fixed; top: 50%; left: 50%;
-      transform: translate(-50%, -50%); z-index: 100;
-      text-align: center; padding: 32px 48px;
-      border: 2px solid var(--green); background: var(--bg-dark);
-      box-shadow: 0 0 40px rgba(57,255,20,0.2);
-    }
-    .result-banner__score { font-size: 14px; color: var(--green); text-shadow: 0 0 10px var(--green); margin-bottom: 8px; }
-    .result-banner__msg   { font-size: 10px; color: var(--white); letter-spacing: 1px; margin-bottom: 16px; }
-    .result-banner__btn   { font-family: var(--font-pixel); font-size: 8px; letter-spacing: 2px; padding: 8px 20px; border: none; cursor: pointer; background: var(--cyan); color: var(--bg-dark); box-shadow: 0 0 10px var(--cyan); }
 
     /* ===== EMPTY STATE ===== */
     .po-empty { text-align: center; padding: 60px 20px; color: var(--grey); font-size: 11px; letter-spacing: 1px; }
 
     /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .game-area { grid-template-columns: 1fr; }
+      .card-pool-section { order: -1; position: static; }
+      .type-row__zone .drag-card { width: 100%; }
+    }
     @media (max-width: 480px) {
-      .game-page { padding: 20px 1rem 100px; }
-      .po-title-row { flex-direction: column; align-items: flex-start; gap: 4px; margin-bottom: 14px; }
-      .po-card { padding: 10px 10px; }
-      .po-text { font-size: 11px; }
-      .po-badge { font-size: 7px; padding: 2px 5px; }
+      .game-page { padding: 20px 1rem 80px; }
+      .po-title-row { flex-direction: column; align-items: flex-start; gap: 4px; margin-bottom: 12px; }
+      .type-row { padding: 6px 8px; gap: 6px; }
+      .type-row__label { min-width: 70px; font-size: 6px; padding: 4px 6px; }
+      .drag-card { font-size: 12px; }
       .fn-answer-bar { padding: 8px 10px; gap: 8px; }
-      .result-banner { padding: 24px 20px; width: 88vw; box-sizing: border-box; }
+      .action-bar { gap: 8px; }
     }
     @media (max-width: 360px) {
       .fn-answer-bar { flex-wrap: nowrap; overflow-x: auto; }
-      .po-page-title { font-size: 13px; }
+      .type-row__label { min-width: 60px; }
     }
   </style>
 </head>
 <body>
-  <!-- NAVBAR -->
+
+  <!-- ===== NAVBAR ===== -->
   <nav class="navbar">
     <a href="../../index.html" class="navbar__logo">◈ PIXELVERSE</a>
     <ul class="navbar__links">
-      <li><a href="../../index.html" title="Home">🏠</a></li>
+      <li><a href="../../index.html" title="Home">◈</a></li>
       <li>
         <button class="navbar__grid-btn" id="gamesBtn" title="Games">
           <span class="navbar__grid-btn__dots">
@@ -187,6 +267,7 @@
     </ul>
   </nav>
 
+  <!-- ===== GAMES POPUP ===== -->
   <div class="navbar__games-popup" id="gamesPopup">
     <div class="navbar__games-list">
       <a href="../pros-cons/index.html" class="navbar__game-item">🐺</a>
@@ -199,61 +280,93 @@
     </div>
   </div>
 
-  <!-- MAIN -->
+  <!-- ===== MAIN ===== -->
   <div class="game-page">
+
     <div class="po-title-row">
       <h1 class="po-page-title" id="pageTitle">🐜 PROMPT ORDER</h1>
       <span class="po-score" id="scoreDisplay">SCORE: — / —</span>
     </div>
+
     <div class="po-q-header">
-      CÂU <span class="po-q-number" id="qNumber">1</span> — KÉO THẢ ĐỂ SẮP XẾP ĐÚNG THỨ TỰ
+      CÂU <span class="po-q-number" id="qNumber">1</span> — KÉO THẺ VÀO ĐÚNG LOẠI
     </div>
-    <p class="po-hint">Thứ tự chuẩn: Vai trò → Bối cảnh → Nhiệm vụ → Đầu ra → Phong cách → Tham khảo → Khác</p>
-    <div class="po-cards" id="poCards"></div>
-    <div class="po-correct-ref" id="poCorrectRef">
-      <div class="po-correct-ref__label">✓ THỨ TỰ ĐÚNG</div>
-      <div class="po-correct-ref__list" id="poCorrectList"></div>
+
+    <div class="game-area">
+
+      <!-- LEFT: 7 type classification rows -->
+      <div class="types-column" id="typesColumn"></div>
+
+      <!-- RIGHT: card pool -->
+      <div class="card-pool-section">
+        <div class="card-pool-header">▸ THẺ CÒN LẠI</div>
+        <div class="card-pool" id="cardPool"
+             ondragover="handleDragOverPool(event)"
+             ondragleave="handleDragLeavePool(event)"
+             ondrop="handleDropToPool(event)">
+          <div class="card-pool__empty" id="poolEmpty">Tất cả thẻ đã được phân loại!</div>
+        </div>
+      </div>
+
     </div>
+
+    <!-- Action bar -->
+    <div class="action-bar">
+      <button class="action-btn action-btn--check" id="checkBtn">✓ CHECK</button>
+      <button class="action-btn action-btn--continue" id="continueBtn" style="display:none">▶ CONTINUE</button>
+    </div>
+
+    <!-- Result banner -->
+    <div class="result-banner" id="resultBanner">
+      <div class="result-banner__score" id="resultScore"></div>
+      <div class="result-banner__msg"   id="resultMsg"></div>
+    </div>
+
+    <!-- Empty state -->
     <div id="poEmpty" class="po-empty" style="display:none">Chưa có câu hỏi nào. Thêm trong Admin.</div>
+
   </div>
 
-  <!-- BOTTOM BAR -->
+  <!-- ===== BOTTOM NAV BAR ===== -->
   <div class="fn-answer-bar" id="fnAnswerBar">
     <div class="fn-q-nav">
       <button class="fn-nav-btn" id="fnPrevQ">◀</button>
-      <span class="fn-q-label" id="fnQLabel">Q1/5</span>
+      <span class="fn-q-label" id="fnQLabel">Q1/1</span>
       <button class="fn-nav-btn" id="fnNextQ">▶</button>
     </div>
     <div style="flex:1"></div>
-    <button class="fn-check-btn" id="fnCheckBtn">✓ CHECK</button>
     <div class="fn-dots" id="fnDots"></div>
-  </div>
-
-  <!-- RESULT BANNER -->
-  <div class="result-banner" id="resultBanner">
-    <div class="result-banner__score" id="resultScore"></div>
-    <div class="result-banner__msg" id="resultMsg"></div>
-    <button class="result-banner__btn" id="resultContinueBtn">▶ CONTINUE</button>
   </div>
 
   <script>
     // ================================================================
     //  CONSTANTS
     // ================================================================
-    const GAME_EMOJI = '🐜';
     const TYPE_ORDER  = ['role','context','task','output','style','reference','other'];
-    const TYPE_LABELS = { role:'Vai trò', context:'Bối cảnh', task:'Nhiệm vụ', output:'Đầu ra', style:'Phong cách', reference:'Tham khảo', other:'Khác' };
+    const TYPE_LABELS = {
+      role:'Vai trò', context:'Bối cảnh', task:'Nhiệm vụ',
+      output:'Đầu ra', style:'Phong cách', reference:'Tham khảo', other:'Khác'
+    };
+    const TYPE_COLORS = {
+      role:'var(--cyan)', context:'var(--magenta)', task:'var(--green)',
+      output:'var(--yellow)', style:'#ff9966', reference:'#aa88ff', other:'var(--grey)'
+    };
 
     // ================================================================
     //  STATE
     // ================================================================
-    let questions    = [];
-    let draftOrders  = {};   // qIdx → [part obj, ...]
-    let correctOrders = {};  // qIdx → [part obj, ...]
-    let checkResults = {};   // qIdx → { isCorrect, partResults:[bool,...] }
-    let currentQ     = 0;
-    let totalQ       = 0;
-    let dragSrcIdx   = null;
+    let questions      = [];
+    let allPlacements  = {};   // qIdx → { role:[partIdx,...], context:[...], ... }
+    let shuffledOrders = {};   // qIdx → [partIdx,...] stable shuffled
+    let checkResults   = {};   // qIdx → { correct, total, results:{partIdx:bool} }
+    let currentQ       = 0;
+    let totalQ         = 0;
+    let checked        = false;
+
+    // Drag state
+    let dragPartIdx = null;
+    // Click-to-place state
+    let selectedPartIdx = null;
 
     // ================================================================
     //  DATA LOAD
@@ -269,13 +382,43 @@
       }
     }
 
+    function escHtml(s) {
+      return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    // ================================================================
+    //  PLACEMENTS HELPERS
+    // ================================================================
+    function initPlacements() {
+      const p = {};
+      TYPE_ORDER.forEach(t => p[t] = []);
+      return p;
+    }
+
+    function getPlacedSet(qIdx) {
+      const s = new Set();
+      const p = allPlacements[qIdx];
+      if (p) TYPE_ORDER.forEach(t => (p[t] || []).forEach(i => s.add(i)));
+      return s;
+    }
+
+    // Remove partIdx from all placement arrays for qIdx.
+    // Returns the typeKey it was in, or null if it was in the pool.
+    function removeFromPlacements(qIdx, partIdx) {
+      const p = allPlacements[qIdx];
+      if (!p) return null;
+      for (const t of TYPE_ORDER) {
+        const arr = p[t];
+        const i = arr.indexOf(partIdx);
+        if (i !== -1) { arr.splice(i, 1); return t; }
+      }
+      return null;
+    }
+
     // ================================================================
     //  INIT
     // ================================================================
     async function initGame() {
-      document.title = `${GAME_EMOJI} — PIXELVERSE`;
-      document.getElementById('pageTitle').textContent = `${GAME_EMOJI} PROMPT ORDER`;
-
       await loadData();
 
       if (!questions.length) {
@@ -285,36 +428,32 @@
       }
 
       totalQ = questions.length;
-      questions.forEach((q, i) => {
-        correctOrders[i] = [...q.parts].sort((a, b) =>
-          TYPE_ORDER.indexOf(a.type) - TYPE_ORDER.indexOf(b.type));
 
-        // Shuffle until not already in correct order (best effort)
-        let shuffled = [...q.parts].sort(() => Math.random() - 0.5);
-        if (q.parts.length > 1) {
-          let tries = 0;
-          while (tries++ < 20 && shuffled.every((p, j) => p.type === correctOrders[i][j].type)) {
-            shuffled = [...q.parts].sort(() => Math.random() - 0.5);
-          }
+      questions.forEach((q, i) => {
+        allPlacements[i] = initPlacements();
+        // Stable shuffle of part indices
+        const indices = q.parts.map((_, j) => j);
+        for (let k = indices.length - 1; k > 0; k--) {
+          const j = Math.floor(Math.random() * (k + 1));
+          [indices[k], indices[j]] = [indices[j], indices[k]];
         }
-        draftOrders[i] = shuffled;
+        shuffledOrders[i] = indices;
       });
 
       buildDots();
       goToQ(0);
 
-      document.getElementById('fnCheckBtn').addEventListener('click', doCheck);
+      document.getElementById('checkBtn').addEventListener('click', doCheck);
+      document.getElementById('continueBtn').addEventListener('click', doContinue);
       document.getElementById('fnPrevQ').addEventListener('click', () => {
         if (currentQ > 0) { SFX.navigate(); goToQ(currentQ - 1); }
       });
       document.getElementById('fnNextQ').addEventListener('click', () => {
         if (currentQ < totalQ - 1) { SFX.navigate(); goToQ(currentQ + 1); }
       });
-      document.getElementById('resultContinueBtn').addEventListener('click', () => {
-        document.getElementById('resultBanner').style.display = 'none';
-        const wrongIdx = questions.findIndex((_, i) => checkResults[i] && !checkResults[i].isCorrect);
-        if (wrongIdx !== -1) goToQ(wrongIdx);
-      });
+
+      // Deselect cards on background click
+      document.addEventListener('click', clearSelection);
     }
 
     // ================================================================
@@ -326,128 +465,313 @@
       document.getElementById('fnQLabel').textContent = `Q${idx + 1}/${totalQ}`;
       document.getElementById('fnPrevQ').disabled = idx === 0;
       document.getElementById('fnNextQ').disabled = idx === totalQ - 1;
-      renderCards();
+      clearSelection();
+      renderTypeRows();
+      renderPool();
       updateDots();
     }
 
     // ================================================================
-    //  CARDS RENDER
+    //  RENDER TYPE ROWS
     // ================================================================
-    function renderCards() {
-      const container = document.getElementById('poCards');
-      container.innerHTML = '';
-      const parts   = draftOrders[currentQ];
-      const results = checkResults[currentQ];
-      const refEl   = document.getElementById('poCorrectRef');
+    function renderTypeRows() {
+      const col = document.getElementById('typesColumn');
+      col.innerHTML = '';
+      const placements = allPlacements[currentQ];
+      const results    = checkResults[currentQ];
 
-      parts.forEach((part, idx) => {
-        const card = document.createElement('div');
-        card.className = 'po-card';
-        card.draggable = true;
-        if (results) card.classList.add(results.partResults[idx] ? 'po-correct' : 'po-wrong');
+      TYPE_ORDER.forEach(typeKey => {
+        const row = document.createElement('div');
+        row.className = `type-row type-row--${typeKey}`;
 
-        const handle = document.createElement('span');
-        handle.className = 'po-handle';
-        handle.innerHTML = '&#8801;';
+        // Label
+        const label = document.createElement('span');
+        label.className = 'type-row__label';
+        label.textContent = TYPE_LABELS[typeKey];
+        row.appendChild(label);
 
-        const text = document.createElement('span');
-        text.className = 'po-text';
-        text.textContent = part.text;
+        // Drop zone
+        const zone = document.createElement('div');
+        zone.className = 'type-row__zone';
+        zone.dataset.type = typeKey;
 
-        card.appendChild(handle);
-        card.appendChild(text);
-        makeDraggable(card, idx);
-        container.appendChild(card);
+        // Empty hint (hidden when cards are present)
+        const emptyHint = document.createElement('span');
+        emptyHint.className = 'type-row__zone-empty';
+        emptyHint.textContent = 'Kéo thẻ vào đây';
+        zone.appendChild(emptyHint);
+
+        const cardIdxs = placements[typeKey] || [];
+        if (cardIdxs.length > 0) emptyHint.style.display = 'none';
+
+        // Render placed cards
+        cardIdxs.forEach(partIdx => {
+          const card = makeCardEl(partIdx, typeKey);
+          if (results) {
+            card.classList.add(results.results[partIdx] ? 'po-correct' : 'po-wrong');
+            // Revealed type badge showing the correct type
+            const part = questions[currentQ].parts[partIdx];
+            const badge = document.createElement('span');
+            badge.className = 'drag-card__badge';
+            badge.textContent = TYPE_LABELS[part.type];
+            badge.style.color = TYPE_COLORS[part.type];
+            badge.style.borderColor = TYPE_COLORS[part.type];
+            card.insertBefore(badge, card.firstChild);
+          }
+          zone.appendChild(card);
+        });
+
+        // Drag events on zone
+        zone.addEventListener('dragover', e => {
+          e.preventDefault();
+          zone.classList.add('drag-over');
+        });
+        zone.addEventListener('dragleave', e => {
+          if (!zone.contains(e.relatedTarget)) zone.classList.remove('drag-over');
+        });
+        zone.addEventListener('drop', e => {
+          e.preventDefault();
+          zone.classList.remove('drag-over');
+          if (dragPartIdx === null || checked) return;
+          doPlaceInZone(typeKey, dragPartIdx);
+          dragPartIdx = null;
+        });
+
+        // Click-to-place: clicking a zone places selected card
+        zone.addEventListener('click', e => {
+          e.stopPropagation();
+          if (selectedPartIdx === null || checked) return;
+          doPlaceInZone(typeKey, selectedPartIdx);
+          clearSelection();
+        });
+
+        row.appendChild(zone);
+        col.appendChild(row);
       });
-
-      // Show/hide correct reference after check
-      if (results && !results.isCorrect) {
-        refEl.classList.add('visible');
-        const correct = correctOrders[currentQ];
-        document.getElementById('poCorrectList').innerHTML =
-          correct.map((p, i) => `<span style="color:var(--grey)">${i+1}.</span> <span class="po-badge po-badge--${p.type}" style="font-size:8px;padding:1px 5px;border:1px solid">${TYPE_LABELS[p.type]}</span> ${p.text}`).join('<br>');
-      } else {
-        refEl.classList.remove('visible');
-      }
     }
 
     // ================================================================
-    //  DRAG AND DROP
+    //  RENDER POOL
     // ================================================================
-    function makeDraggable(card, idx) {
-      card.dataset.idx = idx;
-      card.addEventListener('dragstart', e => {
-        dragSrcIdx = idx;
-        card.classList.add('dragging');
+    function renderPool() {
+      const pool    = document.getElementById('cardPool');
+      const emptyMsg = document.getElementById('poolEmpty');
+
+      pool.querySelectorAll('.drag-card').forEach(c => c.remove());
+
+      const placed   = getPlacedSet(currentQ);
+      const results  = checkResults[currentQ];
+      const unplaced = shuffledOrders[currentQ].filter(i => !placed.has(i));
+
+      emptyMsg.style.display = unplaced.length === 0 ? 'block' : 'none';
+
+      unplaced.forEach(partIdx => {
+        const card = makeCardEl(partIdx, null);
+        if (results) {
+          // Cards left in pool are wrong
+          card.classList.add('po-wrong');
+          const part = questions[currentQ].parts[partIdx];
+          const badge = document.createElement('span');
+          badge.className = 'drag-card__badge';
+          badge.textContent = TYPE_LABELS[part.type];
+          badge.style.color = TYPE_COLORS[part.type];
+          badge.style.borderColor = TYPE_COLORS[part.type];
+          card.insertBefore(badge, card.firstChild);
+        }
+        pool.appendChild(card);
+      });
+    }
+
+    // ================================================================
+    //  CARD ELEMENT FACTORY
+    // ================================================================
+    function makeCardEl(partIdx, fromType) {
+      const part = questions[currentQ].parts[partIdx];
+      const div  = document.createElement('div');
+      div.className = 'drag-card';
+      div.draggable = true;
+      div.dataset.partIdx = partIdx;
+
+      const textSpan = document.createElement('span');
+      textSpan.textContent = part.text;
+      div.appendChild(textSpan);
+
+      // Click: toggle select for click-to-place
+      div.addEventListener('click', e => {
+        e.stopPropagation();
+        if (checked) return;
+        if (selectedPartIdx === partIdx) {
+          clearSelection();
+        } else {
+          clearSelection();
+          selectedPartIdx = partIdx;
+          div.classList.add('selected');
+          SFX.click();
+          document.querySelectorAll('.type-row__zone').forEach(z => z.classList.add('accepting'));
+        }
+      });
+
+      // HTML5 drag
+      div.addEventListener('dragstart', e => {
+        dragPartIdx = partIdx;
+        div.classList.add('dragging');
         e.dataTransfer.effectAllowed = 'move';
-        e.dataTransfer.setData('text/plain', idx);
+        e.dataTransfer.setData('text/plain', String(partIdx));
+        clearSelection();
       });
-      card.addEventListener('dragend', () => {
-        dragSrcIdx = null;
-        document.querySelectorAll('.po-card.dragging').forEach(c => c.classList.remove('dragging'));
-        document.querySelectorAll('.po-card.drag-over').forEach(c => c.classList.remove('drag-over'));
+      div.addEventListener('dragend', () => {
+        dragPartIdx = null;
+        div.classList.remove('dragging');
+        document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
       });
-      card.addEventListener('dragover', e => {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
-        document.querySelectorAll('.po-card.drag-over').forEach(c => c.classList.remove('drag-over'));
-        card.classList.add('drag-over');
+
+      // Touch support
+      div.addEventListener('touchstart', () => {
+        // nothing needed here
+      }, { passive: true });
+      div.addEventListener('touchend', e => {
+        if (checked) return;
+        const touch = e.changedTouches[0];
+        const el    = document.elementFromPoint(touch.clientX, touch.clientY);
+        const zone  = el ? el.closest('.type-row__zone') : null;
+        const pool  = el ? el.closest('.card-pool') : null;
+        if (zone) {
+          doPlaceInZone(zone.dataset.type, partIdx);
+        } else if (pool && fromType !== null) {
+          // Return to pool
+          removeFromPlacements(currentQ, partIdx);
+          SFX.click();
+          renderTypeRows();
+          renderPool();
+        }
       });
-      card.addEventListener('dragleave', e => {
-        if (!card.contains(e.relatedTarget)) card.classList.remove('drag-over');
-      });
-      card.addEventListener('drop', e => {
-        e.preventDefault();
-        const src = dragSrcIdx;
-        card.classList.remove('drag-over');
-        if (src === null || src === idx) return;
-        SFX.click();
-        const arr = draftOrders[currentQ];
-        const [item] = arr.splice(src, 1);
-        arr.splice(idx, 0, item);
-        if (checkResults[currentQ]) { delete checkResults[currentQ]; }
-        renderCards();
-        updateDots();
-      });
+
+      return div;
+    }
+
+    // ================================================================
+    //  PLACE CARD IN ZONE
+    // ================================================================
+    function doPlaceInZone(typeKey, partIdx) {
+      if (checked) return;
+      removeFromPlacements(currentQ, partIdx);
+      allPlacements[currentQ][typeKey].push(partIdx);
+      SFX.click();
+      renderTypeRows();
+      renderPool();
+    }
+
+    // ================================================================
+    //  POOL DRAG HANDLERS (called via inline html)
+    // ================================================================
+    function handleDragOverPool(e) {
+      e.preventDefault();
+      document.getElementById('cardPool').classList.add('drag-over');
+    }
+    function handleDragLeavePool(e) {
+      if (!document.getElementById('cardPool').contains(e.relatedTarget)) {
+        document.getElementById('cardPool').classList.remove('drag-over');
+      }
+    }
+    function handleDropToPool(e) {
+      e.preventDefault();
+      document.getElementById('cardPool').classList.remove('drag-over');
+      if (dragPartIdx === null || checked) return;
+      removeFromPlacements(currentQ, dragPartIdx);
+      SFX.click();
+      renderTypeRows();
+      renderPool();
+      dragPartIdx = null;
+    }
+
+    // ================================================================
+    //  CLEAR SELECTION
+    // ================================================================
+    function clearSelection() {
+      selectedPartIdx = null;
+      document.querySelectorAll('.drag-card.selected').forEach(c => c.classList.remove('selected'));
+      document.querySelectorAll('.type-row__zone.accepting').forEach(z => z.classList.remove('accepting'));
     }
 
     // ================================================================
     //  CHECK
     // ================================================================
     function doCheck() {
-      let correct = 0;
-      questions.forEach((_, i) => {
-        const draft   = draftOrders[i];
-        const correct_order = correctOrders[i];
-        const partResults = draft.map((p, j) => p.type === correct_order[j].type);
-        const isCorrect = partResults.every(Boolean);
-        checkResults[i] = { isCorrect, partResults };
-        if (isCorrect) correct++;
+      checked = true;
+      let questionsAllCorrect = 0;
+
+      questions.forEach((q, qIdx) => {
+        const placements = allPlacements[qIdx];
+        const results    = {};
+        let correct = 0;
+
+        // Check placed cards
+        TYPE_ORDER.forEach(typeKey => {
+          (placements[typeKey] || []).forEach(partIdx => {
+            const isCorrect = q.parts[partIdx].type === typeKey;
+            results[partIdx] = isCorrect;
+            if (isCorrect) correct++;
+          });
+        });
+
+        // Cards left in pool are wrong
+        const placed = getPlacedSet(qIdx);
+        q.parts.forEach((_, i) => {
+          if (!placed.has(i)) results[i] = false;
+        });
+
+        checkResults[qIdx] = { correct, total: q.parts.length, results };
+        if (correct === q.parts.length) questionsAllCorrect++;
       });
 
-      SFX[correct === totalQ ? 'correct' : 'wrong']();
-      renderCards();
+      SFX[questionsAllCorrect === totalQ ? 'correct' : 'wrong']();
+      renderTypeRows();
+      renderPool();
       updateDots();
-      updateScore(correct);
-      showFinalResults(correct);
+      updateScoreDisplay();
+      showResultBanner();
+
+      document.getElementById('checkBtn').style.display    = 'none';
+      document.getElementById('continueBtn').style.display = '';
     }
 
-    function showFinalResults(correct) {
-      const pct = Math.round(correct / totalQ * 100);
+    function updateScoreDisplay() {
+      let cardCorrect = 0, cardTotal = 0;
+      questions.forEach((q, i) => {
+        cardTotal   += q.parts.length;
+        cardCorrect += checkResults[i]?.correct || 0;
+      });
+      document.getElementById('scoreDisplay').textContent = `SCORE: ${cardCorrect} / ${cardTotal}`;
+    }
+
+    function showResultBanner() {
+      const correct = Object.values(checkResults).filter(r => r.correct === r.total).length;
+      const pct  = Math.round(correct / totalQ * 100);
       const msgs = [
-        [100, '🏆 Hoàn hảo! Bạn nắm vững cấu trúc prompt chuẩn!'],
-        [70,  '🎉 Rất tốt! Còn một vài thứ tự chưa đúng.'],
-        [40,  '👍 Khá ổn! Hãy xem lại thứ tự chuẩn của từng phần.'],
-        [0,   '💪 Chưa đạt! Ôn lại cấu trúc prompt và thử lại nhé.'],
+        [100, '🏆 Hoàn hảo! Bạn nắm rõ cấu trúc prompt!'],
+        [70,  '🎉 Rất tốt! Còn vài thẻ cần xem lại.'],
+        [40,  '👍 Khá ổn! Hãy ôn lại các loại thành phần prompt.'],
+        [0,   '💪 Chưa đạt! Xem lại và thử lại nhé.'],
       ];
       const msg = msgs.find(([min]) => pct >= min)[1];
-      document.getElementById('resultScore').textContent = `${correct} / ${totalQ} ĐÚNG (${pct}%)`;
-      document.getElementById('resultMsg').textContent = msg;
+      document.getElementById('resultScore').textContent = `${correct} / ${totalQ} CÂU ĐÚNG (${pct}%)`;
+      document.getElementById('resultMsg').textContent   = msg;
       document.getElementById('resultBanner').style.display = 'block';
     }
 
-    function updateScore(correct) {
-      document.getElementById('scoreDisplay').textContent = `SCORE: ${correct} / ${totalQ}`;
+    // ================================================================
+    //  CONTINUE
+    // ================================================================
+    function doContinue() {
+      checked      = false;
+      checkResults = {};
+      document.getElementById('resultBanner').style.display = 'none';
+      document.getElementById('checkBtn').style.display     = '';
+      document.getElementById('continueBtn').style.display  = 'none';
+      document.getElementById('scoreDisplay').textContent   = 'SCORE: — / —';
+      renderTypeRows();
+      renderPool();
+      updateDots();
     }
 
     // ================================================================
@@ -467,9 +791,11 @@
     function updateDots() {
       document.querySelectorAll('.fn-dot').forEach((dot, i) => {
         dot.className = 'fn-dot';
-        if (i === currentQ)                          dot.classList.add('active');
-        else if (checkResults[i]?.isCorrect)         dot.classList.add('answered');
-        else if (checkResults[i] && !checkResults[i].isCorrect) dot.classList.add('wrong-q');
+        if (i === currentQ) {
+          dot.classList.add('active');
+        } else if (checkResults[i] !== undefined) {
+          dot.classList.add(checkResults[i].correct === checkResults[i].total ? 'answered' : 'wrong-q');
+        }
       });
     }
 
@@ -486,7 +812,9 @@
         gamesPopup.style.top  = (r.bottom + 6) + 'px';
       }
     });
-    document.addEventListener('click', () => gamesPopup.classList.remove('open'));
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.navbar__games-popup')) gamesPopup.classList.remove('open');
+    });
 
     // ================================================================
     //  START
