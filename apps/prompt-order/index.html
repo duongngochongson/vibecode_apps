@@ -7,14 +7,12 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' fill='%2300fff5'>◈</text></svg>">
   <link rel="stylesheet" href="../../css/style.css" />
   <script src="../../js/sfx.js"></script>
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/games-popup.js"></script>
   <script src="../../js/game-visibility.js" data-json="../../data/admin_content.json"></script>
   <style>
-    /* ===== PAGE LAYOUT ===== */
-    .game-page {
-      position: relative; z-index: 2;
-      max-width: 1200px; margin: 0 auto;
-      padding: 28px 1.5rem 40px;
-    }
+    /* ===== PAGE OVERRIDES ===== */
+    .game-page { padding: 28px 1.5rem 40px; }
     .po-header {
       display: flex; align-items: center;
       margin-bottom: 14px;
@@ -167,56 +165,13 @@
       text-align: center; padding: 16px 0;
     }
 
-    /* ===== ACTION BUTTONS (in bottom bar) ===== */
-    .action-btn {
-      font-family: var(--font-pixel); font-size: 9px;
-      padding: 8px 18px;
-      border: 2px solid; background: transparent;
-      cursor: pointer; letter-spacing: 1px;
-      transition: all 0.1s steps(1);
-    }
-    .action-btn--check      { color: var(--green);   border-color: var(--green); }
-    .action-btn--check:hover { background: var(--green); color: var(--bg-dark); }
-    .action-btn--continue   { color: var(--cyan);    border-color: var(--cyan); }
-    .action-btn--continue:hover { background: var(--cyan); color: var(--bg-dark); }
-
-    /* ===== RESULT BANNER ===== */
-    .result-banner {
-      display: none; text-align: center; margin-top: 24px;
-      padding: 20px 24px;
-      border: 3px solid var(--green);
-      box-shadow: 0 0 24px rgba(57,255,20,0.25);
-    }
-    .result-banner__score {
-      font-family: var(--font-pixel);
-      font-size: 10px; color: var(--green); letter-spacing: 2px; margin-bottom: 10px;
-    }
-    .result-banner__msg {
-      font-family: var(--font-vi-body); font-size: 15px; color: var(--white);
-    }
+    .action-btn { font-size: 9px; padding: 8px 18px; }
 
     /* ===== TOP NAV BAR ===== */
     .fn-answer-bar {
       display: flex; flex-direction: column; align-items: center;
       gap: 6px; margin-bottom: 14px;
     }
-    .fn-q-nav { display: flex; align-items: center; gap: 10px; }
-    .fn-nav-btn {
-      background: transparent; border: 2px solid var(--grey);
-      color: var(--grey); font-size: 16px; padding: 2px 10px;
-      cursor: pointer; transition: all 0.15s;
-    }
-    .fn-nav-btn:hover:not(:disabled) { border-color: var(--cyan); color: var(--cyan); }
-    .fn-nav-btn:disabled { opacity: 0.3; cursor: default; }
-    .fn-dots { display: flex; gap: 5px; }
-    .fn-dot {
-      width: 10px; height: 10px; border-radius: 50%;
-      background: var(--grey); cursor: pointer; border: none; padding: 0;
-      transition: background 0.15s, box-shadow 0.15s;
-    }
-    .fn-dot.active   { background: var(--yellow); box-shadow: 0 0 5px var(--yellow); }
-    .fn-dot.answered { background: var(--green);  box-shadow: 0 0 4px var(--green); }
-    .fn-dot.wrong-q  { background: var(--magenta); }
 
     /* ===== EMPTY STATE ===== */
     .po-empty { text-align: center; padding: 60px 20px; color: var(--grey); font-size: 11px; letter-spacing: 1px; }
@@ -359,22 +314,8 @@
     // Click-to-place state
     let selectedPartIdx = null;
 
-    // ================================================================
-    //  DATA LOAD
-    // ================================================================
     async function loadData() {
-      const saved = localStorage.getItem('promptOrder');
-      if (saved) { try { questions = JSON.parse(saved); } catch(e) {} }
-      if (!questions.length) {
-        try {
-          const r = await fetch('../../data/admin_content.json');
-          if (r.ok) { const d = await r.json(); questions = d.promptOrder || []; }
-        } catch(e) {}
-      }
-    }
-
-    function escHtml(s) {
-      return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      questions = await PV.loadData('promptOrder') || [];
     }
 
     // ================================================================
@@ -788,23 +729,6 @@
         }
       });
     }
-
-    // ================================================================
-    //  GAMES POPUP
-    // ================================================================
-    const gamesBtn   = document.getElementById('gamesBtn');
-    const gamesPopup = document.getElementById('gamesPopup');
-    gamesBtn.addEventListener('click', e => {
-      e.stopPropagation(); SFX.click(); gamesPopup.classList.toggle('open');
-      if (gamesPopup.classList.contains('open')) {
-        const r = gamesBtn.getBoundingClientRect();
-        gamesPopup.style.left = (r.left + r.width / 2) + 'px';
-        gamesPopup.style.top  = (r.bottom + 6) + 'px';
-      }
-    });
-    document.addEventListener('click', e => {
-      if (!e.target.closest('.navbar__games-popup')) gamesPopup.classList.remove('open');
-    });
 
     // ================================================================
     //  START

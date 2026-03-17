@@ -7,43 +7,15 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' fill='%2300fff5'>◈</text></svg>">
   <link rel="stylesheet" href="../../css/style.css" />
   <script src="../../js/sfx.js"></script>
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/games-popup.js"></script>
   <script src="../../js/game-visibility.js" data-json="../../data/admin_content.json"></script>
   <style>
-    /* ===== GAME PAGE ===== */
-    .game-page {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 28px 2rem 60px;
-      position: relative;
-      z-index: 2;
-    }
-    .page-header {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .page-header h1 {
-      font-family: var(--font-vi-heading);
-      font-size: clamp(18px, 4vw, 28px);
-      color: var(--white);
-      margin-bottom: 6px;
-    }
-
-    /* ===== SCORE BAR ===== */
-    .score-bar {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 14px;
-      flex-wrap: wrap;
-      margin-bottom: 10px;
-    }
-    .score-chip {
-      font-family: var(--font-pixel);
-      font-size: 7px;
-      padding: 8px 14px;
-      letter-spacing: 1px;
-      color: var(--cyan);
-    }
+    /* ===== PAGE OVERRIDES ===== */
+    .game-page { padding: 28px 2rem 60px; }
+    .page-header { text-align: center; margin-bottom: 20px; }
+    .score-bar { gap: 14px; margin-bottom: 10px; }
+    .score-chip { font-size: 7px; padding: 8px 14px; color: var(--cyan); }
     .score-chip--yellow { color: var(--yellow); }
 
 
@@ -279,66 +251,9 @@
       padding: 8px 0;
     }
 
-    /* ===== ACTION BUTTONS (in score bar) ===== */
-    .action-btn {
-      font-family: var(--font-pixel);
-      font-size: 7px;
-      padding: 8px 14px;
-      border: 2px solid;
-      background: transparent;
-      cursor: pointer;
-      letter-spacing: 1px;
-      transition: all 0.1s steps(1);
-    }
-    .action-btn--check     { color: var(--green);  border-color: var(--green); }
-    .action-btn--check:hover { background: var(--green); color: var(--bg-dark); }
-    .action-btn--reset     { color: var(--grey);   border-color: var(--grey); }
-    .action-btn--reset:hover { background: var(--grey); color: var(--bg-dark); }
-    .action-btn--play-again { color: var(--cyan);  border-color: var(--cyan); }
-    .action-btn--play-again:hover { background: var(--cyan); color: var(--bg-dark); }
-
-    /* ===== RESULT BANNER ===== */
-    .result-banner {
-      display: none;
-      text-align: center;
-      margin-top: 24px;
-      padding: 20px 24px;
-      border: 3px solid var(--green);
-      box-shadow: 0 0 24px rgba(57,255,20,0.3);
-    }
-    .result-banner__score {
-      font-family: var(--font-pixel);
-      font-size: 10px;
-      color: var(--green);
-      letter-spacing: 2px;
-      margin-bottom: 10px;
-    }
-    .result-banner__msg {
-      font-family: var(--font-vi-body);
-      font-size: 16px;
-      color: var(--white);
-    }
-
-    /* ===== TOAST NOTIFICATIONS ===== */
-    .toast {
-      position: fixed;
-      bottom: 36px;
-      left: 50%;
-      transform: translateX(-50%) translateY(12px);
-      background: var(--bg-card);
-      border: 2px solid var(--orange);
-      color: var(--orange);
-      font-family: var(--font-pixel);
-      font-size: 8px;
-      padding: 12px 22px;
-      letter-spacing: 1px;
-      opacity: 0;
-      transition: opacity 0.25s, transform 0.25s;
-      z-index: 500;
-      pointer-events: none;
-      white-space: nowrap;
-    }
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    /* ===== PAGE-SPECIFIC OVERRIDES ===== */
+    .action-btn { font-size: 7px; padding: 8px 14px; }
+    .toast { bottom: 36px; border-color: var(--orange); color: var(--orange); }
 
     /* ===== RESPONSIVE ===== */
     @media (max-width: 768px) {
@@ -442,57 +357,12 @@
     const SEP = '|';
     function ck(a, b)   { return a < b ? `${a}${SEP}${b}` : `${b}${SEP}${a}`; }
     function cpair(k)   { return k.split(SEP); }
-    function escHtml(s) { return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-    function shuffle(arr) {
-      const a = [...arr];
-      for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
-      }
-      return a;
-    }
 
-    // ================================================================
-    //  GAMES POPUP
-    // ================================================================
-    const gamesBtn   = document.getElementById('gamesBtn');
-    const gamesPopup = document.getElementById('gamesPopup');
-    gamesBtn.addEventListener('click', e => {
-      e.stopPropagation(); SFX.click(); gamesPopup.classList.toggle('open');
-      if (gamesPopup.classList.contains('open')) {
-        const r = gamesBtn.getBoundingClientRect();
-        gamesPopup.style.left = (r.left + r.width / 2) + 'px';
-        gamesPopup.style.top  = (r.bottom + 6) + 'px';
-      }
-    });
-    document.addEventListener('click', () => gamesPopup.classList.remove('open'));
-
-    // ================================================================
-    //  TOAST
-    // ================================================================
-    function showToast(msg) {
-      const existing = document.querySelector('.toast');
-      if (existing) existing.remove();
-      const t = document.createElement('div');
-      t.className = 'toast';
-      t.textContent = msg;
-      document.body.appendChild(t);
-      requestAnimationFrame(() => requestAnimationFrame(() => t.classList.add('show')));
-      setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 3200);
-    }
-
-    // ================================================================
-    //  DATA LOADING
-    // ================================================================
-    let _cachedJson = null;
     async function loadGameData() {
       const saved = localStorage.getItem('mindMap');
       if (saved) { try { return JSON.parse(saved)[0]; } catch(e) {} }
-      if (!_cachedJson) {
-        try { const r = await fetch('../../data/admin_content.json'); if (r.ok) { const d = await r.json(); _cachedJson = d.mindMap; } } catch(e) {}
-      }
-      if (_cachedJson) return _cachedJson[0];
-      return null;
+      const data = await PV.loadData('mindMap');
+      return data ? data[0] : null;
     }
 
     // ================================================================
@@ -516,7 +386,7 @@
       connections = new Set();
       rowOrder = {};
       selectedNodeId = null;
-      poolOrder = shuffle(gameData.keywords.map(kw => kw.id));
+      poolOrder = PV.shuffle(gameData.keywords.map(kw => kw.id));
       renderGameRows();
       renderGamePool();
       refreshGameConnections();
@@ -731,7 +601,7 @@
       div.innerHTML = `
         <div class="node-dot node-dot--top"></div>
         <span class="node-conn-count" title="connections"></span>
-        <span>${escHtml(kw.text)}</span>
+        <span>${PV.escHtml(kw.text)}</span>
         <div class="node-dot node-dot--bottom"></div>
         ${!isAdmin ? '<span class="node-remove" title="Remove from canvas">✕</span>' : ''}
       `;
@@ -957,7 +827,7 @@
       const placedKids = Object.keys(placements);
       if (placedKids.length < gameData.keywords.length) {
         const missing = gameData.keywords.length - placedKids.length;
-        showToast(`PLACE ALL KEYWORDS FIRST! (${missing} left)`);
+        PV.showToast(`PLACE ALL KEYWORDS FIRST! (${missing} left)`);
         return;
       }
 
@@ -966,7 +836,7 @@
       connections.forEach(key => { const [a, b] = cpair(key); connectedSet.add(a); connectedSet.add(b); });
       const unconnected = gameData.keywords.filter(kw => !connectedSet.has(kw.id));
       if (unconnected.length > 0) {
-        showToast(`${unconnected.length} NODES NOT CONNECTED!`);
+        PV.showToast(`${unconnected.length} NODES NOT CONNECTED!`);
         return;
       }
 

@@ -7,13 +7,11 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' fill='%2300fff5'>◈</text></svg>">
   <link rel="stylesheet" href="../../css/style.css" />
   <script src="../../js/sfx.js"></script>
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/games-popup.js"></script>
   <script src="../../js/game-visibility.js" data-json="../../data/admin_content.json"></script>
   <style>
-    .game-page {
-      position: relative; z-index: 2;
-      padding: 32px 1.5rem 80px;
-      max-width: 800px; margin: 0 auto;
-    }
+    .game-page { padding: 32px 1.5rem 80px; max-width: 800px; }
 
     /* ===== PAGE HEADER ===== */
     .page-header { margin-bottom: 24px; text-align: center; }
@@ -30,15 +28,7 @@
     }
     .mece-explanation strong { color: var(--orange); }
 
-    /* ===== SCORE BAR ===== */
-    .score-bar {
-      display: flex; align-items: center; justify-content: center;
-      gap: 24px; flex-wrap: wrap; margin-bottom: 28px;
-    }
-    .score-chip {
-      font-family: var(--font-pixel);
-      font-size: 8px; padding: 6px 14px; letter-spacing: 1px;
-    }
+    /* (score-bar & score-chip in style.css) */
 
     /* ===== QUESTION CARD ===== */
     .question-card {
@@ -122,35 +112,7 @@
       background: rgba(255,0,204,0.08);
     }
 
-    /* ===== ACTION BUTTONS (in score bar) ===== */
-    .action-btn {
-      font-family: var(--font-pixel);
-      font-size: 8px; padding: 6px 14px;
-      border: 2px solid; background: transparent;
-      cursor: pointer; letter-spacing: 1px;
-      transition: all 0.1s steps(1);
-    }
-    .action-btn--check { color: var(--green); border-color: var(--green); }
-    .action-btn--check:hover { background: var(--green); color: var(--bg-dark); }
-    .action-btn--continue { color: var(--cyan); border-color: var(--cyan); }
-    .action-btn--continue:hover { background: var(--cyan); color: var(--bg-dark); }
-
-    /* ===== RESULT BANNER ===== */
-    .result-banner {
-      display: none; text-align: center; margin-top: 24px;
-      padding: 20px 24px;
-      border: 3px solid var(--green);
-      box-shadow: 0 0 24px rgba(57,255,20,0.3);
-    }
-    .result-banner__score {
-      font-family: var(--font-pixel);
-      font-size: 10px; color: var(--green);
-      letter-spacing: 2px; margin-bottom: 10px;
-    }
-    .result-banner__msg {
-      font-family: var(--font-vi-body);
-      font-size: 16px; color: var(--white);
-    }
+    /* (action-btn & result-banner in style.css) */
 
     /* ===== EMPTY STATE ===== */
     .mece-empty {
@@ -248,21 +210,6 @@
     };
 
     // ================================================================
-    //  GAMES POPUP
-    // ================================================================
-    const gamesBtn   = document.getElementById('gamesBtn');
-    const gamesPopup = document.getElementById('gamesPopup');
-    gamesBtn.addEventListener('click', e => {
-      e.stopPropagation(); SFX.click(); gamesPopup.classList.toggle('open');
-      if (gamesPopup.classList.contains('open')) {
-        const r = gamesBtn.getBoundingClientRect();
-        gamesPopup.style.left = (r.left + r.width / 2) + 'px';
-        gamesPopup.style.top  = (r.bottom + 6) + 'px';
-      }
-    });
-    document.addEventListener('click', () => gamesPopup.classList.remove('open'));
-
-    // ================================================================
     //  STATE
     // ================================================================
     let gameData = [];
@@ -271,28 +218,9 @@
     let totalCorrect  = 0;
     let totalAnswered = 0;
 
-    // ================================================================
-    //  DATA LOADING
-    // ================================================================
-    let _cachedJson = null;
     async function loadGameData() {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) { try { return JSON.parse(saved); } catch(e) {} }
-      if (!_cachedJson) {
-        try {
-          const r = await fetch('../../data/admin_content.json');
-          if (r.ok) { const d = await r.json(); _cachedJson = d.mece; }
-        } catch(e) {}
-      }
-      if (_cachedJson) return JSON.parse(JSON.stringify(_cachedJson));
-      return [];
-    }
-
-    // ================================================================
-    //  HELPERS
-    // ================================================================
-    function escHtml(s) {
-      return (s || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      const data = await PV.loadData(STORAGE_KEY);
+      return data ? JSON.parse(JSON.stringify(data)) : [];
     }
 
     // ================================================================
@@ -327,7 +255,7 @@
         const header = document.createElement('div');
         header.className = 'question-card__header';
         header.innerHTML = `<span class="question-card__num">#${idx + 1}</span>
-          <span class="question-card__topic">${escHtml(q.topic)}</span>`;
+          <span class="question-card__topic">${PV.escHtml(q.topic)}</span>`;
         card.appendChild(header);
 
         // Topic concept

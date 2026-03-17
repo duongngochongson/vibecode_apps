@@ -7,48 +7,14 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' fill='%2300fff5'>◈</text></svg>">
   <link rel="stylesheet" href="../../css/style.css" />
   <script src="../../js/sfx.js"></script>
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/games-popup.js"></script>
   <script src="../../js/game-visibility.js" data-json="../../data/admin_content.json"></script>
   <style>
-    /* ===== PAGE LAYOUT ===== */
-    .game-page {
-      position: relative;
-      z-index: 2;
-      padding: 32px 1.5rem 60px;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .page-header h1 {
-      font-family: var(--font-vi-heading);
-      font-size: clamp(22px, 4vw, 34px);
-      font-weight: 900;
-      color: var(--cyan);
-      margin-bottom: 8px;
-    }
-
-    /* ===== SCORE BAR ===== */
-    .score-bar {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 24px;
-      flex-wrap: wrap;
-      margin-bottom: 28px;
-    }
-    .score-chip {
-      font-family: var(--font-pixel);
-      font-size: 8px;
-      padding: 6px 14px;
-      letter-spacing: 1px;
-    }
-    #scoreDisplay {
-      color: var(--yellow);
-      border-color: var(--yellow);
-    }
-    #progressDisplay {
-      color: var(--cyan);
-      border-color: var(--cyan);
-    }
+    /* ===== PAGE OVERRIDES ===== */
+    .page-header h1 { color: var(--cyan); font-size: clamp(22px, 4vw, 34px); }
+    #scoreDisplay { color: var(--yellow); border-color: var(--yellow); }
+    #progressDisplay { color: var(--cyan); border-color: var(--cyan); }
 
     /* ===== GAME AREA ===== */
     .game-area {
@@ -254,68 +220,7 @@
       padding: 20px 0;
     }
 
-    /* ===== ACTION BUTTONS (in score bar) ===== */
-    .action-btn {
-      font-family: var(--font-pixel);
-      font-size: 8px;
-      padding: 6px 14px;
-      border: 2px solid;
-      background: transparent;
-      cursor: pointer;
-      letter-spacing: 1px;
-      transition: all 0.1s steps(1);
-    }
-    .action-btn--check {
-      color: var(--green);
-      border-color: var(--green);
-      box-shadow: 0 0 6px rgba(57,255,20,0.3);
-    }
-    .action-btn--check:hover {
-      background: var(--green);
-      color: var(--bg-dark);
-      box-shadow: 4px 4px 0 var(--cyan), 0 0 16px rgba(57,255,20,0.5);
-    }
-    .action-btn--reset {
-      color: var(--grey);
-      border-color: var(--grey);
-    }
-    .action-btn--reset:hover {
-      color: var(--white);
-      border-color: var(--white);
-    }
-    .action-btn--play-again {
-      color: var(--cyan);
-      border-color: var(--cyan);
-    }
-    .action-btn--play-again:hover {
-      background: var(--cyan);
-      color: var(--bg-dark);
-      box-shadow: 4px 4px 0 var(--magenta);
-    }
-
-    /* ===== RESULT BANNER ===== */
-    .result-banner {
-      display: none;
-      background: var(--bg-card);
-      border: 3px solid var(--green);
-      box-shadow: 0 0 20px rgba(57,255,20,0.4);
-      padding: 24px 28px;
-      text-align: center;
-      margin-top: 28px;
-    }
-    .result-banner__score {
-      font-family: var(--font-pixel);
-      font-size: 22px;
-      color: var(--green);
-      text-shadow: 0 0 14px var(--green);
-      margin-bottom: 8px;
-    }
-    .result-banner__msg {
-      font-family: var(--font-vi-body);
-      font-size: 16px;
-      color: rgba(232,232,255,0.8);
-    }
-
+    .result-banner__score { font-size: 22px; }
   </style>
 </head>
 <body>
@@ -394,46 +299,9 @@
   <!-- ===== FOOTER ===== -->
   <script>
     // ================================================================
-    //  GAMES POPUP
-    // ================================================================
-    const gamesBtn   = document.getElementById('gamesBtn');
-    const gamesPopup = document.getElementById('gamesPopup');
-    gamesBtn.addEventListener('click', e => {
-      e.stopPropagation(); SFX.click(); gamesPopup.classList.toggle('open');
-      if (gamesPopup.classList.contains('open')) {
-        const r = gamesBtn.getBoundingClientRect();
-        gamesPopup.style.left = (r.left + r.width / 2) + 'px';
-        gamesPopup.style.top  = (r.bottom + 6) + 'px';
-      }
-    });
-    document.addEventListener('click', () => gamesPopup.classList.remove('open'));
-
-    function escHtml(s) {
-      return (s || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    }
-
-    // ================================================================
     //  GAME DATA & STATE
     // ================================================================
     let gameData = [];
-    let _cachedJsonData = null; // cache fetched admin_pros_cons.json
-
-    async function loadGameData() {
-      // 1. localStorage (in-session admin saves take priority)
-      const saved = localStorage.getItem('prosCons');
-      if (saved) {
-        try { return JSON.parse(saved); } catch(e) {}
-      }
-      // 2. data/admin_content.json (source of truth on GitHub)
-      if (!_cachedJsonData) {
-        try {
-          const res = await fetch('../../data/admin_content.json');
-          if (res.ok) { const d = await res.json(); _cachedJsonData = d.prosCons; }
-        } catch(e) {}
-      }
-      if (_cachedJsonData) return _cachedJsonData;
-      return [];
-    }
 
     // dragging state
     let dragCardId   = null;   // ID of card being dragged
@@ -481,9 +349,9 @@
         article.innerHTML = `
           <div class="topic-card__header">
             <span class="topic-card__num">${String(idx + 1).padStart(2,'0')}.</span>
-            <span class="topic-card__title font-vi-h">${escHtml(topic.topic)}</span>
+            <span class="topic-card__title font-vi-h">${PV.escHtml(topic.topic)}</span>
           </div>
-          <p class="topic-card__passage font-vi">${escHtml(topic.passage)}</p>
+          <p class="topic-card__passage font-vi">${PV.escHtml(topic.passage)}</p>
           <div class="drop-zones">
             <div class="drop-zone drop-zone--pro"
                  id="dz-${topic.id}-pro"
@@ -778,7 +646,7 @@
     }
 
     async function playAgain() {
-      gameData = await loadGameData();
+      gameData = await PV.loadData('prosCons') || [];
       buildGame();
     }
 
@@ -786,7 +654,7 @@
     //  INIT
     // ================================================================
     async function initGame() {
-      gameData = await loadGameData();
+      gameData = await PV.loadData('prosCons') || [];
       buildGame();
     }
     initGame();

@@ -7,6 +7,7 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' fill='%2300fff5'>◈</text></svg>">
   <link rel="stylesheet" href="css/style.css" />
   <script src="js/sfx.js"></script>
+  <script src="js/games-popup.js"></script>
   <script src="js/game-visibility.js" data-json="data/admin_content.json"></script>
   <style>
     /* ===== HOME-SPECIFIC STYLES ===== */
@@ -279,19 +280,6 @@
 
 
   <script>
-    // ===== GAMES POPUP =====
-    const gamesBtn   = document.getElementById('gamesBtn');
-    const gamesPopup = document.getElementById('gamesPopup');
-    gamesBtn.addEventListener('click', e => {
-      e.stopPropagation(); SFX.click(); gamesPopup.classList.toggle('open');
-      if (gamesPopup.classList.contains('open')) {
-        const r = gamesBtn.getBoundingClientRect();
-        gamesPopup.style.left = (r.left + r.width / 2) + 'px';
-        gamesPopup.style.top  = (r.bottom + 6) + 'px';
-      }
-    });
-    document.addEventListener('click', () => gamesPopup.classList.remove('open'));
-
     // ===== GAME COUNTER =====
     document.getElementById('gameCount').textContent =
       document.querySelectorAll('.app-card').length + '+';

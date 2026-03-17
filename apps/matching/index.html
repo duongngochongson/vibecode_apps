@@ -7,17 +7,12 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' fill='%2300fff5'>◈</text></svg>">
   <link rel="stylesheet" href="../../css/style.css" />
   <script src="../../js/sfx.js"></script>
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/games-popup.js"></script>
   <script src="../../js/game-visibility.js" data-json="../../data/admin_content.json"></script>
   <style>
-    /* ===== PAGE LAYOUT ===== */
-    .game-page {
-      position: relative;
-      z-index: 2;
-      padding: 32px 1.5rem 80px;
-      max-width: 900px;
-      margin: 0 auto;
-    }
-
+    /* ===== PAGE OVERRIDES ===== */
+    .game-page { padding: 32px 1.5rem 80px; max-width: 900px; }
     .page-header__title {
       font-family: var(--font-vi-heading);
       font-size: clamp(20px, 4vw, 32px);
@@ -202,15 +197,11 @@
     .set-dot.active   { background: var(--yellow); box-shadow: 0 0 5px var(--yellow); }
     .set-dot.answered { background: var(--green);  box-shadow: 0 0 4px var(--green); }
 
-    /* ===== ACTION BUTTONS (in set-nav) ===== */
+    /* ===== MATCHING-SPECIFIC ACTION BTN OVERRIDES ===== */
     .action-btn {
-      font-family: var(--font-pixel);
-      font-size: 8px;
       letter-spacing: 2px;
       padding: 8px 18px;
       border: none;
-      cursor: pointer;
-      transition: all 0.15s steps(2);
     }
     .action-btn--check {
       background: var(--green);
@@ -225,44 +216,9 @@
     }
     .action-btn--play-again:hover { box-shadow: 0 0 20px var(--cyan); }
 
-    /* ===== RESULT BANNER ===== */
-    .result-banner {
-      display: none;
-      text-align: center;
-      padding: 16px;
-      margin-top: 16px;
-      border: 2px solid var(--green);
-      background: rgba(57,255,20,0.05);
-    }
-    .result-banner__score {
-      font-size: 14px;
-      color: var(--green);
-      margin-bottom: 6px;
-    }
-    .result-banner__msg {
-      font-size: 10px;
-      color: var(--white);
-      letter-spacing: 1px;
-    }
-
-    /* ===== TOAST ===== */
-    .toast {
-      position: fixed;
-      bottom: 80px;
-      left: 50%;
-      transform: translateX(-50%) translateY(20px);
-      background: var(--bg-mid);
-      border: 2px solid var(--yellow);
-      color: var(--yellow);
-      font-size: 9px;
-      letter-spacing: 1px;
-      padding: 8px 20px;
-      z-index: 9999;
-      opacity: 0;
-      transition: opacity 0.2s, transform 0.2s;
-      pointer-events: none;
-    }
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .result-banner { padding: 16px; margin-top: 16px; border-width: 2px; background: rgba(57,255,20,0.05); }
+    .result-banner__score { font-size: 14px; }
+    .result-banner__msg { font-size: 10px; letter-spacing: 1px; }
 
     /* ===== RESPONSIVE ===== */
     @media (max-width: 600px) {
@@ -381,32 +337,9 @@
     // ================================================================
     function ck(a, b) { return a < b ? `${a}|${b}` : `${b}|${a}`; }
 
-    function showToast(msg, dur = 2000) {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), dur);
-    }
-
-    // ================================================================
-    //  DATA LOADING
-    // ================================================================
-    let _cachedMatchingJson = null;
     async function loadGameData() {
-      // 1. localStorage (in-session admin saves take priority)
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        try { return JSON.parse(saved); } catch(e) {}
-      }
-      // 2. data/admin_content.json (source of truth on GitHub)
-      if (!_cachedMatchingJson) {
-        try {
-          const r = await fetch('../../data/admin_content.json');
-          if (r.ok) { const d = await r.json(); _cachedMatchingJson = d.matching; }
-        } catch(e) {}
-      }
-      if (_cachedMatchingJson) return JSON.parse(JSON.stringify(_cachedMatchingJson));
-      return [];
+      const data = await PV.loadData(STORAGE_KEY);
+      return data ? JSON.parse(JSON.stringify(data)) : [];
     }
 
     // ================================================================
@@ -734,21 +667,6 @@
     //  RESIZE → REDRAW LINES
     // ================================================================
     window.addEventListener('resize', () => renderLines(checked ? undefined : undefined));
-
-    // ================================================================
-    //  GAMES POPUP
-    // ================================================================
-    const gamesBtn   = document.getElementById('gamesBtn');
-    const gamesPopup = document.getElementById('gamesPopup');
-    gamesBtn.addEventListener('click', e => {
-      e.stopPropagation(); SFX.click(); gamesPopup.classList.toggle('open');
-      if (gamesPopup.classList.contains('open')) {
-        const r = gamesBtn.getBoundingClientRect();
-        gamesPopup.style.left = (r.left + r.width / 2) + 'px';
-        gamesPopup.style.top  = (r.bottom + 6) + 'px';
-      }
-    });
-    document.addEventListener('click', () => gamesPopup.classList.remove('open'));
 
     // ================================================================
     //  INIT
