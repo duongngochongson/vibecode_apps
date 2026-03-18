@@ -49,7 +49,9 @@ const c=document.getElementById(containerId||'ctrlDots');if(!c)return;
 const d=c.children[idx];if(!d)return;d.className='control-bar__dot';if(state)d.classList.add(state)},
 setAllDots(states,containerId){
 const c=document.getElementById(containerId||'ctrlDots');if(!c)return;
-Array.from(c.children).forEach((d,i)=>{d.className='control-bar__dot';if(states[i])d.classList.add(states[i])})}
+Array.from(c.children).forEach((d,i)=>{d.className='control-bar__dot';if(states[i])d.classList.add(states[i])})},
+toggleCheckMode(gameState){gameState.checkMode=gameState.checkMode==='all'?'set':'all';
+const toggle=document.getElementById('checkToggle');if(toggle)toggle.classList.toggle('active',gameState.checkMode==='set')}
 };
 document.addEventListener('DOMContentLoaded',()=>{
 const cur=location.pathname.split('/').pop()||'index.html';const isHome=cur==='index.html';

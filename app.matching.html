@@ -39,7 +39,7 @@
 <div class="control-bar">
 <div class="control-bar__row">
 <span class="control-bar__stat" id="setDisp">Bộ: 1 / 1</span>
-<button class="control-bar__check" id="checkBtn">Check</button>
+<button class="control-bar__check" id="checkBtn">Check<span class="check-toggle" id="checkToggle" title="Toggle: check all sets / check this set only">⚙</span></button>
 <button class="control-bar__continue" id="contBtn" style="display:none">Tiếp tục</button>
 <span class="control-bar__stat" id="scoreDisp">Điểm: 0</span></div>
 <div class="control-bar__nav">
@@ -116,6 +116,7 @@ PV.showResult(globalOk,globalTot,PV.checkMsg(globalPct));document.getElementById
 function contGame(){chk=false;document.querySelectorAll('.match-item').forEach(e=>e.classList.remove('correct','wrong'));renderLines();
 document.getElementById('resultBanner').style.display='none';document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none'}
 document.getElementById('checkBtn').addEventListener('click',checkAnswers);
+document.getElementById('checkToggle').addEventListener('click',e=>{e.stopPropagation();SFX.click();PV.toggleCheckMode(gameState)});
 document.getElementById('contBtn').addEventListener('click',contGame);
 document.getElementById('prevBtn').addEventListener('click',prevSet);
 document.getElementById('nextBtn').addEventListener('click',nextSet);

@@ -48,7 +48,7 @@
 <div class="control-bar">
 <div class="control-bar__row">
 <span class="control-bar__stat" id="progDisp">0 / 0 đặt</span>
-<button class="control-bar__check" id="checkBtn">Check</button>
+<button class="control-bar__check" id="checkBtn">Check<span class="check-toggle" id="checkToggle" title="Toggle: check all sets / check this set only">⚙</span></button>
 <button class="control-bar__continue" id="contBtn" style="display:none">Tiếp tục</button>
 <span class="control-bar__stat" id="scoreDisp">Điểm: —</span></div></div>
 <div class="map-layout"><div class="map-canvas" id="mapCanvas"><svg class="map-svg" id="mapSvg"></svg></div>
@@ -175,6 +175,7 @@ renderPlaced();gd.keywords.forEach(kw=>{const ok=pl[kw.id]===crm[kw.id];const n=
 function contGame(){chk=false;document.querySelectorAll('#mapCanvas .map-node').forEach(n=>n.classList.remove('correct','wrong'));
 refreshConns();document.getElementById('resultBanner').style.display='none';document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none';upProg()}
 document.getElementById('checkBtn').addEventListener('click',checkAnswers);
+document.getElementById('checkToggle').addEventListener('click',e=>{e.stopPropagation();SFX.click();PV.toggleCheckMode(gameState)});
 document.getElementById('contBtn').addEventListener('click',contGame);
 (async()=>{const d=await PV.loadData('mindMap');gd=d?d[0]||d:null;if(!gd){document.getElementById('progDisp').textContent='No data';return}gameState.sets=[{id:'set-0',data:gd}];gameState.currentSetIdx=0;gameState.checkMode='all';buildGame()})();
 </script></body></html>

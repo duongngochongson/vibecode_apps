@@ -51,7 +51,7 @@
 <div class="control-bar">
 <div class="control-bar__row">
 <span class="control-bar__stat" id="progDisp">0 / 0 đặt</span>
-<button class="control-bar__check" id="checkBtn">Check</button>
+<button class="control-bar__check" id="checkBtn">Check<span class="check-toggle" id="checkToggle" title="Toggle: check all sets / check this set only">⚙</span></button>
 <button class="control-bar__continue" id="contBtn" style="display:none">Tiếp tục</button>
 <span class="control-bar__stat" id="scoreDisp">Điểm: —</span></div></div>
 <div class="game-area"><div class="topics-col" id="topicsCol"></div>
@@ -118,6 +118,7 @@ document.getElementById('checkBtn').style.display='none';document.getElementById
 function contGame(){chk=false;document.querySelectorAll('.drop-zone').forEach(z=>z.classList.remove('correct','wrong'));
 document.getElementById('resultBanner').style.display='none';document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none'}
 document.getElementById('checkBtn').addEventListener('click',checkAnswers);
+document.getElementById('checkToggle').addEventListener('click',e=>{e.stopPropagation();SFX.click();PV.toggleCheckMode(gameState)});
 document.getElementById('contBtn').addEventListener('click',contGame);
 (async()=>{gd=await PV.loadData('prosCons')||[];gameState.sets=[{id:'set-0',questions:gd}];gameState.currentSetIdx=0;gameState.checkMode='all';buildGame()})();
 </script></body></html>

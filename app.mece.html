@@ -33,7 +33,7 @@
 <div class="control-bar">
 <div class="control-bar__row">
 <span class="control-bar__stat" id="pDisp">0 / 0 trả lời</span>
-<button class="control-bar__check" id="checkBtn">Check</button>
+<button class="control-bar__check" id="checkBtn">Check<span class="check-toggle" id="checkToggle" title="Toggle: check all sets / check this set only">⚙</span></button>
 <button class="control-bar__continue" id="contBtn" style="display:none">Tiếp tục</button>
 <span class="control-bar__stat" id="sDisp">Điểm: —</span></div></div>
 <div id="qCont"></div><div id="meceEmpty" class="mece-empty" style="display:none">Chưa có câu hỏi nào. Thêm trong Admin.</div>
@@ -80,6 +80,8 @@ function doCont(){chk=false;document.querySelectorAll('.qcard').forEach(c=>c.cla
 document.querySelectorAll('.ans-btn').forEach(b=>{b.classList.remove('r-ok','r-bad');const gr=b.closest('.ans-group');
 b.classList.toggle('selected',b.dataset.answer===ans[+gr.dataset.qid])});
 document.getElementById('resultBanner').style.display='none';document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none'}
-document.getElementById('checkBtn').addEventListener('click',doCheck);document.getElementById('contBtn').addEventListener('click',doCont);
+document.getElementById('checkBtn').addEventListener('click',doCheck);
+document.getElementById('checkToggle').addEventListener('click',e=>{e.stopPropagation();SFX.click();PV.toggleCheckMode(gameState)});
+document.getElementById('contBtn').addEventListener('click',doCont);
 (async()=>{const d=await PV.loadData('mece');gd=d?JSON.parse(JSON.stringify(d)):[];gameState.sets=[{id:'set-0',questions:gd}];gameState.currentSetIdx=0;gameState.checkMode='all';build()})();
 </script></body></html>

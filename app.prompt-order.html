@@ -38,7 +38,7 @@
 <div class="control-bar">
 <div class="control-bar__row">
 <span class="control-bar__stat" id="scoreDisp">Điểm: — / —</span>
-<button class="control-bar__check" id="checkBtn">Check</button>
+<button class="control-bar__check" id="checkBtn">Check<span class="check-toggle" id="checkToggle" title="Toggle: check all sets / check this set only">⚙</span></button>
 <button class="control-bar__continue" id="contBtn" style="display:none">Tiếp tục</button>
 <span class="control-bar__stat po-q-header">Câu <span class="po-q-number" id="qNum">1</span></span></div>
 <div class="control-bar__nav">
@@ -122,7 +122,9 @@ gameState.setResults[0]={correct:cor,total:tq,pct};gameState.globalResults={corr
 PV.showResult(cor,tq,PV.checkMsg(pct));document.getElementById('checkBtn').style.display='none';document.getElementById('contBtn').style.display=''}
 function doCont(){chk=false;cr={};document.getElementById('resultBanner').style.display='none';document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none';
 document.getElementById('scoreDisp').textContent='SCORE: — / —';renderRows();renderPool();upDots()}
-document.getElementById('checkBtn').addEventListener('click',doCheck);document.getElementById('contBtn').addEventListener('click',doCont);
+document.getElementById('checkBtn').addEventListener('click',doCheck);
+document.getElementById('checkToggle').addEventListener('click',e=>{e.stopPropagation();SFX.click();PV.toggleCheckMode(gameState)});
+document.getElementById('contBtn').addEventListener('click',doCont);
 document.getElementById('prevBtn').addEventListener('click',()=>{if(cq>0){SFX.navigate();goToQ(cq-1)}});
 document.getElementById('nextBtn').addEventListener('click',()=>{if(cq<tq-1){SFX.navigate();goToQ(cq+1)}});
 (async()=>{qs=await PV.loadData('promptOrder')||[];if(!qs.length){document.getElementById('poEmpty').style.display='';return}
