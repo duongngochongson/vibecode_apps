@@ -11,13 +11,13 @@
 .qcard.wrong{border-color:var(--error);background-color:rgba(217,100,89,.05)}
 .qcard__hdr{display:flex;align-items:center;gap:12px;margin-bottom:8px}
 .qcard__num{font-family:var(--font-sans);font-size:12px;font-weight:600;color:var(--accent);min-width:28px}
-.qcard__topic{font-family:var(--font-serif);font-size:18px;font-weight:700;color:var(--text-primary)}
+.qcard__topic{font-family:var(--font-serif);font-size:22px;font-weight:700;color:var(--text-primary)}
 .qcard__concept{font-family:var(--font-sans);font-size:13px;color:var(--text-secondary);font-style:italic;margin-bottom:12px;padding-left:40px}
 .cats{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;padding-left:40px}
 .cat-chip{font-family:var(--font-sans);font-size:12px;color:var(--text-primary);padding:6px 12px;border:1px solid var(--border-subtle);background:var(--bg-elevated);border-radius:4px}
 .cat-chip[title]{cursor:help}
 .ans-group{display:flex;flex-wrap:wrap;gap:8px;padding-left:40px}
-.ans-btn{font-family:var(--font-sans);font-size:13px;font-weight:600;padding:8px 14px;border:1px solid var(--border-default);background:transparent;color:var(--text-secondary);border-radius:4px;cursor:pointer;transition:all 0.15s}
+.ans-btn{font-family:var(--font-sans);font-size:14px;font-weight:600;padding:10px 18px;border:1px solid var(--border-default);background:transparent;color:var(--text-secondary);border-radius:4px;cursor:pointer;transition:all 0.15s;min-height:48px;display:flex;align-items:center;justify-content:center}
 .ans-btn:hover{border-color:var(--accent);color:var(--accent)}
 .ans-btn.selected{border-color:var(--accent);color:var(--accent);background:var(--accent-subtle)}
 .ans-btn.r-ok{border-color:var(--success)!important;color:var(--success)!important;background:var(--success-subtle)!important}
@@ -28,10 +28,11 @@
 <body><main class="game-page">
 <div class="page-header"><a href="index.html" class="page-header__back">← Home</a>
 <h1 class="page-header__title">🦊 MECE</h1>
-<p class="mece-exp"><strong>MECE = Mutually Exclusive, Collectively Exhaustive.</strong><br>Phân loại đúng MECE khi các nhóm <strong>không chồng chéo</strong> (ME) và <strong>bao phủ hết</strong> tất cả trường hợp (CE).</p></div>
+<p class="mece-exp"><strong>MECE = Mutually Exclusive, Collectively Exhaustive.</strong><br>Phân loại đúng MECE khi các nhóm <strong>không chồng chéo</strong> (ME) và <strong>bao phủ hết</strong> tất cả trường hợp (CE).</p>
+<div class="how-to"><strong>Cách chơi:</strong> Chọn loại phân loại phù hợp cho mỗi ví dụ. Các tùy chọn: MECE đúng, Sai ME (chồng chéo), Sai CE (chưa bao hết), hoặc không MECE.</div></div>
 <div class="score-bar"><div class="score-chip" id="pDisp">0 / 0 trả lời</div>
-<button class="btn btn-success" id="checkBtn">Check</button>
-<button class="btn btn-secondary" id="contBtn" style="display:none">Tiếp tục</button>
+<button class="btn btn-success btn-lg" id="checkBtn">Check</button>
+<button class="btn btn-secondary btn-lg" id="contBtn" style="display:none">Tiếp tục</button>
 <div class="score-chip" id="sDisp">Điểm: —</div></div>
 <div id="qCont"></div><div id="meceEmpty" class="mece-empty" style="display:none">Chưa có câu hỏi nào. Thêm trong Admin.</div>
 <div class="result-banner" id="resultBanner"><div class="result-banner__score" id="resultScore"></div><div class="result-banner__msg" id="resultMsg"></div></div></main>
