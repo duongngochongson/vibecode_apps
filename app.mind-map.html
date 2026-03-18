@@ -5,11 +5,11 @@
 .map-layout{display:grid;grid-template-columns:1fr 196px;gap:20px;align-items:start}
 .map-canvas{position:relative;display:flex;flex-direction:column;gap:14px;min-height:280px}
 .map-svg{position:absolute;inset:0;overflow:visible;z-index:10;fill:none;pointer-events:none}
-.map-row{min-height:80px;border:1px dashed var(--border-default);border-radius:6px;padding:10px 12px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;position:relative;z-index:2;transition:all 0.15s}
+.map-row{min-height:96px;border:1px dashed var(--border-default);border-radius:6px;padding:12px 16px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;position:relative;z-index:2;transition:all 0.15s}
 .map-row.accepting{border-color:var(--accent)}.map-row.drag-over{border-color:var(--accent);background:var(--accent-subtle)}
-.row-label{font-family:var(--font-sans);font-size:11px;color:var(--text-secondary);min-width:20px;user-select:none;font-weight:600}
+.row-label{font-family:var(--font-sans);font-size:13px;color:var(--text-secondary);min-width:24px;user-select:none;font-weight:600;text-align:center}
 .row-nodes{display:flex;justify-content:space-evenly;align-items:center;flex:1;flex-wrap:wrap}
-.map-node{position:relative;padding:10px 18px 10px 14px;border:1px solid var(--border-default);border-radius:4px;background:var(--bg-surface);cursor:pointer;user-select:none;font-size:13px;color:var(--text-primary);transition:all 0.12s}
+.map-node{position:relative;padding:12px 20px 12px 16px;border:1px solid var(--border-default);border-radius:4px;background:var(--bg-surface);cursor:pointer;user-select:none;font-size:14px;color:var(--text-primary);transition:all 0.12s;min-height:48px;display:flex;align-items:center;justify-content:center}
 .map-node:hover{border-color:var(--border-subtle)}
 .map-node.selected{border-color:var(--accent);background:var(--accent-subtle)}
 .map-node.correct{border-color:var(--success);background:var(--success-subtle);color:var(--success)}.map-node.wrong{border-color:var(--error);background:var(--error-subtle);color:var(--error)}
@@ -33,7 +33,7 @@
 .kw-pool-count{color:var(--text-tertiary);font-size:11px}
 .kw-pool{display:flex;flex-direction:column;gap:6px;min-height:60px;padding:10px;border:1px solid var(--border-default);border-radius:6px;transition:all 0.15s;background:var(--bg-surface)}
 .kw-pool.drag-over{border-color:var(--accent);background:var(--accent-subtle)}
-.kw-chip{padding:9px 12px;border:1px solid var(--border-default);border-radius:4px;background:var(--bg-elevated);cursor:grab;font-size:12px;color:var(--text-primary);transition:all 0.15s}
+.kw-chip{padding:11px 16px;border:1px solid var(--border-default);border-radius:4px;background:var(--bg-elevated);cursor:grab;font-size:14px;color:var(--text-primary);transition:all 0.15s;min-height:48px;display:flex;align-items:center;justify-content:center}
 .kw-chip:hover{border-color:var(--accent);transform:translateX(2px)}.kw-chip:active{cursor:grabbing}.kw-chip.dragging{opacity:0.4}
 .pool-empty{font-family:var(--font-sans);font-size:12px;color:var(--text-tertiary);letter-spacing:0.25px;text-align:center;padding:8px 0}
 @media(max-width:768px){.map-layout{grid-template-columns:1fr}.kw-pool-section{order:-1}.kw-pool{flex-direction:row;flex-wrap:wrap}.kw-chip{flex:0 0 auto}}
@@ -44,9 +44,10 @@
 <div class="page-header"><a href="index.html" class="page-header__back">← Home</a>
 <h1>🐙 Sơ đồ Tư Duy</h1>
 <p class="page-header__sub">Kéo thả từ khóa vào đúng hàng · Ấn 2 ô khác hàng để nối · Ấn lại để bỏ nối</p></div>
+<div class="how-to"><strong>Bước 1:</strong> Kéo từ khóa từ bên phải vào hàng thích hợp · <strong>Bước 2:</strong> Ấn 2 từ khóa ở hàng khác nhau để nối chúng · <strong>Bước 3:</strong> Nhấp "Check" để kiểm tra</div>
 <div class="score-bar"><div class="score-chip" id="progDisp">0 / 0 đặt</div>
-<button class="btn btn-success" id="checkBtn" onclick="checkAnswers()">Check</button>
-<button class="btn btn-secondary" id="contBtn" onclick="contGame()" style="display:none">Tiếp tục</button>
+<button class="btn btn-success btn-lg" id="checkBtn" onclick="checkAnswers()">Check</button>
+<button class="btn btn-secondary btn-lg" id="contBtn" onclick="contGame()" style="display:none">Tiếp tục</button>
 <div class="score-chip" id="scoreDisp">Điểm: —</div></div>
 <div class="map-layout"><div class="map-canvas" id="mapCanvas"><svg class="map-svg" id="mapSvg"></svg></div>
 <div class="kw-pool-section"><div class="kw-pool-header">Keywords <span class="kw-pool-count" id="poolCount"></span></div>
