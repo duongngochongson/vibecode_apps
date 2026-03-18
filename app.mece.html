@@ -1,35 +1,38 @@
 <!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>🦊 — PIXELVERSE</title><link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' fill='%2300fff5'>◈</text></svg>">
 <link rel="stylesheet" href="style.css"/><script src="app.js"></script>
-<style>.game-page{padding:32px 1.5rem 80px;max-width:800px}
-.page-header__title{font-family:var(--fp);font-size:clamp(14px,3vw,20px);color:var(--orange);letter-spacing:3px;margin:12px 0 10px}
-.mece-exp{font-family:var(--fb);font-size:13px;color:rgba(232,232,255,.75);line-height:1.6;max-width:600px;margin:0 auto}
-.mece-exp strong{color:var(--orange)}
-.qcard{background:var(--card);border:2px solid var(--grey);padding:20px 24px;margin-bottom:16px;transition:border-color .2s}
-.qcard.correct{border-color:var(--green)}.qcard.wrong{border-color:var(--magenta)}
+<style>
+.page-header__title{font-family:var(--font-serif);font-size:clamp(24px,4vw,32px);font-weight:900;color:var(--text-primary);letter-spacing:0.5px;margin:12px 0 16px}
+.mece-exp{font-family:var(--font-sans);font-size:14px;color:var(--text-secondary);line-height:var(--leading-relaxed);max-width:600px;margin:0 auto}
+.mece-exp strong{color:var(--accent);font-weight:600}
+.qcard{background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:20px;margin-bottom:16px;transition:all 0.15s}
+.qcard:hover{border-color:var(--border-default)}
+.qcard.correct{border-color:var(--success);background-color:rgba(92,184,92,.05)}
+.qcard.wrong{border-color:var(--error);background-color:rgba(217,100,89,.05)}
 .qcard__hdr{display:flex;align-items:center;gap:12px;margin-bottom:8px}
-.qcard__num{font-family:var(--fp);font-size:9px;color:var(--orange);min-width:28px}
-.qcard__topic{font-family:var(--fh);font-size:16px;font-weight:700;color:var(--white)}
-.qcard__concept{font-family:var(--fb);font-size:12px;color:rgba(232,232,255,.4);font-style:italic;margin-bottom:12px;padding-left:40px}
+.qcard__num{font-family:var(--font-sans);font-size:12px;font-weight:600;color:var(--accent);min-width:28px}
+.qcard__topic{font-family:var(--font-serif);font-size:18px;font-weight:700;color:var(--text-primary)}
+.qcard__concept{font-family:var(--font-sans);font-size:13px;color:var(--text-secondary);font-style:italic;margin-bottom:12px;padding-left:40px}
 .cats{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;padding-left:40px}
-.cat-chip{font-family:var(--fb);font-size:12px;color:var(--white);padding:6px 14px;border:1px solid rgba(255,255,255,.15);background:var(--card2)}
+.cat-chip{font-family:var(--font-sans);font-size:12px;color:var(--text-primary);padding:6px 12px;border:1px solid var(--border-subtle);background:var(--bg-elevated);border-radius:4px}
 .cat-chip[title]{cursor:help}
 .ans-group{display:flex;flex-wrap:wrap;gap:8px;padding-left:40px}
-.ans-btn{font-family:var(--fb);font-size:12px;font-weight:600;padding:8px 14px;border:2px solid var(--grey);background:transparent;color:var(--grey);cursor:pointer;transition:all .15s}
-.ans-btn:hover{border-color:var(--white);color:var(--white)}
-.ans-btn.selected{border-color:var(--cyan);color:var(--cyan);box-shadow:0 0 8px rgba(0,255,245,.2);background:rgba(0,255,245,.05)}
-.ans-btn.r-ok{border-color:var(--green)!important;color:var(--green)!important;box-shadow:0 0 8px rgba(57,255,20,.3);background:rgba(57,255,20,.08)}
-.ans-btn.r-bad{border-color:var(--magenta)!important;color:var(--magenta)!important;box-shadow:0 0 8px rgba(255,0,204,.3);background:rgba(255,0,204,.08)}
-.mece-empty{text-align:center;padding:60px 20px;color:var(--grey);font-size:11px;letter-spacing:1px}
-@media(max-width:600px){.game-page{padding:16px 1rem 60px}.qcard{padding:16px}.cats,.ans-group,.qcard__concept{padding-left:0}.ans-btn{font-size:10px;padding:6px 10px}}</style></head>
+.ans-btn{font-family:var(--font-sans);font-size:13px;font-weight:600;padding:8px 14px;border:1px solid var(--border-default);background:transparent;color:var(--text-secondary);border-radius:4px;cursor:pointer;transition:all 0.15s}
+.ans-btn:hover{border-color:var(--accent);color:var(--accent)}
+.ans-btn.selected{border-color:var(--accent);color:var(--accent);background:var(--accent-subtle)}
+.ans-btn.r-ok{border-color:var(--success)!important;color:var(--success)!important;background:var(--success-subtle)!important}
+.ans-btn.r-bad{border-color:var(--error)!important;color:var(--error)!important;background:var(--error-subtle)!important}
+.mece-empty{text-align:center;padding:60px 20px;color:var(--text-tertiary);font-size:13px;letter-spacing:0.25px}
+@media(max-width:600px){.game-page{padding:16px 1rem 60px}.qcard{padding:16px}.cats,.ans-group,.qcard__concept{padding-left:0}.ans-btn{font-size:12px;padding:6px 10px}}
+</style></head>
 <body><main class="game-page">
-<div class="page-header"><a href="index.html" class="page-header__back">◀ HOME</a>
+<div class="page-header"><a href="index.html" class="page-header__back">← Home</a>
 <h1 class="page-header__title">🦊 MECE</h1>
 <p class="mece-exp"><strong>MECE = Mutually Exclusive, Collectively Exhaustive.</strong><br>Phân loại đúng MECE khi các nhóm <strong>không chồng chéo</strong> (ME) và <strong>bao phủ hết</strong> tất cả trường hợp (CE).</p></div>
-<div class="score-bar"><div class="score-chip pixel-box" id="pDisp">0 / 0 ANSWERED</div>
-<button class="action-btn action-btn--check" id="checkBtn">✓ CHECK</button>
-<button class="action-btn action-btn--continue" id="contBtn" style="display:none">▶ CONTINUE</button>
-<div class="score-chip pixel-box pixel-box--yellow" id="sDisp">SCORE: —</div></div>
+<div class="score-bar"><div class="score-chip" id="pDisp">0 / 0 trả lời</div>
+<button class="btn btn-success" id="checkBtn">Check</button>
+<button class="btn btn-secondary" id="contBtn" style="display:none">Tiếp tục</button>
+<div class="score-chip" id="sDisp">Điểm: —</div></div>
 <div id="qCont"></div><div id="meceEmpty" class="mece-empty" style="display:none">Chưa có câu hỏi nào. Thêm trong Admin.</div>
 <div class="result-banner" id="resultBanner"><div class="result-banner__score" id="resultScore"></div><div class="result-banner__msg" id="resultMsg"></div></div></main>
 <script>
