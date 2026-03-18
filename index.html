@@ -1,340 +1,48 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PIXELVERSE</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' fill='%2300fff5'>◈</text></svg>">
-  <link rel="stylesheet" href="css/style.css" />
-  <script src="js/sfx.js"></script>
-  <script src="js/games-popup.js"></script>
-  <script src="js/game-visibility.js" data-json="data/admin_content.json"></script>
-  <style>
-    /* ===== HOME-SPECIFIC STYLES ===== */
-
-    /* ===== SPACE BACKGROUND ===== */
-    .hero-space {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
-      background:
-        radial-gradient(ellipse 60% 40% at 50% 50%, rgba(0,20,60,0.4) 0%, transparent 70%),
-        radial-gradient(circle 70px at 14% 28%, rgba(0,255,245,0.09) 0%, transparent 65%),
-        radial-gradient(circle 44px at 78% 18%, rgba(255,0,204,0.10) 0%, transparent 65%),
-        radial-gradient(circle 90px at 88% 68%, rgba(57,255,20,0.06) 0%, transparent 65%),
-        radial-gradient(circle 55px at 28% 72%, rgba(255,230,0,0.07) 0%, transparent 65%);
-      animation: space-drift 30s ease-in-out infinite alternate;
-    }
-    @keyframes space-drift {
-      from { transform: scale(1)    translateX(0); }
-      to   { transform: scale(1.05) translateX(-8px); }
-    }
-
-    /* ===== QUOTE ===== */
-    .hero-quote {
-      margin-top: 24px;
-      max-width: 560px;
-      text-align: center;
-      padding: 0 1rem;
-    }
-    .hero-quote__text {
-      font-family: var(--font-vi-body);
-      font-size: 14px;
-      font-style: italic;
-      color: rgba(232,232,255,0.55);
-      line-height: 1.7;
-      margin-bottom: 6px;
-      transition: opacity 0.6s;
-    }
-    .hero-quote__author {
-      font-family: var(--font-pixel);
-      font-size: 6px;
-      color: var(--cyan);
-      letter-spacing: 2px;
-      opacity: 0.7;
-      transition: opacity 0.6s;
-    }
-
-    .hero-grid {
-      position: absolute;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(0,255,245,0.06) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,255,245,0.06) 1px, transparent 1px);
-      background-size: 40px 40px;
-      animation: grid-scroll 8s linear infinite;
-      pointer-events: none;
-    }
-    @keyframes grid-scroll {
-      from { background-position: 0 0; }
-      to   { background-position: 40px 40px; }
-    }
-
-    .pixel-float {
-      position: absolute;
-      bottom: 0;
-      width: 8px;
-      height: 8px;
-      pointer-events: none;
-      animation: float-up linear infinite;
-      opacity: 0.6;
-    }
-    @keyframes float-up {
-      0%   { transform: translateY(0) rotate(0deg); opacity: 0.6; }
-      100% { transform: translateY(-120vh) rotate(360deg); opacity: 0; }
-    }
-    .pixel-float--1 { left: 8%;  background: var(--cyan);    animation-duration: 7s;  animation-delay: 0s; }
-    .pixel-float--2 { left: 20%; background: var(--magenta); animation-duration: 9s;  animation-delay: 2s; }
-    .pixel-float--3 { left: 35%; background: var(--yellow);  animation-duration: 6s;  animation-delay: 1s; }
-    .pixel-float--4 { left: 55%; background: var(--green);   animation-duration: 11s; animation-delay: 3s; }
-    .pixel-float--5 { left: 70%; background: var(--cyan);    animation-duration: 8s;  animation-delay: 0.5s; }
-    .pixel-float--6 { left: 85%; background: var(--magenta); animation-duration: 10s; animation-delay: 4s; }
-    /* Hide some particles on small screens to reduce visual noise */
-    @media (max-width: 480px) {
-      .pixel-float--2, .pixel-float--4, .pixel-float--6 { display: none; }
-    }
-
-    .stats-bar {
-      display: flex;
-      justify-content: center;
-      gap: clamp(16px, 5vw, 40px);
-      flex-wrap: wrap;
-      margin-top: 20px;
-      padding: 20px;
-    }
-    .stat-item {
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .stat-item__value {
-      font-size: clamp(16px, 4vw, 20px);
-      color: var(--cyan);
-    }
-    .stat-item:nth-child(2) .stat-item__value { color: var(--magenta); }
-    .stat-item:nth-child(3) .stat-item__value { color: var(--yellow); }
-    .stat-item__label {
-      font-size: 7px;
-      color: rgba(232,232,255,0.5);
-      letter-spacing: 2px;
-    }
-
-    /* Card title in Vietnamese uses Merriweather */
-    .app-card__title.font-vi-h {
-      font-size: clamp(15px, 3vw, 18px);
-      letter-spacing: 0;
-    }
-
-    /* Remove glow from app cards (colors kept via color-class border in style.css) */
-    .app-card { box-shadow: none !important; }
-
-  </style>
-</head>
+<!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>PIXELVERSE</title><link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' fill='%2300fff5'>◈</text></svg>">
+<link rel="stylesheet" href="style.css"/><script src="app.js"></script>
+<style>.hero-space{position:absolute;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse 60% 40% at 50% 50%,rgba(0,20,60,.4) 0%,transparent 70%),radial-gradient(circle 70px at 14% 28%,rgba(0,255,245,.09) 0%,transparent 65%),radial-gradient(circle 44px at 78% 18%,rgba(255,0,204,.1) 0%,transparent 65%);animation:sd 30s ease-in-out infinite alternate}
+@keyframes sd{from{transform:scale(1) translateX(0)}to{transform:scale(1.05) translateX(-8px)}}
+.hero-quote{margin-top:24px;max-width:560px;text-align:center;padding:0 1rem}
+.hero-quote__text{font-family:var(--fb);font-size:14px;font-style:italic;color:rgba(232,232,255,.55);line-height:1.7;margin-bottom:6px;transition:opacity .6s}
+.hero-quote__author{font-family:var(--fp);font-size:6px;color:var(--cyan);letter-spacing:2px;opacity:.7;transition:opacity .6s}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(0,255,245,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,245,.06) 1px,transparent 1px);background-size:40px 40px;animation:gs 8s linear infinite;pointer-events:none}
+@keyframes gs{from{background-position:0 0}to{background-position:40px 40px}}
+.stats-bar{display:flex;justify-content:center;gap:clamp(16px,5vw,40px);flex-wrap:wrap;margin-top:20px;padding:20px}
+.stat-item{text-align:center;display:flex;flex-direction:column;gap:6px}
+.stat-item__value{font-size:clamp(16px,4vw,20px);color:var(--cyan)}
+.stat-item:nth-child(2) .stat-item__value{color:var(--magenta)}
+.stat-item:nth-child(3) .stat-item__value{color:var(--yellow)}
+.stat-item__label{font-size:7px;color:rgba(232,232,255,.5);letter-spacing:2px}</style></head>
 <body>
-
-  <!-- ===== NAVBAR ===== -->
-  <nav class="navbar">
-    <a href="index.html" class="navbar__logo">◈ PIXELVERSE</a>
-    <ul class="navbar__links">
-      <li><a href="index.html" class="active" title="Home">◈</a></li>
-      <li>
-        <button class="navbar__grid-btn" id="gamesBtn" title="Games">
-          <span class="navbar__grid-btn__dots">
-            <span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span>
-            <span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span>
-            <span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span><span class="navbar__grid-dot"></span>
-          </span>
-        </button>
-      </li>
-      <li><a class="navbar__admin-btn" href="apps/admin/">⚙</a></li>
-    </ul>
-  </nav>
-
-  <!-- ===== GAMES POPUP ===== -->
-  <div class="navbar__games-popup" id="gamesPopup">
-    <div class="navbar__games-list">
-      <a href="apps/pros-cons/index.html"   class="navbar__game-item" data-game="pros-cons">🐺</a>
-      <a href="apps/mind-map/index.html"    class="navbar__game-item" data-game="mind-map">🐙</a>
-      <a href="apps/matching/index.html"    class="navbar__game-item" data-game="matching">🐿️</a>
-      <a href="apps/file-naming/index.html" class="navbar__game-item" data-game="file-naming">🐟</a>
-      <a href="apps/prompt-order/index.html" class="navbar__game-item" data-game="prompt-order">🐜</a>
-      <a href="apps/calculator/index.html"  class="navbar__game-item" data-game="calculator">🐬</a>
-      <a href="apps/mece/index.html"        class="navbar__game-item" data-game="mece">🦊</a>
-      <a href="apps/noticeboard/index.html" class="navbar__game-item" data-game="noticeboard">🐝</a>
-    </div>
-  </div>
-
-
-  <!-- ===== HERO ===== -->
-  <section class="hero">
-    <div class="hero-space"></div>
-    <div class="hero-grid"></div>
-
-    <div class="pixel-float pixel-float--1"></div>
-    <div class="pixel-float pixel-float--2"></div>
-    <div class="pixel-float pixel-float--3"></div>
-    <div class="pixel-float pixel-float--4"></div>
-    <div class="pixel-float pixel-float--5"></div>
-    <div class="pixel-float pixel-float--6"></div>
-
-    <div class="hero__badge">◀ PIXEL UNIVERSE ▶</div>
-    <h1 class="hero__title">Welcome to universe of pixel</h1>
-    <a href="#apps" class="hero__cta" onclick="SFX.navigate()">▶ EXPLORE</a>
-
-    <div class="stats-bar">
-      <div class="stat-item">
-        <span class="stat-item__value" id="gameCount">4+</span>
-        <span class="stat-item__label">GAMES</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-item__value">∞</span>
-        <span class="stat-item__label">DEVELOPMENT</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-item__value" id="sessionTimer">0s</span>
-        <span class="stat-item__label" id="timerLabel">SECONDS</span>
-      </div>
-    </div>
-
-    <div class="hero-quote">
-      <p class="hero-quote__text" id="heroQuoteText"></p>
-      <span class="hero-quote__author" id="heroQuoteAuthor"></span>
-    </div>
-  </section>
-
-  <!-- ===== APPS SECTION ===== -->
-  <section class="apps-section" id="apps">
-    <h2 class="section-title">▦ ALL GAMES</h2>
-    <div class="section-divider"><span></span></div>
-
-    <div class="apps-grid">
-
-      <!-- Card 1: Đoán Ưu/Nhược (LIVE) -->
-      <article class="app-card pixel-box app-card--cyan" data-game="pros-cons" onclick="SFX.navigate();location.href='apps/pros-cons/index.html'">
-        <div class="app-card__icon">🐺</div>
-        <h3 class="app-card__title font-vi-h">Đoán Ưu/Nhược</h3>
-        <p class="app-card__desc font-vi">Kéo thả thẻ vào đúng ô. Phân tích ưu/nhược điểm.</p>
-        <span class="app-card__btn">▶ PLAY</span>
-      </article>
-
-      <!-- Card 2: Sơ đồ Tư Duy -->
-      <article class="app-card pixel-box app-card--magenta" data-game="mind-map" onclick="SFX.navigate();location.href='apps/mind-map/index.html'" style="cursor:pointer">
-        <div class="app-card__icon">🐙</div>
-        <h3 class="app-card__title font-vi-h">Sơ đồ Tư Duy</h3>
-        <p class="app-card__desc">Kéo thả từ khóa, nối quan hệ, hoàn thiện sơ đồ</p>
-        <a href="apps/mind-map/index.html" class="app-card__btn">▶ PLAY</a>
-      </article>
-
-      <!-- Card 3: Nối Từ (Matching) -->
-      <article class="app-card pixel-box app-card--green" data-game="matching" onclick="SFX.navigate();location.href='apps/matching/index.html'">
-        <div class="app-card__icon">🐿️</div>
-        <h3 class="app-card__title font-vi-h">Nối Từ</h3>
-        <p class="app-card__desc font-vi">Nối các từ khóa ở hai cột với nhau theo mối quan hệ đúng.</p>
-        <span class="app-card__btn">▶ PLAY</span>
-      </article>
-
-      <!-- Card 4: Đặt Tên File -->
-      <article class="app-card pixel-box app-card--yellow" data-game="file-naming" onclick="SFX.navigate();location.href='apps/file-naming/index.html'">
-        <div class="app-card__icon">🐟</div>
-        <h3 class="app-card__title font-vi-h">Đặt Tên File</h3>
-        <p class="app-card__desc font-vi">Điền đường dẫn và kéo hành tinh vào đúng thư mục trong cây vũ trụ.</p>
-        <span class="app-card__btn">▶ PLAY</span>
-      </article>
-
-      <!-- Card 5: Sắp xếp Prompt -->
-      <article class="app-card pixel-box app-card--cyan" data-game="prompt-order" onclick="SFX.navigate();location.href='apps/prompt-order/index.html'">
-        <div class="app-card__icon">🐜</div>
-        <h3 class="app-card__title font-vi-h">Sắp xếp Prompt</h3>
-        <p class="app-card__desc font-vi">Kéo thả các thành phần prompt AI vào đúng thứ tự chuẩn.</p>
-        <span class="app-card__btn">▶ PLAY</span>
-      </article>
-
-      <!-- Card 6: Máy Tính -->
-      <article class="app-card pixel-box app-card--magenta" data-game="calculator" onclick="SFX.navigate();location.href='apps/calculator/index.html'">
-        <div class="app-card__icon">🐬</div>
-        <h3 class="app-card__title font-vi-h">Máy Tính</h3>
-        <p class="app-card__desc font-vi">Công cụ tính toán nhanh với giao diện pixel. Hỗ trợ bấm và gõ phím.</p>
-        <span class="app-card__btn">▶ OPEN</span>
-      </article>
-
-      <!-- Card 7: MECE -->
-      <article class="app-card pixel-box app-card--green" data-game="mece" onclick="SFX.navigate();location.href='apps/mece/index.html'">
-        <div class="app-card__icon">🦊</div>
-        <h3 class="app-card__title font-vi-h">MECE</h3>
-        <p class="app-card__desc font-vi">Phân loại đúng MECE hay không? Rèn tư duy phân tích logic!</p>
-        <span class="app-card__btn">▶ PLAY</span>
-      </article>
-
-      <!-- Card 8: Bảng Thông Báo -->
-      <article class="app-card pixel-box app-card--yellow" data-game="noticeboard" onclick="SFX.navigate();location.href='apps/noticeboard/index.html'">
-        <div class="app-card__icon">🐝</div>
-        <h3 class="app-card__title font-vi-h">Bảng Thông Báo</h3>
-        <p class="app-card__desc font-vi">Đọc thông báo và thông tin quan trọng. Copy toàn bộ hoặc bôi đen để sao chép.</p>
-        <span class="app-card__btn">▶ READ</span>
-      </article>
-
-    </div>
-  </section>
-
-
-  <script>
-    // ===== GAME COUNTER =====
-    document.getElementById('gameCount').textContent =
-      document.querySelectorAll('.app-card').length + '+';
-
-    // ===== QUOTE ROTATOR =====
-    const QUOTES = [
-      { text: "The universe is under no obligation to make sense to you.", author: "Neil deGrasse Tyson" },
-      { text: "We are all made of star-stuff.", author: "Carl Sagan" },
-      { text: "Space is big. You just won't believe how vastly, hugely, mind-bogglingly big it is.", author: "Douglas Adams" },
-      { text: "Look up at the stars and not down at your feet.", author: "Stephen Hawking" },
-      { text: "The cosmos is within us. We are made of star-stuff. We are a way for the universe to know itself.", author: "Carl Sagan" },
-      { text: "Two things are infinite: the universe and human stupidity; and I'm not sure about the universe.", author: "Albert Einstein" },
-      { text: "Not only is the universe stranger than we think, it is stranger than we can think.", author: "Werner Heisenberg" },
-    ];
-    let _qi = 0;
-    const qText   = document.getElementById('heroQuoteText');
-    const qAuthor = document.getElementById('heroQuoteAuthor');
-    function showQuote(idx) {
-      qText.style.opacity = '0'; qAuthor.style.opacity = '0';
-      setTimeout(() => {
-        qText.textContent   = '\u201c' + QUOTES[idx].text + '\u201d';
-        qAuthor.textContent = '\u2014 ' + QUOTES[idx].author;
-        qText.style.opacity = '1'; qAuthor.style.opacity = '1';
-      }, 600);
-    }
-    showQuote(0);
-    setInterval(() => { _qi = (_qi + 1) % QUOTES.length; showQuote(_qi); }, 9000);
-
-    // ===== SESSION TIMER =====
-    const _navType = performance.getEntriesByType('navigation')[0]?.type;
-    const _SK = 'pv_start';
-    if (_navType === 'reload' || !sessionStorage.getItem(_SK)) {
-      sessionStorage.setItem(_SK, Date.now());
-    }
-    const _sessionStart = parseInt(sessionStorage.getItem(_SK));
-    const timerEl    = document.getElementById('sessionTimer');
-    const timerLabel = document.getElementById('timerLabel');
-    function updateTimer() {
-      const secs = Math.floor((Date.now() - _sessionStart) / 1000);
-      if (secs < 60) {
-        timerEl.textContent    = secs + 's';
-        timerLabel.textContent = 'SECONDS';
-      } else {
-        timerEl.textContent    = Math.floor(secs / 60) + '+';
-        timerLabel.textContent = 'MINUTES PLAYED';
-      }
-    }
-    updateTimer();
-    const _secInterval = setInterval(() => {
-      updateTimer();
-      if (Date.now() - _sessionStart >= 60000) {
-        clearInterval(_secInterval);
-        setInterval(updateTimer, 60000);
-      }
-    }, 1000);
-  </script>
-</body>
-</html>
+<section class="hero"><div class="hero-space"></div><div class="hero-grid"></div>
+<div class="hero__badge">◀ PIXEL UNIVERSE ▶</div>
+<h1 class="hero__title">Welcome to universe of pixel</h1>
+<a href="#apps" class="hero__cta" onclick="SFX.navigate()">▶ EXPLORE</a>
+<div class="stats-bar"><div class="stat-item"><span class="stat-item__value" id="gameCount">4+</span><span class="stat-item__label">GAMES</span></div>
+<div class="stat-item"><span class="stat-item__value">∞</span><span class="stat-item__label">DEVELOPMENT</span></div>
+<div class="stat-item"><span class="stat-item__value" id="sessionTimer">0s</span><span class="stat-item__label" id="timerLabel">SECONDS</span></div></div>
+<div class="hero-quote"><p class="hero-quote__text" id="heroQuoteText"></p><span class="hero-quote__author" id="heroQuoteAuthor"></span></div></section>
+<section class="apps-section" id="apps"><h2 class="section-title">▦ ALL GAMES</h2><div class="section-divider"><span></span></div>
+<div class="apps-grid" id="appsGrid"></div></section>
+<script>
+const cards=[['pros-cons','cyan','🐺','Đoán Ưu/Nhược','Kéo thả thẻ vào đúng ô. Phân tích ưu/nhược điểm.','PLAY'],
+['mind-map','magenta','🐙','Sơ đồ Tư Duy','Kéo thả từ khóa, nối quan hệ, hoàn thiện sơ đồ','PLAY'],
+['matching','green','🐿️','Nối Từ','Nối các từ khóa ở hai cột với nhau theo mối quan hệ đúng.','PLAY'],
+['file-naming','yellow','🐟','Đặt Tên File','Điền đường dẫn và kéo hành tinh vào đúng thư mục.','PLAY'],
+['prompt-order','cyan','🐜','Sắp xếp Prompt','Kéo thả các thành phần prompt AI vào đúng thứ tự chuẩn.','PLAY'],
+['calculator','magenta','🐬','Máy Tính','Công cụ tính toán nhanh với giao diện pixel.','OPEN'],
+['mece','green','🦊','MECE','Phân loại đúng MECE hay không? Rèn tư duy phân tích logic!','PLAY'],
+['noticeboard','yellow','🐝','Bảng Thông Báo','Đọc thông báo và thông tin quan trọng.','READ']];
+document.getElementById('appsGrid').innerHTML=cards.map(([id,c,e,t,d,b])=>`<article class="app-card pixel-box app-card--${c}" data-game="${id}" onclick="SFX.navigate();location.href='app.${id}.html'"><div class="app-card__icon">${e}</div><h3 class="app-card__title font-vi-h">${t}</h3><p class="app-card__desc font-vi">${d}</p><span class="app-card__btn">▶ ${b}</span></article>`).join('');
+document.getElementById('gameCount').textContent=cards.length+'+';
+const Q=[{t:"The universe is under no obligation to make sense to you.",a:"Neil deGrasse Tyson"},{t:"We are all made of star-stuff.",a:"Carl Sagan"},{t:"Space is big. You just won't believe how vastly, hugely, mind-bogglingly big it is.",a:"Douglas Adams"},{t:"Look up at the stars and not down at your feet.",a:"Stephen Hawking"},{t:"Two things are infinite: the universe and human stupidity; and I'm not sure about the universe.",a:"Albert Einstein"}];
+let qi=0;const qT=document.getElementById('heroQuoteText'),qA=document.getElementById('heroQuoteAuthor');
+function showQ(i){qT.style.opacity='0';qA.style.opacity='0';setTimeout(()=>{qT.textContent='\u201c'+Q[i].t+'\u201d';qA.textContent='\u2014 '+Q[i].a;qT.style.opacity='1';qA.style.opacity='1'},600)}
+showQ(0);setInterval(()=>{qi=(qi+1)%Q.length;showQ(qi)},9000);
+const nt=performance.getEntriesByType('navigation')[0]?.type,SK='pv_start';
+if(nt==='reload'||!sessionStorage.getItem(SK))sessionStorage.setItem(SK,Date.now());
+const ss=parseInt(sessionStorage.getItem(SK)),tE=document.getElementById('sessionTimer'),tL=document.getElementById('timerLabel');
+function uT(){const s=Math.floor((Date.now()-ss)/1000);if(s<60){tE.textContent=s+'s';tL.textContent='SECONDS'}else{tE.textContent=Math.floor(s/60)+'+';tL.textContent='MINUTES PLAYED'}}
+uT();const si=setInterval(()=>{uT();if(Date.now()-ss>=60000){clearInterval(si);setInterval(uT,60000)}},1000);
+</script></body></html>

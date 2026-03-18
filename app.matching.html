@@ -1,0 +1,112 @@
+<!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>🐿️ — PIXELVERSE</title><link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' fill='%2300fff5'>◈</text></svg>">
+<link rel="stylesheet" href="style.css"/><script src="app.js"></script>
+<style>.game-page{padding:32px 1.5rem 80px;max-width:900px}
+.page-header__title{font-family:var(--fh);font-size:clamp(20px,4vw,32px);font-weight:900;color:var(--green);margin:0 0 6px}
+.status-bar{display:flex;justify-content:center;gap:2rem;margin-bottom:20px;font-size:9px;letter-spacing:1px;color:var(--grey)}
+#scoreDisp{color:var(--green)}#setDisp{color:var(--cyan)}
+.match-arena{position:relative;display:grid;grid-template-columns:1fr 60px 1fr;gap:0;align-items:start;min-height:300px}
+.match-col{display:flex;flex-direction:column;gap:12px;padding:8px 0}
+.match-item{position:relative;display:flex;align-items:center;min-height:48px;padding:8px 16px;font-size:10px;letter-spacing:1px;background:rgba(12,12,26,.7);border:2px solid rgba(255,255,255,.08);color:var(--white);transition:border-color .15s,box-shadow .15s;user-select:none;cursor:pointer}
+.match-item.pending{border-color:var(--cyan);box-shadow:0 0 8px var(--cyan)}
+.match-item.correct{border-color:var(--green);box-shadow:0 0 8px var(--green);color:var(--green)}
+.match-item.wrong{border-color:var(--magenta);box-shadow:0 0 8px var(--magenta);color:var(--magenta)}
+.match-item.highlight{border-color:var(--magenta)!important;box-shadow:0 0 10px rgba(255,0,204,.45)!important}
+.match-col--left .match-item{padding-right:28px}.match-col--right .match-item{padding-left:28px}
+.dot{position:absolute;top:50%;transform:translateY(-50%);width:14px;height:14px;border-radius:50%;background:var(--grey);border:2px solid var(--bg);pointer-events:none;z-index:10;transition:background .15s,box-shadow .15s}
+.match-col--left .dot{right:-10px}.match-col--right .dot{left:-10px}
+.dot.pending{background:var(--cyan);box-shadow:0 0 8px var(--cyan)}.dot.connected{background:var(--green)}
+.match-svg-wrap{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;z-index:5}
+.match-svg-wrap svg{width:100%;height:100%;overflow:visible}
+.conn-line{stroke:var(--cyan);stroke-width:2;fill:none;opacity:.7}
+.conn-line.correct{stroke:var(--green);opacity:1}.conn-line.wrong{stroke:var(--magenta);opacity:1}
+.conn-group{cursor:pointer}.conn-hit{stroke:transparent;stroke-width:20;pointer-events:stroke;fill:none}
+.conn-del-group{visibility:hidden;pointer-events:none}.conn-group:hover .conn-del-group{visibility:visible}
+.conn-del-bg{fill:var(--bg);stroke:var(--magenta);stroke-width:1.5}
+.conn-del-txt{fill:var(--magenta);font-size:11px;text-anchor:middle;dominant-baseline:central}
+.set-nav{display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:20px}
+.set-nav__row{display:flex;align-items:center;gap:12px}
+.set-nav__btn{background:transparent;border:2px solid var(--grey);color:var(--grey);font-size:18px;padding:4px 12px;cursor:pointer;transition:all .15s steps(2)}
+.set-nav__btn:hover:not(:disabled){border-color:var(--cyan);color:var(--cyan)}.set-nav__btn:disabled{opacity:.3;cursor:default}
+.set-nav__dots{display:flex;gap:5px}
+.set-dot{width:10px;height:10px;border-radius:50%;background:var(--grey);cursor:pointer;border:none;padding:0;transition:background .15s,box-shadow .15s}
+.set-dot.active{background:var(--yellow);box-shadow:0 0 5px var(--yellow)}.set-dot.answered{background:var(--green);box-shadow:0 0 4px var(--green)}
+.action-btn{letter-spacing:2px;padding:8px 18px;border:none}
+.action-btn--check{background:var(--green);color:var(--bg);box-shadow:0 0 12px var(--green)}
+.action-btn--check:hover{box-shadow:0 0 20px var(--green)}
+.action-btn--play-again{background:var(--cyan);color:var(--bg);box-shadow:0 0 12px var(--cyan)}
+.action-btn--play-again:hover{box-shadow:0 0 20px var(--cyan)}
+.result-banner{padding:16px;margin-top:16px;border-width:2px;background:rgba(57,255,20,.05)}
+.result-banner__score{font-size:14px}.result-banner__msg{font-size:10px;letter-spacing:1px}
+@media(max-width:600px){.game-page{padding:16px 1rem 60px}.match-arena{grid-template-columns:1fr 24px 1fr}.match-item{font-size:9px;padding:6px 8px;min-height:40px}.match-col--left .match-item{padding-right:20px}.match-col--right .match-item{padding-left:20px}}
+@media(max-width:400px){.match-arena{grid-template-columns:1fr 16px 1fr}.match-item{font-size:8px;padding:5px 6px}.dot{width:12px;height:12px}}</style></head>
+<body><main class="game-page">
+<div class="page-header"><a href="index.html" class="page-header__back" onclick="SFX.navigate()">◀ HOME</a>
+<h1 class="page-header__title" id="gameTitle">🐿️ Nối Từ</h1>
+<p class="page-header__sub font-vi">Nối các từ khóa ở hai cột theo mối quan hệ đúng</p></div>
+<div class="status-bar"><span id="scoreDisp">SCORE: 0</span><span id="setDisp">BỘ: 1 / 1</span></div>
+<div class="set-nav"><div class="set-nav__row">
+<button class="set-nav__btn" id="prevBtn" onclick="prevSet()">◀</button>
+<button class="action-btn action-btn--check" id="checkBtn" onclick="checkAnswers()">✓ CHECK</button>
+<button class="action-btn action-btn--play-again" id="contBtn" onclick="contGame()" style="display:none">▶ CONTINUE</button>
+<button class="set-nav__btn" id="nextBtn" onclick="nextSet()">▶</button></div>
+<div class="set-nav__dots" id="setDots"></div></div>
+<div class="match-arena" id="arena"><div class="match-col match-col--left" id="colL"></div><div></div>
+<div class="match-col match-col--right" id="colR"></div>
+<div class="match-svg-wrap" id="svgWrap"><svg id="svg" xmlns="http://www.w3.org/2000/svg"></svg></div></div>
+<div class="result-banner" id="resultBanner"><div class="result-banner__score" id="resultScore"></div><div class="result-banner__msg" id="resultMsg"></div></div></main>
+<div class="toast" id="toast"></div>
+<script>
+let gd=[],cs=0,conns=new Set(),pd=null,chk=false,sConns={};
+const ck=(a,b)=>a<b?a+'|'+b:b+'|'+a;
+function getDotPos(el){const a=document.getElementById('arena').getBoundingClientRect(),d=el.getBoundingClientRect();return{x:d.left+d.width/2-a.left,y:d.top+d.height/2-a.top}}
+function renderLines(cSet){const svg=document.getElementById('svg');svg.innerHTML='';const ns='http://www.w3.org/2000/svg';
+conns.forEach(key=>{const[a,b]=key.split('|');const eA=document.querySelector(`[data-dot="${a}"]`),eB=document.querySelector(`[data-dot="${b}"]`);
+if(!eA||!eB)return;const pA=getDotPos(eA),pB=getDotPos(eB),mx=(pA.x+pB.x)/2,my=(pA.y+pB.y)/2;
+const g=document.createElementNS(ns,'g');g.setAttribute('class',!chk?'conn-group':'');
+const hit=document.createElementNS(ns,'line');hit.setAttribute('x1',pA.x);hit.setAttribute('y1',pA.y);hit.setAttribute('x2',pB.x);hit.setAttribute('y2',pB.y);hit.setAttribute('class','conn-hit');
+const ln=document.createElementNS(ns,'line');ln.setAttribute('x1',pA.x);ln.setAttribute('y1',pA.y);ln.setAttribute('x2',pB.x);ln.setAttribute('y2',pB.y);ln.classList.add('conn-line');ln.style.pointerEvents='none';
+if(cSet)ln.classList.add(cSet.has(key)?'correct':'wrong');g.appendChild(hit);g.appendChild(ln);
+if(!chk){const dg=document.createElementNS(ns,'g');dg.setAttribute('class','conn-del-group');
+const bg=document.createElementNS(ns,'rect');bg.setAttribute('x',mx-9);bg.setAttribute('y',my-9);bg.setAttribute('width',18);bg.setAttribute('height',18);bg.setAttribute('rx',3);bg.setAttribute('class','conn-del-bg');
+const txt=document.createElementNS(ns,'text');txt.setAttribute('x',mx);txt.setAttribute('y',my);txt.setAttribute('class','conn-del-txt');txt.textContent='✕';
+dg.appendChild(bg);dg.appendChild(txt);g.appendChild(dg);g.addEventListener('click',()=>{SFX.click();conns.delete(key);sConns[cs]=new Set(conns);upDots();renderLines()})}
+svg.appendChild(g)})}
+function upDots(){document.querySelectorAll('[data-dot]').forEach(d=>{const id=d.dataset.dot;const has=[...conns].some(k=>k.split('|').includes(id));
+d.classList.toggle('connected',has);d.classList.toggle('pending',pd&&pd.id===id);
+const item=d.closest('.match-item');if(item)item.classList.toggle('pending',pd&&pd.id===id)})}
+function buildGame(){const set=gd[cs];if(!set)return;conns=sConns[cs]||new Set();sConns[cs]=conns;chk=false;
+const cL=document.getElementById('colL'),cR=document.getElementById('colR');cL.innerHTML='';cR.innerHTML='';
+[...set.leftItems].sort(()=>Math.random()-.5).forEach(it=>{const el=document.createElement('div');el.className='match-item';el.dataset.id=it.id;el.dataset.side='left';
+el.innerHTML=`<span>${it.text}</span><div class="dot" data-dot="${it.id}"></div>`;cL.appendChild(el)});
+[...set.rightItems].sort(()=>Math.random()-.5).forEach(it=>{const el=document.createElement('div');el.className='match-item';el.dataset.id=it.id;el.dataset.side='right';
+el.innerHTML=`<div class="dot" data-dot="${it.id}"></div><span>${it.text}</span>`;cR.appendChild(el)});
+document.querySelectorAll('.match-item').forEach(item=>{item.addEventListener('click',onItemClick);
+item.addEventListener('mouseenter',()=>{const id=item.dataset.id;document.querySelectorAll('.match-item.highlight').forEach(e=>e.classList.remove('highlight'));
+[...conns].filter(k=>k.split('|').includes(id)).forEach(k=>{const pid=k.split('|').find(x=>x!==id);document.querySelector(`.match-item[data-id="${pid}"]`)?.classList.add('highlight')})});
+item.addEventListener('mouseleave',()=>document.querySelectorAll('.match-item.highlight').forEach(e=>e.classList.remove('highlight')))});
+upDots();renderLines();upSetNav()}
+function onItemClick(e){if(chk)return;e.stopPropagation();SFX.click();const id=e.currentTarget.dataset.id,side=e.currentTarget.dataset.side;
+if(!pd){pd={id,side};upDots();return}if(pd.id===id){pd=null;upDots();return}if(pd.side===side){pd={id,side};upDots();return}
+const lId=side==='right'?pd.id:id,rId=side==='right'?id:pd.id,key=ck(lId,rId);
+if(conns.has(key))conns.delete(key);else{conns.add(key);SFX.place()}sConns[cs]=new Set(conns);pd=null;upDots();renderLines()}
+document.addEventListener('click',()=>{if(pd){pd=null;upDots()}});
+function buildSetDots(){const c=document.getElementById('setDots');c.innerHTML='';gd.forEach((_,i)=>{const b=document.createElement('button');b.className='set-dot';b.addEventListener('click',e=>{e.stopPropagation();if(i!==cs){SFX.navigate();goTo(i)}});c.appendChild(b)})}
+function upSetDots(){document.querySelectorAll('.set-dot').forEach((d,i)=>{d.classList.toggle('active',i===cs);d.classList.toggle('answered',i!==cs&&!!sConns[i]?.size)})}
+function goTo(i){cs=i;chk=false;document.getElementById('resultBanner').style.display='none';document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none';buildGame()}
+function upSetNav(){document.getElementById('setDisp').textContent=`BỘ: ${cs+1} / ${gd.length}`;document.getElementById('prevBtn').disabled=cs===0;document.getElementById('nextBtn').disabled=cs===gd.length-1;upSetDots()}
+function prevSet(){if(cs>0){SFX.navigate();goTo(cs-1)}}function nextSet(){if(cs<gd.length-1){SFX.navigate();goTo(cs+1)}}
+function checkAnswers(){const set=gd[cs],cSet=new Set(set.connections.map(c=>ck(c.from,c.to)));chk=true;let ok=0;
+conns.forEach(k=>{if(cSet.has(k))ok++});const tot=cSet.size,pct=tot===0?100:Math.round(ok/tot*100);
+SFX[pct===100?'correct':'wrong']();
+const ids=new Set();[...conns,...cSet].forEach(k=>k.split('|').forEach(id=>ids.add(id)));
+ids.forEach(id=>{const item=document.querySelector(`[data-id="${id}"]`);if(!item)return;
+const hasOk=[...conns].some(k=>k.split('|').includes(id)&&cSet.has(k));const hasBad=[...conns].some(k=>k.split('|').includes(id)&&!cSet.has(k));
+item.classList.remove('correct','wrong');if(hasOk&&!hasBad)item.classList.add('correct');else if(hasBad)item.classList.add('wrong')});
+renderLines(cSet);document.getElementById('scoreDisp').textContent=`SCORE: ${ok}/${tot}`;
+PV.showResult(ok,tot,PV.checkMsg(pct));document.getElementById('checkBtn').style.display='none';document.getElementById('contBtn').style.display=''}
+function contGame(){chk=false;document.querySelectorAll('.match-item').forEach(e=>e.classList.remove('correct','wrong'));renderLines();
+document.getElementById('resultBanner').style.display='none';document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none'}
+window.addEventListener('resize',()=>renderLines());
+(async()=>{const d=await PV.loadData('matching');gd=d?JSON.parse(JSON.stringify(d)):[];sConns={};cs=0;buildSetDots();buildGame()})();
+</script></body></html>
