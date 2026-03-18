@@ -23,7 +23,34 @@ checkMsg(pct){return[[100,'Tuyệt vời! Hoàn hảo!'],[70,'Rất tốt! Gần
 showResult(correct,total,msg){const b=document.getElementById('resultBanner');if(!b)return;
 const pct=Math.round(correct/total*100);
 document.getElementById('resultScore').textContent=`${correct} / ${total} (${pct}%)`;
-document.getElementById('resultMsg').textContent=msg;b.classList.add('show');if(pct<70)b.classList.add('error');else b.classList.remove('error')}};
+document.getElementById('resultMsg').textContent=msg;b.classList.add('show');if(pct<70)b.classList.add('error');else b.classList.remove('error')},
+/* ============================================
+   UNIFIED CONTROL BAR BUILDER
+   ============================================ */
+controlBar(opts){
+/* opts: { paged:bool, progId, scoreId, checkId, contId, dotsId, prevId, nextId, containerId } */
+const o=Object.assign({paged:false,progId:'progDisp',scoreId:'scoreDisp',
+checkId:'checkBtn',contId:'contBtn',dotsId:'ctrlDots',prevId:'prevBtn',nextId:'nextBtn',containerId:'controlBar'},opts||{});
+const nav=o.paged?`<div class="control-bar__nav">
+<button class="control-bar__prev" id="${o.prevId}">←</button>
+<div class="control-bar__dots" id="${o.dotsId}"></div>
+<button class="control-bar__next" id="${o.nextId}">→</button></div>`:'';
+return`<div class="control-bar" id="${o.containerId}">
+<div class="control-bar__row">
+<span class="control-bar__stat" id="${o.progId}">0 / 0</span>
+<button class="control-bar__check" id="${o.checkId}">Check</button>
+<button class="control-bar__continue" id="${o.contId}" style="display:none">Tiếp tục</button>
+<span class="control-bar__stat" id="${o.scoreId}">Điểm: —</span></div>${nav}</div>`},
+buildDots(count,containerId){
+const c=document.getElementById(containerId||'ctrlDots');if(!c)return;c.innerHTML='';
+for(let i=0;i<count;i++){const d=document.createElement('button');d.className='control-bar__dot';d.dataset.idx=i;c.appendChild(d)}},
+setDot(idx,state,containerId){
+const c=document.getElementById(containerId||'ctrlDots');if(!c)return;
+const d=c.children[idx];if(!d)return;d.className='control-bar__dot';if(state)d.classList.add(state)},
+setAllDots(states,containerId){
+const c=document.getElementById(containerId||'ctrlDots');if(!c)return;
+Array.from(c.children).forEach((d,i)=>{d.className='control-bar__dot';if(states[i])d.classList.add(states[i])})}
+};
 document.addEventListener('DOMContentLoaded',()=>{
 const cur=location.pathname.split('/').pop()||'index.html';const isHome=cur==='index.html';
 const gid=cur.replace('app.','').replace('.html','');

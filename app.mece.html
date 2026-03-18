@@ -30,10 +30,12 @@
 <h1 class="page-header__title">🦊 MECE</h1>
 <p class="mece-exp"><strong>MECE = Mutually Exclusive, Collectively Exhaustive.</strong><br>Phân loại đúng MECE khi các nhóm <strong>không chồng chéo</strong> (ME) và <strong>bao phủ hết</strong> tất cả trường hợp (CE).</p>
 <div class="how-to"><strong>Cách chơi:</strong> Chọn loại phân loại phù hợp cho mỗi ví dụ. Các tùy chọn: MECE đúng, Sai ME (chồng chéo), Sai CE (chưa bao hết), hoặc không MECE.</div></div>
-<div class="score-bar"><div class="score-chip" id="pDisp">0 / 0 trả lời</div>
-<button class="btn btn-success btn-lg" id="checkBtn">Check</button>
-<button class="btn btn-secondary btn-lg" id="contBtn" style="display:none">Tiếp tục</button>
-<div class="score-chip" id="sDisp">Điểm: —</div></div>
+<div class="control-bar">
+<div class="control-bar__row">
+<span class="control-bar__stat" id="pDisp">0 / 0 trả lời</span>
+<button class="control-bar__check" id="checkBtn">Check</button>
+<button class="control-bar__continue" id="contBtn" style="display:none">Tiếp tục</button>
+<span class="control-bar__stat" id="sDisp">Điểm: —</span></div></div>
 <div id="qCont"></div><div id="meceEmpty" class="mece-empty" style="display:none">Chưa có câu hỏi nào. Thêm trong Admin.</div>
 <div class="result-banner" id="resultBanner"><div class="result-banner__score" id="resultScore"></div><div class="result-banner__msg" id="resultMsg"></div></div></main>
 <script>

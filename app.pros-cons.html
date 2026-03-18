@@ -48,10 +48,12 @@
 <div class="page-header"><a href="index.html" class="page-header__back">← Home</a><h1>🐺 Đoán Ưu / Nhược</h1>
 <p class="page-header__sub">Kéo thả thẻ vào đúng ô tương ứng với từng chủ đề</p></div>
 <div class="how-to"><strong>Cách chơi:</strong> Mỗi chủ đề có 2 ô: Ưu điểm (xanh) và Nhược điểm (đỏ). Kéo thẻ vào ô đúng. Nhấp "Check" khi xong.</div>
-<div class="score-bar"><div class="score-chip" id="progDisp">0 / 0 đặt</div>
-<button class="btn btn-success btn-lg" id="checkBtn" onclick="checkAnswers()">Check</button>
-<button class="btn btn-secondary btn-lg" id="contBtn" onclick="contGame()" style="display:none">Tiếp tục</button>
-<div class="score-chip" id="scoreDisp">Điểm: —</div></div>
+<div class="control-bar">
+<div class="control-bar__row">
+<span class="control-bar__stat" id="progDisp">0 / 0 đặt</span>
+<button class="control-bar__check" id="checkBtn">Check</button>
+<button class="control-bar__continue" id="contBtn" style="display:none">Tiếp tục</button>
+<span class="control-bar__stat" id="scoreDisp">Điểm: —</span></div></div>
 <div class="game-area"><div class="topics-col" id="topicsCol"></div>
 <div class="card-pool-section"><div class="card-pool-header">Thẻ còn lại</div>
 <div class="card-pool" id="cardPool" ondragover="hDragOver(event)" ondrop="hDropPool(event)">
@@ -107,5 +109,7 @@ document.getElementById('scoreDisp').textContent=`SCORE: ${ok}/${tot}`;PV.showRe
 document.getElementById('checkBtn').style.display='none';document.getElementById('contBtn').style.display=''}
 function contGame(){chk=false;document.querySelectorAll('.drop-zone').forEach(z=>z.classList.remove('correct','wrong'));
 document.getElementById('resultBanner').style.display='none';document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none'}
+document.getElementById('checkBtn').addEventListener('click',checkAnswers);
+document.getElementById('contBtn').addEventListener('click',contGame);
 (async()=>{gd=await PV.loadData('prosCons')||[];buildGame()})();
 </script></body></html>

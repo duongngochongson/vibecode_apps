@@ -45,10 +45,12 @@
 <h1>🐙 Sơ đồ Tư Duy</h1>
 <p class="page-header__sub">Kéo thả từ khóa vào đúng hàng · Ấn 2 ô khác hàng để nối · Ấn lại để bỏ nối</p></div>
 <div class="how-to"><strong>Bước 1:</strong> Kéo từ khóa từ bên phải vào hàng thích hợp · <strong>Bước 2:</strong> Ấn 2 từ khóa ở hàng khác nhau để nối chúng · <strong>Bước 3:</strong> Nhấp "Check" để kiểm tra</div>
-<div class="score-bar"><div class="score-chip" id="progDisp">0 / 0 đặt</div>
-<button class="btn btn-success btn-lg" id="checkBtn" onclick="checkAnswers()">Check</button>
-<button class="btn btn-secondary btn-lg" id="contBtn" onclick="contGame()" style="display:none">Tiếp tục</button>
-<div class="score-chip" id="scoreDisp">Điểm: —</div></div>
+<div class="control-bar">
+<div class="control-bar__row">
+<span class="control-bar__stat" id="progDisp">0 / 0 đặt</span>
+<button class="control-bar__check" id="checkBtn">Check</button>
+<button class="control-bar__continue" id="contBtn" style="display:none">Tiếp tục</button>
+<span class="control-bar__stat" id="scoreDisp">Điểm: —</span></div></div>
 <div class="map-layout"><div class="map-canvas" id="mapCanvas"><svg class="map-svg" id="mapSvg"></svg></div>
 <div class="kw-pool-section"><div class="kw-pool-header">Keywords <span class="kw-pool-count" id="poolCount"></span></div>
 <div class="kw-pool" id="kwPool"></div></div></div>
@@ -154,5 +156,7 @@ const po=ro[row-1]||[];rk.sort((a,b)=>{const pA=po.findIndex(p=>(ch[p]||[]).incl
 renderPlaced();gd.keywords.forEach(kw=>{const ok=pl[kw.id]===crm[kw.id];const n=document.querySelector(`#mapCanvas .map-node[data-kid="${kw.id}"]`);if(n)n.classList.add(ok?'correct':'wrong')});refreshConns(ccs)}
 function contGame(){chk=false;document.querySelectorAll('#mapCanvas .map-node').forEach(n=>n.classList.remove('correct','wrong'));
 refreshConns();document.getElementById('resultBanner').style.display='none';document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none';upProg()}
+document.getElementById('checkBtn').addEventListener('click',checkAnswers);
+document.getElementById('contBtn').addEventListener('click',contGame);
 (async()=>{const d=await PV.loadData('mindMap');gd=d?d[0]||d:null;if(!gd){document.getElementById('progDisp').textContent='No data';return}buildGame()})();
 </script></body></html>

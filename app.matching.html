@@ -3,8 +3,7 @@
 <link rel="stylesheet" href="style.css"/><script src="app.js"></script>
 <style>
 .page-header__title{font-family:var(--font-serif);font-size:clamp(24px,4vw,32px);font-weight:900;color:var(--text-primary);margin:0 0 6px}
-.status-bar{display:flex;justify-content:center;gap:2rem;margin-bottom:24px;font-size:15px;letter-spacing:0.25px;color:var(--text-secondary);font-weight:500}
-#scoreDisp{color:var(--text-primary)}#setDisp{color:var(--text-primary)}
+/* game-specific only — control bar from style.css */
 .match-arena{position:relative;display:grid;grid-template-columns:1fr 60px 1fr;gap:0;align-items:start;min-height:300px}
 .match-col{display:flex;flex-direction:column;gap:12px;padding:8px 0}
 .match-item{position:relative;display:flex;align-items:center;min-height:52px;padding:10px 18px;font-size:13px;letter-spacing:0.25px;background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:4px;color:var(--text-primary);transition:all 0.15s;user-select:none;cursor:pointer}
@@ -25,18 +24,7 @@
 .conn-del-group{visibility:hidden;pointer-events:none}.conn-group:hover .conn-del-group{visibility:visible}
 .conn-del-bg{fill:var(--bg-base);stroke:var(--error);stroke-width:1.5}
 .conn-del-txt{fill:var(--error);font-size:11px;text-anchor:middle;dominant-baseline:central}
-.set-nav{display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:20px}
-.set-nav__row{display:flex;align-items:center;gap:12px}
-.set-nav__btn{background:transparent;border:1px solid var(--border-default);color:var(--text-secondary);font-size:18px;padding:10px 14px;cursor:pointer;border-radius:4px;transition:all 0.15s;min-width:48px;min-height:48px;display:flex;align-items:center;justify-content:center}
-.set-nav__btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}.set-nav__btn:disabled{opacity:0.3;cursor:default}
-.set-nav__dots{display:flex;gap:6px}
-.set-dot{width:14px;height:14px;border-radius:50%;background:var(--border-default);cursor:pointer;border:none;padding:0;transition:all 0.15s}
-.set-dot.active{background:var(--accent);box-shadow:0 0 4px var(--accent)}.set-dot.answered{background:var(--success);box-shadow:0 0 4px var(--success)}
-.action-btn{letter-spacing:0.5px;padding:10px 18px;border:none;border-radius:4px;font-weight:600}
-.action-btn--check{background:var(--success);color:var(--text-inverse);transition:all 0.15s}
-.action-btn--check:hover{background:filter(brightness(1.1))}
-.action-btn--play-again{background:var(--accent);color:var(--text-inverse);transition:all 0.15s}
-.action-btn--play-again:hover{background:var(--accent-hover)}
+/* removed: set-nav, set-dot, action-btn — now using unified .control-bar */
 .result-banner{padding:20px;margin-top:20px;border:1px solid var(--border-default);border-left:3px solid var(--success);background:var(--bg-surface);border-radius:var(--radius-md)}
 .result-banner.error{border-left-color:var(--error)}
 .result-banner__score{font-size:16px;font-weight:600}.result-banner__msg{font-size:14px;letter-spacing:0.25px;margin-top:8px}
@@ -47,14 +35,17 @@
 <div class="page-header"><a href="index.html" class="page-header__back" onclick="SFX.navigate()">← Home</a>
 <h1 class="page-header__title" id="gameTitle">🐿️ Nối Từ</h1>
 <p class="page-header__sub">Nối các từ khóa ở hai cột theo mối quan hệ đúng</p></div>
-<div class="status-bar"><span id="scoreDisp">Điểm: 0</span><span id="setDisp">Bộ: 1 / 1</span></div>
 <div class="how-to"><strong>Cách chơi:</strong> Nhấp lên từ khóa ở cột trái rồi cột phải để nối chúng. Nhấp vào đường nối để xóa.</div>
-<div class="set-nav"><div class="set-nav__row">
-<button class="set-nav__btn" id="prevBtn" onclick="prevSet()">←</button>
-<button class="btn btn-success btn-lg" id="checkBtn" onclick="checkAnswers()">Check</button>
-<button class="btn btn-secondary btn-lg" id="contBtn" onclick="contGame()" style="display:none">Tiếp tục</button>
-<button class="set-nav__btn" id="nextBtn" onclick="nextSet()">→</button></div>
-<div class="set-nav__dots" id="setDots"></div></div>
+<div class="control-bar">
+<div class="control-bar__row">
+<span class="control-bar__stat" id="setDisp">Bộ: 1 / 1</span>
+<button class="control-bar__check" id="checkBtn">Check</button>
+<button class="control-bar__continue" id="contBtn" style="display:none">Tiếp tục</button>
+<span class="control-bar__stat" id="scoreDisp">Điểm: 0</span></div>
+<div class="control-bar__nav">
+<button class="control-bar__prev" id="prevBtn">←</button>
+<div class="control-bar__dots" id="ctrlDots"></div>
+<button class="control-bar__next" id="nextBtn">→</button></div></div>
 <div class="match-arena" id="arena"><div class="match-col match-col--left" id="colL"></div><div></div>
 <div class="match-col match-col--right" id="colR"></div>
 <div class="match-svg-wrap" id="svgWrap"><svg id="svg" xmlns="http://www.w3.org/2000/svg"></svg></div></div>
@@ -95,9 +86,10 @@ if(!pd){pd={id,side};upDots();return}if(pd.id===id){pd=null;upDots();return}if(p
 const lId=side==='right'?pd.id:id,rId=side==='right'?id:pd.id,key=ck(lId,rId);
 if(conns.has(key))conns.delete(key);else{conns.add(key);SFX.place()}sConns[cs]=new Set(conns);pd=null;upDots();renderLines()}
 document.addEventListener('click',()=>{if(pd){pd=null;upDots()}});
-function buildSetDots(){const c=document.getElementById('setDots');c.innerHTML='';gd.forEach((_,i)=>{const b=document.createElement('button');b.className='set-dot';b.addEventListener('click',e=>{e.stopPropagation();if(i!==cs){SFX.navigate();goTo(i)}});c.appendChild(b)})}
-function upSetDots(){document.querySelectorAll('.set-dot').forEach((d,i)=>{d.classList.toggle('active',i===cs);d.classList.toggle('answered',i!==cs&&!!sConns[i]?.size)})}
-function goTo(i){cs=i;chk=false;document.getElementById('resultBanner').style.display='none';document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none';buildGame()}
+function buildSetDots(){PV.buildDots(gd.length,'ctrlDots');
+document.querySelectorAll('#ctrlDots .control-bar__dot').forEach((d,i)=>{d.addEventListener('click',e=>{e.stopPropagation();if(i!==cs){SFX.navigate();goTo(i)}})})}
+function upSetDots(){const states=gd.map((_,i)=>i===cs?'active':sConns[i]?.size?'answered':null);PV.setAllDots(states,'ctrlDots')}
+function goTo(i){cs=i;chk=false;document.getElementById('resultBanner').style.display='none';document.getElementById('resultBanner').classList.remove('show');document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none';buildGame()}
 function upSetNav(){document.getElementById('setDisp').textContent=`Bộ: ${cs+1} / ${gd.length}`;document.getElementById('prevBtn').disabled=cs===0;document.getElementById('nextBtn').disabled=cs===gd.length-1;upSetDots()}
 function prevSet(){if(cs>0){SFX.navigate();goTo(cs-1)}}function nextSet(){if(cs<gd.length-1){SFX.navigate();goTo(cs+1)}}
 function checkAnswers(){const set=gd[cs],cSet=new Set(set.connections.map(c=>ck(c.from,c.to)));chk=true;let ok=0;
@@ -111,6 +103,10 @@ renderLines(cSet);document.getElementById('scoreDisp').textContent=`Điểm: ${o
 PV.showResult(ok,tot,PV.checkMsg(pct));document.getElementById('checkBtn').style.display='none';document.getElementById('contBtn').style.display=''}
 function contGame(){chk=false;document.querySelectorAll('.match-item').forEach(e=>e.classList.remove('correct','wrong'));renderLines();
 document.getElementById('resultBanner').style.display='none';document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none'}
+document.getElementById('checkBtn').addEventListener('click',checkAnswers);
+document.getElementById('contBtn').addEventListener('click',contGame);
+document.getElementById('prevBtn').addEventListener('click',prevSet);
+document.getElementById('nextBtn').addEventListener('click',nextSet);
 window.addEventListener('resize',()=>renderLines());
 (async()=>{const d=await PV.loadData('matching');gd=d?JSON.parse(JSON.stringify(d)):[];sConns={};cs=0;buildSetDots();buildGame()})();
 </script></body></html>

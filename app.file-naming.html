@@ -38,8 +38,7 @@
 .fn-selected-path.empty{color:var(--text-secondary)}.fn-selected-path.correct{border-color:var(--success);color:var(--success);background:var(--success-subtle)}.fn-selected-path.wrong{border-color:var(--error);color:var(--error);background:var(--error-subtle)}
 .fn-write-input{background:var(--bg-elevated);border:1px solid var(--border-default);color:var(--text-primary);font-size:12px;padding:8px 12px;letter-spacing:0.25px;width:320px;max-width:100%;font-family:var(--font-mono);border-radius:4px}
 .fn-write-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-subtle)}.fn-write-input.input-correct{border-color:var(--success);color:var(--success)}.fn-write-input.input-wrong{border-color:var(--error);color:var(--error)}
-.fn-check-btn{font-family:var(--font-sans);font-size:16px;font-weight:600;letter-spacing:0.25px;padding:12px 24px;border:none;cursor:pointer;background:var(--success);color:var(--text-inverse);border-radius:4px;flex-shrink:0;transition:all 0.15s;min-height:48px;display:flex;align-items:center;justify-content:center}
-.fn-check-btn:hover{background:filter(brightness(1.1))}
+/* removed: fn-check-btn — now using unified .control-bar__check */
 .fn-answer-feedback{font-size:12px;letter-spacing:0.25px;flex-basis:100%;padding:6px 0;margin-top:8px;font-weight:500}
 .fn-answer-feedback.wrong{color:var(--error)}.fn-answer-feedback.correct{color:var(--success)}
 .result-banner{display:none;margin-top:20px;padding:20px;border:1px solid var(--border-default);border-left:3px solid var(--success);background:var(--bg-surface);border-radius:var(--radius-md);grid-column:1/-1}
@@ -57,10 +56,15 @@
 <div class="fn-q-block"><div class="how-to"><strong>Cách chơi:</strong> Nhấp vào các thư mục để tìm tệp. Chọn đúng hành tinh rồi nhấp "CHECK".</div><div class="fn-story-text" id="fnStoryText"></div>
 <div class="fn-q-answer-row"><div class="fn-selected-path empty" id="fnSelectedPath">Chưa chọn</div>
 <input class="fn-write-input" id="fnWriteInput" placeholder="vutru.thiênhà.ngânhà.hệsao.hànhtinh" autocomplete="off" style="display:none"/></div></div>
-<div class="fn-bottom-nav"><div class="fn-q-type-badge fn-q-type-badge--find" id="fnQTypeBadge">🔍 TÌM FILE</div>
-<div class="fn-nav-group"><div class="fn-q-nav">
-<button class="fn-nav-btn" id="fnPrevQ">◀</button><button class="fn-check-btn" id="fnCheckBtn">✓ CHECK</button><button class="fn-nav-btn" id="fnNextQ">▶</button></div>
-<div class="fn-dots" id="fnDots"></div></div></div></div></div>
+<div class="fn-bottom-nav">
+<div class="fn-q-type-badge fn-q-type-badge--find" id="fnQTypeBadge">🔍 TÌM FILE</div>
+<div class="control-bar" style="margin-bottom:0;padding:8px 0">
+<div class="control-bar__row">
+<button class="control-bar__check" id="fnCheckBtn">Check</button></div>
+<div class="control-bar__nav">
+<button class="control-bar__prev" id="fnPrevQ">←</button>
+<div class="control-bar__dots" id="ctrlDots"></div>
+<button class="control-bar__next" id="fnNextQ">→</button></div></div></div></div></div>
 <div class="result-banner" id="resultBanner"><div class="result-banner__score" id="resultScore"></div><div class="result-banner__msg" id="resultMsg"></div>
 <button class="result-banner__btn" id="resultContBtn">▶ CONTINUE</button></div>
 <div class="toast" id="toast"></div>
@@ -132,8 +136,13 @@ if(selPl){pe.textContent=selPl.path;pe.className='fn-selected-path'}else{pe.text
 else{pe.style.display='none';ie.style.display='';ie.value=dr?.text||'';ie.className='fn-write-input';selPl=null}
 if(results[i])showFeedback(i);upNav();upDots()}
 function upNav(){document.getElementById('fnPrevQ').disabled=cq===0;document.getElementById('fnNextQ').disabled=cq===TQ-1}
-function buildDots(){const c=document.getElementById('fnDots');c.innerHTML='';for(let i=0;i<TQ;i++){const d=document.createElement('button');d.className='fn-dot';d.addEventListener('click',()=>{SFX.click();goToQ(i)});c.appendChild(d)}}
-function upDots(){document.querySelectorAll('.fn-dot').forEach((d,i)=>{d.className='fn-dot';if(i===cq)d.classList.add('active');else if(results[i]?.isCorrect)d.classList.add('answered');else if(results[i]&&!results[i].isCorrect)d.classList.add('wrong-q');else if(drafts[i])d.classList.add('drafted')})}
+function buildDots(){PV.buildDots(TQ,'ctrlDots');
+document.querySelectorAll('#ctrlDots .control-bar__dot').forEach((d,i)=>{d.addEventListener('click',()=>{SFX.click();goToQ(i)})})}
+function upDots(){const states=[];for(let i=0;i<TQ;i++){if(i===cq)states.push('active');
+else if(results[i]?.isCorrect)states.push('answered');
+else if(results[i]&&!results[i].isCorrect)states.push('wrong-q');
+else if(drafts[i])states.push('drafted');
+else states.push(null)}PV.setAllDots(states,'ctrlDots')}
 function doCheckAll(){saveDraft(cq);let ok=0;ques.forEach((q,i)=>{const dr=drafts[i];let isOk=false,cv='';
 if(q.type==='find'){cv=q.planet.path;isOk=(dr?.planet?.path||'').toLowerCase()===cv.toLowerCase()}
 else{cv=q.planet.path.replace(/\//g,'.');isOk=(dr?.text||'').trim().toLowerCase()===cv.toLowerCase()}

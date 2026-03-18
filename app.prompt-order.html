@@ -3,9 +3,8 @@
 <link rel="stylesheet" href="style.css"/><script src="app.js"></script>
 <style>.game-page{padding:28px 1.5rem 40px;max-width:1200px}
 .po-title{font-family:var(--font-serif);font-size:clamp(18px,4vw,28px);font-weight:700;color:var(--text-primary);letter-spacing:0.5px;margin-bottom:16px}
-.po-score{font-family:var(--font-sans);font-size:15px;letter-spacing:0.5px;color:var(--text-secondary);font-weight:500}
-.po-q-header{font-family:var(--font-sans);font-size:15px;color:var(--text-secondary);margin-bottom:20px;font-weight:500}
-.po-q-number{color:var(--accent)}
+.po-q-header{font-size:15px;color:var(--text-secondary);font-weight:500}
+.po-q-number{color:var(--accent);font-weight:600}
 .game-area{display:grid;grid-template-columns:1fr 260px;gap:20px;align-items:start}
 .types-col{display:flex;flex-direction:column;gap:8px}
 .type-row{display:flex;align-items:flex-start;gap:10px;background:var(--bg-surface);border:2px solid var(--border-subtle);padding:10px 12px}
@@ -35,21 +34,22 @@
 <div class="page-header"><a href="index.html" class="page-header__back">← Home</a>
 <h1 class="po-title">🐜 Sắp xếp Prompt</h1>
 <p class="page-header__sub">Kéo thẻ vào đúng loại thành phần prompt</p></div>
-<div style="display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:14px">
-<div class="fn-q-nav">
-<button class="fn-nav-btn" id="prevBtn">←</button>
-<button class="btn btn-success btn-lg" id="checkBtn">Check</button>
-<button class="btn btn-secondary btn-lg" id="contBtn" style="display:none">Tiếp tục</button>
-<button class="fn-nav-btn" id="nextBtn">→</button></div>
-<div class="fn-dots" id="fnDots"></div>
-<span class="po-score" id="scoreDisp">Điểm: — / —</span></div>
-<div class="po-q-header">Câu <span class="po-q-number" id="qNum">1</span> — Kéo thẻ vào đúng loại</div>
 <div class="how-to"><strong>Cách chơi:</strong> Kéo từng thẻ vào cột loại đúng của nó. Nhấp "Check" khi xong.</div>
+<div class="control-bar">
+<div class="control-bar__row">
+<span class="control-bar__stat" id="scoreDisp">Điểm: — / —</span>
+<button class="control-bar__check" id="checkBtn">Check</button>
+<button class="control-bar__continue" id="contBtn" style="display:none">Tiếp tục</button>
+<span class="control-bar__stat po-q-header">Câu <span class="po-q-number" id="qNum">1</span></span></div>
+<div class="control-bar__nav">
+<button class="control-bar__prev" id="prevBtn">←</button>
+<div class="control-bar__dots" id="ctrlDots"></div>
+<button class="control-bar__next" id="nextBtn">→</button></div></div>
 <div class="game-area"><div class="types-col" id="typesCol"></div>
 <div class="card-pool-section"><div class="card-pool-header">Thẻ còn lại</div>
 <div class="card-pool" id="cardPool"><div class="card-pool__empty" id="poolEmpty">Tất cả thẻ đã được phân loại!</div></div></div></div>
 <div class="result-banner" id="resultBanner"><div class="result-banner__score" id="resultScore"></div><div class="result-banner__msg" id="resultMsg"></div></div>
-<div class="po-empty" id="poEmpty" style="display:none;text-align:center;padding:60px 20px;color:var(--grey);font-size:11px">Chưa có câu hỏi nào. Thêm trong Admin.</div></main>
+<div class="po-empty" id="poEmpty" style="display:none;text-align:center;padding:60px 20px;color:var(--text-tertiary);font-size:13px">Chưa có câu hỏi nào. Thêm trong admin.</div></main>
 <script>
 const TO=['role','context','task','output','style','reference','other'];
 const TL={role:'Vai trò',context:'Bối cảnh',task:'Nhiệm vụ',output:'Đầu ra',style:'Phong cách',reference:'Tham khảo',other:'Khác'};
@@ -93,8 +93,11 @@ pool.addEventListener('dragleave',e=>{if(!pool.contains(e.relatedTarget))pool.cl
 pool.addEventListener('drop',e=>{e.preventDefault();pool.classList.remove('drag-over');if(dpIdx===null||chk)return;rmFromPl(cq,dpIdx);SFX.click();renderRows();renderPool();dpIdx=null});
 document.addEventListener('click',clrSel);
 function goToQ(i){cq=i;document.getElementById('qNum').textContent=i+1;document.getElementById('prevBtn').disabled=i===0;document.getElementById('nextBtn').disabled=i===tq-1;clrSel();renderRows();renderPool();upDots()}
-function buildDots(){const c=document.getElementById('fnDots');c.innerHTML='';for(let i=0;i<tq;i++){const d=document.createElement('button');d.className='fn-dot';d.addEventListener('click',()=>{SFX.click();goToQ(i)});c.appendChild(d)}}
-function upDots(){document.querySelectorAll('.fn-dot').forEach((d,i)=>{d.className='fn-dot';if(i===cq)d.classList.add('active');else if(cr[i]!==undefined)d.classList.add(cr[i].correct===cr[i].total?'answered':'wrong-q')})}
+function buildDots(){PV.buildDots(tq,'ctrlDots');
+document.querySelectorAll('#ctrlDots .control-bar__dot').forEach((d,i)=>{d.addEventListener('click',()=>{SFX.click();goToQ(i)})})}
+function upDots(){const states=[];for(let i=0;i<tq;i++){if(i===cq)states.push('active');
+else if(cr[i]!==undefined)states.push(cr[i].correct===cr[i].total?'answered':'wrong-q');
+else states.push(null)}PV.setAllDots(states,'ctrlDots')}
 function doCheck(){chk=true;let qOk=0;qs.forEach((q,qi)=>{const pls=ap[qi],results={};let ok=0;
 TO.forEach(tk=>{(pls[tk]||[]).forEach(pi=>{const isOk=q.parts[pi].type===tk;results[pi]=isOk;if(isOk)ok++})});
 const placed=getPlaced(qi);q.parts.forEach((_,i)=>{if(!placed.has(i))results[i]=false});

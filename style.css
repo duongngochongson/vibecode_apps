@@ -598,7 +598,159 @@ section,
   filter:brightness(1.1);
 }
 
-/* Score and progress */
+/* ============================================
+   UNIFIED CONTROL BAR — The Sacred Component
+   Used by ALL games. Same position, same style.
+   ============================================ */
+.control-bar{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:var(--space-3);
+  margin-bottom:var(--space-6);
+  padding:var(--space-4) 0;
+}
+
+.control-bar__row{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:var(--space-4);
+  flex-wrap:wrap;
+}
+
+.control-bar__stat{
+  font-family:var(--font-sans);
+  font-size:15px;
+  color:var(--text-secondary);
+  padding:var(--space-2) var(--space-4);
+  border-radius:var(--radius-full);
+  font-weight:600;
+  min-height:40px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  white-space:nowrap;
+}
+
+.control-bar__check{
+  font-family:var(--font-sans);
+  font-size:16px;
+  font-weight:600;
+  color:var(--text-inverse);
+  background:var(--success);
+  border:none;
+  border-radius:var(--radius-sm);
+  padding:var(--space-3) var(--space-6);
+  min-height:48px;
+  min-width:120px;
+  cursor:pointer;
+  transition:all var(--duration-normal) var(--ease-default);
+}
+
+.control-bar__check:hover{
+  filter:brightness(1.1);
+}
+
+.control-bar__check:active{
+  transform:scale(0.98);
+}
+
+.control-bar__continue{
+  font-family:var(--font-sans);
+  font-size:16px;
+  font-weight:600;
+  color:var(--text-primary);
+  background:transparent;
+  border:1px solid var(--border-default);
+  border-radius:var(--radius-sm);
+  padding:var(--space-3) var(--space-6);
+  min-height:48px;
+  min-width:120px;
+  cursor:pointer;
+  transition:all var(--duration-normal) var(--ease-default);
+}
+
+.control-bar__continue:hover{
+  border-color:var(--accent);
+  color:var(--accent);
+}
+
+.control-bar__nav{
+  display:flex;
+  align-items:center;
+  gap:var(--space-3);
+}
+
+.control-bar__prev,
+.control-bar__next{
+  width:48px;
+  height:48px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:transparent;
+  border:1px solid var(--border-default);
+  border-radius:var(--radius-sm);
+  color:var(--text-secondary);
+  font-size:18px;
+  cursor:pointer;
+  transition:all var(--duration-normal) var(--ease-default);
+  flex-shrink:0;
+}
+
+.control-bar__prev:hover:not(:disabled),
+.control-bar__next:hover:not(:disabled){
+  border-color:var(--accent);
+  color:var(--accent);
+}
+
+.control-bar__prev:disabled,
+.control-bar__next:disabled{
+  opacity:0.3;
+  cursor:default;
+}
+
+.control-bar__dots{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+
+.control-bar__dot{
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  background:var(--border-default);
+  border:none;
+  padding:0;
+  cursor:pointer;
+  transition:all var(--duration-normal) var(--ease-default);
+  flex-shrink:0;
+}
+
+.control-bar__dot:hover{
+  background:var(--text-tertiary);
+}
+
+.control-bar__dot.active{
+  background:var(--accent);
+  box-shadow:0 0 6px var(--accent);
+}
+
+.control-bar__dot.answered{
+  background:var(--success);
+}
+
+.control-bar__dot.wrong-q{
+  background:var(--error);
+}
+
+.control-bar__dot.drafted{
+  background:var(--text-tertiary);
+}
+
+/* Legacy .score-bar compat (remove after migration) */
 .score-bar{
   display:flex;
   align-items:center;
@@ -610,7 +762,7 @@ section,
 
 .score-chip{
   font-family:var(--font-sans);
-  font-size:var(--text-sm);
+  font-size:15px;
   color:var(--text-secondary);
   padding:var(--space-3) var(--space-4);
   border-radius:var(--radius-full);
@@ -684,10 +836,10 @@ section,
   background:var(--error-subtle) !important;
 }
 
-/* Navigation dots */
+/* Legacy dot-nav compat (use .control-bar__dot instead) */
 .dot-nav{
   display:flex;
-  gap:var(--space-2);
+  gap:8px;
   justify-content:center;
   margin:var(--space-6) 0;
 }
@@ -705,13 +857,14 @@ section,
 
 .dot.active{
   background:var(--accent);
+  box-shadow:0 0 6px var(--accent);
 }
 
-.dot.completed{
+.dot.completed,.dot.answered{
   background:var(--success);
 }
 
-.dot.wrong{
+.dot.wrong,.dot.wrong-q{
   background:var(--error);
 }
 

@@ -18,6 +18,7 @@
 </style></head>
 <body><main class="game-page">
 <div class="page-header"><a href="index.html" class="page-header__back" onclick="SFX.navigate()">← Home</a><h1 class="nb-title">🐝 Bảng Thông Báo</h1></div>
+<div class="how-to"><strong>Thông tin:</strong> Đọc thông báo từ admin. Nhấp "Copy" để sao chép nội dung.</div>
 <div id="noticeList"></div><div class="nb-empty" id="nbEmpty" style="display:none">Chưa có thông báo nào.<br>Thêm trong admin.</div></main>
 <script>
 function linkify(t){return PV.escHtml(t).replace(/(https?:\/\/[^\s<>"]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>')}
