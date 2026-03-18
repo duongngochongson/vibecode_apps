@@ -58,6 +58,7 @@
 <script>
 const SEP='|';function ck(a,b){return a<b?a+SEP+b:b+SEP+a}function cp(k){return k.split(SEP)}
 let gd=null,pl={},conns=new Set(),ro={},po=[],chk=false,selId=null,dkid=null;
+const gameState={sets:[],currentSetIdx:0,checkMode:'all',setResults:[],globalResults:{correct:0,total:0,pct:0}};
 function buildGame(){chk=false;pl={};conns=new Set();ro={};selId=null;po=PV.shuffle(gd.keywords.map(k=>k.id));
 renderRows();renderPool();refreshConns();upProg();
 document.getElementById('resultBanner').style.display='none';document.getElementById('contBtn').style.display='none';
@@ -136,7 +137,8 @@ conns.forEach(k=>{if(k.split('|').includes(kid)){const p=k.split('|').find(x=>x!
 function clrHl(){document.querySelectorAll('#mapCanvas .map-node.highlight').forEach(n=>n.classList.remove('highlight'))}
 window.addEventListener('resize',()=>refreshConns());
 function upProg(){const p=Object.keys(pl).length,t=gd?gd.keywords.length:0;document.getElementById('progDisp').textContent=`${p} / ${t} đặt`;upBadges()}
-function checkAnswers(){if(chk)return;const pk=Object.keys(pl);
+function checkAnswers(){if(gameState.checkMode==='all'){checkAllSets()}else{checkCurrentSet()}}
+function checkCurrentSet(){if(chk)return;const pk=Object.keys(pl);
 if(pk.length<gd.keywords.length){PV.showToast(`PLACE ALL KEYWORDS FIRST! (${gd.keywords.length-pk.length} left)`);return}
 const cs=new Set();conns.forEach(k=>{const[a,b]=cp(k);cs.add(a);cs.add(b)});
 const uc=gd.keywords.filter(kw=>!cs.has(kw.id));if(uc.length>0){PV.showToast(`${uc.length} NODES NOT CONNECTED!`);return}
@@ -144,7 +146,23 @@ chk=true;const crm={};gd.keywords.forEach(kw=>{crm[kw.id]=kw.correctRow});const 
 let cPl=0,cCo=0;const tPl=gd.keywords.length,tCo=gd.connections.length;
 gd.keywords.forEach(kw=>{const ok=pl[kw.id]===crm[kw.id];if(ok)cPl++;const n=document.querySelector(`#mapCanvas .map-node[data-kid="${kw.id}"]`);if(n)n.classList.add(ok?'correct':'wrong')});
 conns.forEach(k=>{if(ccs.has(k))cCo++});refreshConns(ccs);
-const tot=tPl+tCo,cor=cPl+cCo,pct=tot===0?100:Math.round(cor/tot*100);SFX[pct===100?'correct':'wrong']();
+const tot=tPl+tCo,cor=cPl+cCo,pct=tot===0?100:Math.round(cor/tot*100);
+gameState.setResults[0]={correct:cor,total:tot,pct};
+SFX[pct===100?'correct':'wrong']();
+document.getElementById('scoreDisp').textContent=`Điểm: ${cor}/${tot}`;PV.showResult(cor,tot,PV.checkMsg(pct));
+document.getElementById('checkBtn').style.display='none';document.getElementById('contBtn').style.display='';
+autoGroup(crm,ccs);clrSel()}
+function checkAllSets(){if(chk)return;const pk=Object.keys(pl);
+if(pk.length<gd.keywords.length){PV.showToast(`PLACE ALL KEYWORDS FIRST! (${gd.keywords.length-pk.length} left)`);return}
+const cs=new Set();conns.forEach(k=>{const[a,b]=cp(k);cs.add(a);cs.add(b)});
+const uc=gd.keywords.filter(kw=>!cs.has(kw.id));if(uc.length>0){PV.showToast(`${uc.length} NODES NOT CONNECTED!`);return}
+chk=true;const crm={};gd.keywords.forEach(kw=>{crm[kw.id]=kw.correctRow});const ccs=new Set(gd.connections.map(c=>ck(c.from,c.to)));
+let cPl=0,cCo=0;const tPl=gd.keywords.length,tCo=gd.connections.length;
+gd.keywords.forEach(kw=>{const ok=pl[kw.id]===crm[kw.id];if(ok)cPl++;const n=document.querySelector(`#mapCanvas .map-node[data-kid="${kw.id}"]`);if(n)n.classList.add(ok?'correct':'wrong')});
+conns.forEach(k=>{if(ccs.has(k))cCo++});refreshConns(ccs);
+const tot=tPl+tCo,cor=cPl+cCo,pct=tot===0?100:Math.round(cor/tot*100);
+gameState.setResults[0]={correct:cor,total:tot,pct};gameState.globalResults={correct:cor,total:tot,pct};
+SFX[pct===100?'correct':'wrong']();
 document.getElementById('scoreDisp').textContent=`Điểm: ${cor}/${tot}`;PV.showResult(cor,tot,PV.checkMsg(pct));
 document.getElementById('checkBtn').style.display='none';document.getElementById('contBtn').style.display='';
 autoGroup(crm,ccs);clrSel()}
@@ -158,5 +176,5 @@ function contGame(){chk=false;document.querySelectorAll('#mapCanvas .map-node').
 refreshConns();document.getElementById('resultBanner').style.display='none';document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none';upProg()}
 document.getElementById('checkBtn').addEventListener('click',checkAnswers);
 document.getElementById('contBtn').addEventListener('click',contGame);
-(async()=>{const d=await PV.loadData('mindMap');gd=d?d[0]||d:null;if(!gd){document.getElementById('progDisp').textContent='No data';return}buildGame()})();
+(async()=>{const d=await PV.loadData('mindMap');gd=d?d[0]||d:null;if(!gd){document.getElementById('progDisp').textContent='No data';return}gameState.sets=[{id:'set-0',data:gd}];gameState.currentSetIdx=0;gameState.checkMode='all';buildGame()})();
 </script></body></html>

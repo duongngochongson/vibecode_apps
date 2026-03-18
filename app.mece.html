@@ -41,6 +41,7 @@
 <script>
 const AK=['mece','not_me','not_ce','not_mece'],AL={mece:'✓ MECE',not_me:'✗ Sai ME',not_ce:'✗ Sai CE',not_mece:'✗ Sai MECE'};
 let gd=[],ans={},chk=false,tC=0,tA=0;
+const gameState={sets:[],currentSetIdx:0,checkMode:'all',setResults:[],globalResults:{correct:0,total:0,pct:0}};
 function build(){const c=document.getElementById('qCont');c.innerHTML='';ans={};chk=false;tC=0;tA=0;
 if(!gd.length){document.getElementById('meceEmpty').style.display='';document.getElementById('checkBtn').style.display='none';upd();return}
 document.getElementById('meceEmpty').style.display='none';document.getElementById('checkBtn').style.display='';
@@ -58,11 +59,21 @@ gr.querySelectorAll('.ans-btn').forEach(x=>x.classList.toggle('selected',x.datas
 card.appendChild(gr);c.appendChild(card)});upd();uScore()}
 function upd(){document.getElementById('pDisp').textContent=gd.filter(q=>ans[q.id]!==undefined).length+' / '+gd.length+' ANSWERED'}
 function uScore(){document.getElementById('sDisp').textContent=tA===0?'SCORE: —':'SCORE: '+tC+'/'+tA}
-function doCheck(){chk=true;let ok=0;gd.forEach(q=>{const card=document.getElementById('qc-'+q.id);const gr=card.querySelector('.ans-group');
+function doCheck(){if(gameState.checkMode==='all'){doCheckAllSets()}else{doCheckCurrentSet()}}
+function doCheckCurrentSet(){chk=true;let ok=0;gd.forEach(q=>{const card=document.getElementById('qc-'+q.id);const gr=card.querySelector('.ans-group');
 const ua=ans[q.id],isOk=ua===q.answer;if(isOk){ok++;card.classList.add('correct')}else card.classList.add('wrong');
 gr.querySelectorAll('.ans-btn').forEach(b=>{const k=b.dataset.answer;b.classList.remove('selected');
 if(k===q.answer)b.classList.add('r-ok');if(k===ua&&!isOk)b.classList.add('r-bad')})});
-tC+=ok;tA+=gd.length;const pct=Math.round(ok/gd.length*100);SFX[pct===100?'correct':'wrong']();
+const pct=Math.round(ok/gd.length*100);gameState.setResults[0]={correct:ok,total:gd.length,pct};
+tC+=ok;tA+=gd.length;SFX[pct===100?'correct':'wrong']();
+PV.showResult(ok,gd.length,PV.checkMsg(pct));document.getElementById('checkBtn').style.display='none';
+document.getElementById('contBtn').style.display='';uScore()}
+function doCheckAllSets(){chk=true;let ok=0;gd.forEach(q=>{const card=document.getElementById('qc-'+q.id);const gr=card.querySelector('.ans-group');
+const ua=ans[q.id],isOk=ua===q.answer;if(isOk){ok++;card.classList.add('correct')}else card.classList.add('wrong');
+gr.querySelectorAll('.ans-btn').forEach(b=>{const k=b.dataset.answer;b.classList.remove('selected');
+if(k===q.answer)b.classList.add('r-ok');if(k===ua&&!isOk)b.classList.add('r-bad')})});
+const pct=Math.round(ok/gd.length*100);gameState.setResults[0]={correct:ok,total:gd.length,pct};gameState.globalResults={correct:ok,total:gd.length,pct};
+tC+=ok;tA+=gd.length;SFX[pct===100?'correct':'wrong']();
 PV.showResult(ok,gd.length,PV.checkMsg(pct));document.getElementById('checkBtn').style.display='none';
 document.getElementById('contBtn').style.display='';uScore()}
 function doCont(){chk=false;document.querySelectorAll('.qcard').forEach(c=>c.classList.remove('correct','wrong'));
@@ -70,5 +81,5 @@ document.querySelectorAll('.ans-btn').forEach(b=>{b.classList.remove('r-ok','r-b
 b.classList.toggle('selected',b.dataset.answer===ans[+gr.dataset.qid])});
 document.getElementById('resultBanner').style.display='none';document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none'}
 document.getElementById('checkBtn').addEventListener('click',doCheck);document.getElementById('contBtn').addEventListener('click',doCont);
-(async()=>{const d=await PV.loadData('mece');gd=d?JSON.parse(JSON.stringify(d)):[];build()})();
+(async()=>{const d=await PV.loadData('mece');gd=d?JSON.parse(JSON.stringify(d)):[];gameState.sets=[{id:'set-0',questions:gd}];gameState.currentSetIdx=0;gameState.checkMode='all';build()})();
 </script></body></html>

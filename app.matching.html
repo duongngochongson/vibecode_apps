@@ -53,6 +53,7 @@
 <div class="toast" id="toast"></div>
 <script>
 let gd=[],cs=0,conns=new Set(),pd=null,chk=false,sConns={};
+const gameState={sets:[],currentSetIdx:0,checkMode:'all',setResults:[],globalResults:{correct:0,total:0,pct:0}};
 const ck=(a,b)=>a<b?a+'|'+b:b+'|'+a;
 function getDotPos(el){const a=document.getElementById('arena').getBoundingClientRect(),d=el.getBoundingClientRect();return{x:d.left+d.width/2-a.left,y:d.top+d.height/2-a.top}}
 function renderLines(cSet){const svg=document.getElementById('svg');svg.innerHTML='';const ns='http://www.w3.org/2000/svg';
@@ -92,8 +93,10 @@ function upSetDots(){const states=gd.map((_,i)=>i===cs?'active':sConns[i]?.size?
 function goTo(i){cs=i;chk=false;document.getElementById('resultBanner').style.display='none';document.getElementById('resultBanner').classList.remove('show');document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none';buildGame()}
 function upSetNav(){document.getElementById('setDisp').textContent=`Bộ: ${cs+1} / ${gd.length}`;document.getElementById('prevBtn').disabled=cs===0;document.getElementById('nextBtn').disabled=cs===gd.length-1;upSetDots()}
 function prevSet(){if(cs>0){SFX.navigate();goTo(cs-1)}}function nextSet(){if(cs<gd.length-1){SFX.navigate();goTo(cs+1)}}
-function checkAnswers(){const set=gd[cs],cSet=new Set(set.connections.map(c=>ck(c.from,c.to)));chk=true;let ok=0;
+function checkAnswers(){if(gameState.checkMode==='all'){checkAllSets()}else{checkCurrentSet()}}
+function checkCurrentSet(){const set=gd[cs],cSet=new Set(set.connections.map(c=>ck(c.from,c.to)));chk=true;let ok=0;
 conns.forEach(k=>{if(cSet.has(k))ok++});const tot=cSet.size,pct=tot===0?100:Math.round(ok/tot*100);
+gameState.setResults[cs]={correct:ok,total:tot,pct};
 SFX[pct===100?'correct':'wrong']();
 const ids=new Set();[...conns,...cSet].forEach(k=>k.split('|').forEach(id=>ids.add(id)));
 ids.forEach(id=>{const item=document.querySelector(`[data-id="${id}"]`);if(!item)return;
@@ -101,6 +104,15 @@ const hasOk=[...conns].some(k=>k.split('|').includes(id)&&cSet.has(k));const has
 item.classList.remove('correct','wrong');if(hasOk&&!hasBad)item.classList.add('correct');else if(hasBad)item.classList.add('wrong')});
 renderLines(cSet);document.getElementById('scoreDisp').textContent=`Điểm: ${ok}/${tot}`;
 PV.showResult(ok,tot,PV.checkMsg(pct));document.getElementById('checkBtn').style.display='none';document.getElementById('contBtn').style.display=''}
+function checkAllSets(){chk=true;let globalOk=0,globalTot=0;
+gd.forEach((set,idx)=>{const cSet=new Set(set.connections.map(c=>ck(c.from,c.to)));let ok=0;
+(sConns[idx]||new Set()).forEach(k=>{if(cSet.has(k))ok++});const tot=cSet.size;
+gameState.setResults[idx]={correct:ok,total:tot,pct:Math.round(ok/tot*100)};globalOk+=ok;globalTot+=tot});
+const globalPct=globalTot===0?100:Math.round(globalOk/globalTot*100);
+gameState.globalResults={correct:globalOk,total:globalTot,pct:globalPct};
+SFX[globalPct===100?'correct':'wrong']();renderLines();
+document.getElementById('scoreDisp').textContent=`Điểm: ${globalOk}/${globalTot}`;
+PV.showResult(globalOk,globalTot,PV.checkMsg(globalPct));document.getElementById('checkBtn').style.display='none';document.getElementById('contBtn').style.display=''}
 function contGame(){chk=false;document.querySelectorAll('.match-item').forEach(e=>e.classList.remove('correct','wrong'));renderLines();
 document.getElementById('resultBanner').style.display='none';document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none'}
 document.getElementById('checkBtn').addEventListener('click',checkAnswers);
@@ -108,5 +120,5 @@ document.getElementById('contBtn').addEventListener('click',contGame);
 document.getElementById('prevBtn').addEventListener('click',prevSet);
 document.getElementById('nextBtn').addEventListener('click',nextSet);
 window.addEventListener('resize',()=>renderLines());
-(async()=>{const d=await PV.loadData('matching');gd=d?JSON.parse(JSON.stringify(d)):[];sConns={};cs=0;buildSetDots();buildGame()})();
+(async()=>{const d=await PV.loadData('matching');gd=d?JSON.parse(JSON.stringify(d)):[];sConns={};cs=0;gameState.sets=gd;gameState.currentSetIdx=0;gameState.checkMode='all';buildSetDots();buildGame()})();
 </script></body></html>

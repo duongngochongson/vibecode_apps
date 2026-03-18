@@ -55,6 +55,7 @@ const TO=['role','context','task','output','style','reference','other'];
 const TL={role:'Vai trò',context:'Bối cảnh',task:'Nhiệm vụ',output:'Đầu ra',style:'Phong cách',reference:'Tham khảo',other:'Khác'};
 const TC={role:'var(--info)',context:'var(--game-octopus)',task:'var(--success)',output:'var(--accent)',style:'var(--game-fox)',reference:'var(--game-octopus)',other:'var(--text-tertiary)'};
 let qs=[],ap={},so={},cr={},cq=0,tq=0,chk=false,dpIdx=null,spIdx=null;
+const gameState={sets:[],currentSetIdx:0,checkMode:'all',setResults:[],globalResults:{correct:0,total:0,pct:0}};
 function initPl(){const p={};TO.forEach(t=>p[t]=[]);return p}
 function getPlaced(qi){const s=new Set(),p=ap[qi];if(p)TO.forEach(t=>(p[t]||[]).forEach(i=>s.add(i)));return s}
 function rmFromPl(qi,pi){const p=ap[qi];if(!p)return null;for(const t of TO){const a=p[t],i=a.indexOf(pi);if(i!==-1){a.splice(i,1);return t}}return null}
@@ -98,7 +99,8 @@ document.querySelectorAll('#ctrlDots .control-bar__dot').forEach((d,i)=>{d.addEv
 function upDots(){const states=[];for(let i=0;i<tq;i++){if(i===cq)states.push('active');
 else if(cr[i]!==undefined)states.push(cr[i].correct===cr[i].total?'answered':'wrong-q');
 else states.push(null)}PV.setAllDots(states,'ctrlDots')}
-function doCheck(){chk=true;let qOk=0;qs.forEach((q,qi)=>{const pls=ap[qi],results={};let ok=0;
+function doCheck(){if(gameState.checkMode==='all'){doCheckAllSets()}else{doCheckCurrentSet()}}
+function doCheckCurrentSet(){chk=true;let qOk=0;qs.forEach((q,qi)=>{const pls=ap[qi],results={};let ok=0;
 TO.forEach(tk=>{(pls[tk]||[]).forEach(pi=>{const isOk=q.parts[pi].type===tk;results[pi]=isOk;if(isOk)ok++})});
 const placed=getPlaced(qi);q.parts.forEach((_,i)=>{if(!placed.has(i))results[i]=false});
 cr[qi]={correct:ok,total:q.parts.length,results};if(ok===q.parts.length)qOk++});
@@ -106,6 +108,17 @@ SFX[qOk===tq?'correct':'wrong']();renderRows();renderPool();upDots();
 let cc=0,ct=0;qs.forEach((q,i)=>{ct+=q.parts.length;cc+=cr[i]?.correct||0});
 document.getElementById('scoreDisp').textContent=`SCORE: ${cc} / ${ct}`;
 const cor=Object.values(cr).filter(r=>r.correct===r.total).length,pct=Math.round(cor/tq*100);
+gameState.setResults[0]={correct:cor,total:tq,pct};
+PV.showResult(cor,tq,PV.checkMsg(pct));document.getElementById('checkBtn').style.display='none';document.getElementById('contBtn').style.display=''}
+function doCheckAllSets(){chk=true;let qOk=0;qs.forEach((q,qi)=>{const pls=ap[qi],results={};let ok=0;
+TO.forEach(tk=>{(pls[tk]||[]).forEach(pi=>{const isOk=q.parts[pi].type===tk;results[pi]=isOk;if(isOk)ok++})});
+const placed=getPlaced(qi);q.parts.forEach((_,i)=>{if(!placed.has(i))results[i]=false});
+cr[qi]={correct:ok,total:q.parts.length,results};if(ok===q.parts.length)qOk++});
+SFX[qOk===tq?'correct':'wrong']();renderRows();renderPool();upDots();
+let cc=0,ct=0;qs.forEach((q,i)=>{ct+=q.parts.length;cc+=cr[i]?.correct||0});
+document.getElementById('scoreDisp').textContent=`SCORE: ${cc} / ${ct}`;
+const cor=Object.values(cr).filter(r=>r.correct===r.total).length,pct=Math.round(cor/tq*100);
+gameState.setResults[0]={correct:cor,total:tq,pct};gameState.globalResults={correct:cor,total:tq,pct};
 PV.showResult(cor,tq,PV.checkMsg(pct));document.getElementById('checkBtn').style.display='none';document.getElementById('contBtn').style.display=''}
 function doCont(){chk=false;cr={};document.getElementById('resultBanner').style.display='none';document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none';
 document.getElementById('scoreDisp').textContent='SCORE: — / —';renderRows();renderPool();upDots()}
@@ -114,5 +127,6 @@ document.getElementById('prevBtn').addEventListener('click',()=>{if(cq>0){SFX.na
 document.getElementById('nextBtn').addEventListener('click',()=>{if(cq<tq-1){SFX.navigate();goToQ(cq+1)}});
 (async()=>{qs=await PV.loadData('promptOrder')||[];if(!qs.length){document.getElementById('poEmpty').style.display='';return}
 tq=qs.length;qs.forEach((q,i)=>{ap[i]=initPl();const idx=q.parts.map((_,j)=>j);for(let k=idx.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[idx[k],idx[j]]=[idx[j],idx[k]]}so[i]=idx});
+gameState.sets=[{id:'set-0',questions:qs}];gameState.currentSetIdx=0;gameState.checkMode='all';
 buildDots();goToQ(0)})();
 </script></body></html>

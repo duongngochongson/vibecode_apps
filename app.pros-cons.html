@@ -61,6 +61,7 @@
 <div class="result-banner" id="resultBanner"><div class="result-banner__score" id="resultScore"></div><div class="result-banner__msg" id="resultMsg"></div></div></main>
 <script>
 let gd=[],dragId=null,selId=null,dropSt={},chk=false;
+const gameState={sets:[],currentSetIdx:0,checkMode:'all',setResults:[],globalResults:{correct:0,total:0,pct:0}};
 function clrSel(){selId=null;document.querySelectorAll('.drag-card.selected').forEach(c=>c.classList.remove('selected'));document.querySelectorAll('.drop-zone.accepting').forEach(z=>z.classList.remove('accepting'))}
 function initDrop(){dropSt={};gd.forEach(t=>{dropSt[t.id]={pro:null,con:null}})}
 function buildGame(){chk=false;initDrop();renderTopics();renderPool();upProg();
@@ -101,15 +102,22 @@ z.querySelector('.drag-card')?.remove();const emp=z.querySelector('.drop-zone__e
 if(cid){const c=getCard(cid);if(c){const el=mkCard(c);el.addEventListener('dragstart',ev=>{dragId=cid;el.classList.add('dragging');ev.dataTransfer.effectAllowed='move';ev.dataTransfer.setData('text/plain',cid)});
 z.appendChild(el);if(emp)emp.style.display='none'}}else{if(emp)emp.style.display=''}}
 function upProg(){let f=0;const tot=gd.length*2;Object.values(dropSt).forEach(s=>{if(s.pro)f++;if(s.con)f++});document.getElementById('progDisp').textContent=`${f} / ${tot} PLACED`}
-function checkAnswers(){let ok=0;const tot=gd.length*2;gd.forEach(t=>{const s=dropSt[t.id];
+function checkAnswers(){if(gameState.checkMode==='all'){checkAllSets()}else{checkCurrentSet()}}
+function checkCurrentSet(){let ok=0;const tot=gd.length*2;gd.forEach(t=>{const s=dropSt[t.id];
 ['pro','con'].forEach(tp=>{const z=document.getElementById(`dz-${t.id}-${tp}`);if(!z)return;z.classList.remove('correct','wrong');
 const pid=s[tp],cid=tp==='pro'?t.pro.id:t.con.id;if(pid===cid){z.classList.add('correct');ok++}else z.classList.add('wrong')})});
-chk=true;const pct=Math.round(ok/tot*100);SFX[pct===100?'correct':'wrong']();
+chk=true;const pct=Math.round(ok/tot*100);gameState.setResults[0]={correct:ok,total:tot,pct};SFX[pct===100?'correct':'wrong']();
+document.getElementById('scoreDisp').textContent=`SCORE: ${ok}/${tot}`;PV.showResult(ok,tot,PV.checkMsg(pct));
+document.getElementById('checkBtn').style.display='none';document.getElementById('contBtn').style.display=''}
+function checkAllSets(){let ok=0;const tot=gd.length*2;gd.forEach(t=>{const s=dropSt[t.id];
+['pro','con'].forEach(tp=>{const z=document.getElementById(`dz-${t.id}-${tp}`);if(!z)return;z.classList.remove('correct','wrong');
+const pid=s[tp],cid=tp==='pro'?t.pro.id:t.con.id;if(pid===cid){z.classList.add('correct');ok++}else z.classList.add('wrong')})});
+chk=true;const pct=Math.round(ok/tot*100);gameState.setResults[0]={correct:ok,total:tot,pct};gameState.globalResults={correct:ok,total:tot,pct};SFX[pct===100?'correct':'wrong']();
 document.getElementById('scoreDisp').textContent=`SCORE: ${ok}/${tot}`;PV.showResult(ok,tot,PV.checkMsg(pct));
 document.getElementById('checkBtn').style.display='none';document.getElementById('contBtn').style.display=''}
 function contGame(){chk=false;document.querySelectorAll('.drop-zone').forEach(z=>z.classList.remove('correct','wrong'));
 document.getElementById('resultBanner').style.display='none';document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none'}
 document.getElementById('checkBtn').addEventListener('click',checkAnswers);
 document.getElementById('contBtn').addEventListener('click',contGame);
-(async()=>{gd=await PV.loadData('prosCons')||[];buildGame()})();
+(async()=>{gd=await PV.loadData('prosCons')||[];gameState.sets=[{id:'set-0',questions:gd}];gameState.currentSetIdx=0;gameState.checkMode='all';buildGame()})();
 </script></body></html>
