@@ -5,7 +5,7 @@ const SFX={_c:null,c(){if(!this._c)this._c=new(window.AudioContext||window.webki
 _b(f,t,d,v){try{const c=this.c(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);
 o.type=t;o.frequency.value=f;g.gain.setValueAtTime(v||.08,c.currentTime);
 g.gain.exponentialRampToValueAtTime(.001,c.currentTime+d);o.start(c.currentTime);o.stop(c.currentTime+d)}catch(e){}},
-click(){this._b(440,'square',.08,.07)},select(){this._b(660,'sine',.06,.06)},place(){this._b(880,'sine',.08,.07)},
+click(){this._b(440,'sine',.1,.06)},select(){this._b(660,'sine',.08,.05)},place(){this._b(880,'sine',.12,.06)},
 _chord(freqs,type,gap,dur,vol){try{const c=this.c(),t=c.currentTime;freqs.forEach((f,i)=>{const o=c.createOscillator(),g=c.createGain();
 o.connect(g);g.connect(c.destination);o.type=type;o.frequency.value=f;g.gain.setValueAtTime(vol,t+i*gap);
 g.gain.exponentialRampToValueAtTime(.001,t+i*gap+dur);o.start(t+i*gap);o.stop(t+i*gap+dur)})}catch(e){}},
@@ -19,16 +19,17 @@ shuffle(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.
 showToast(m,d){d=d||2500;let t=document.getElementById('toast');if(!t){t=document.createElement('div');t.id='toast';t.className='toast';document.body.appendChild(t)}t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d)},
 async loadData(k,p){const s=localStorage.getItem(k);if(s)try{return JSON.parse(s)}catch(e){}
 try{const r=await fetch(p||'data.json');if(r.ok){const d=await r.json();return d[k]||null}}catch(e){}return null},
-checkMsg(pct){return[[100,'🏆 Hoàn hảo!'],[70,'🎉 Rất tốt!'],[40,'👍 Khá ổn!'],[0,'💪 Chưa đạt!']].find(([m])=>pct>=m)[1]},
+checkMsg(pct){return[[100,'Tuyệt vời! Hoàn hảo!'],[70,'Rất tốt! Gần hoàn hảo.'],[40,'Khá ổn! Cố gắng thêm nhé.'],[0,'Chưa đạt, nhưng đừng bỏ cuộc!']].find(([m])=>pct>=m)[1]},
 showResult(correct,total,msg){const b=document.getElementById('resultBanner');if(!b)return;
-document.getElementById('resultScore').textContent=`${correct} / ${total} ĐÚNG (${Math.round(correct/total*100)}%)`;
-document.getElementById('resultMsg').textContent=msg;b.style.display='block'}};
+const pct=Math.round(correct/total*100);
+document.getElementById('resultScore').textContent=`${correct} / ${total} (${pct}%)`;
+document.getElementById('resultMsg').textContent=msg;b.classList.add('show');if(pct<70)b.classList.add('error');else b.classList.remove('error')}};
 document.addEventListener('DOMContentLoaded',()=>{
 const cur=location.pathname.split('/').pop()||'index.html';const isHome=cur==='index.html';
 const gid=cur.replace('app.','').replace('.html','');
 const nav=document.createElement('nav');nav.className='navbar';
-nav.innerHTML=`<a href="index.html" class="navbar__logo">◈ PIXELVERSE</a><ul class="navbar__links">
-<li><a href="index.html" ${isHome?'class="active"':''} title="Home">◈</a></li>
+nav.innerHTML=`<a href="index.html" class="navbar__logo">PIXELVERSE</a><ul class="navbar__links">
+<li><a href="index.html" ${isHome?'class="active"':''} title="Home">Home</a></li>
 <li><button class="navbar__grid-btn" id="gamesBtn" title="Games"><span class="navbar__grid-btn__dots">${'<span class="navbar__grid-dot"></span>'.repeat(9)}</span></button></li>
 <li><a class="navbar__admin-btn" href="app.admin.html">⚙</a></li></ul>`;
 document.body.prepend(nav);
