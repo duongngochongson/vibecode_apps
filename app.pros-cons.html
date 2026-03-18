@@ -3,17 +3,15 @@
 <link rel="stylesheet" href="style.css"/><script src="app.js"></script>
 <style>
 .page-header h1{color:var(--text-primary);font-family:var(--font-serif);font-size:clamp(24px,4vw,32px);font-weight:700}
-#scoreDisp{color:var(--text-primary)}#progDisp{color:var(--text-primary)}
 .game-area{display:grid;grid-template-columns:1fr 280px;gap:24px;align-items:start}
-.topics-col{display:flex;flex-direction:column;gap:20px}
 .topic-card{background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:20px;transition:all 0.15s}
 .topic-card:hover{border-color:var(--border-default)}
 .topic-card.highlight{border-color:var(--accent);background:var(--accent-subtle)}
 .topic-card__hdr{display:flex;align-items:center;gap:12px;margin-bottom:10px}
 .topic-card__num{font-family:var(--font-sans);font-size:12px;font-weight:600;color:var(--accent);min-width:28px}
 .topic-card__title{font-family:var(--font-serif);font-size:22px;font-weight:700;color:var(--text-primary)}
-.topic-card__passage{font-family:var(--font-sans);font-size:13px;color:var(--text-secondary);line-height:1.7;margin-bottom:16px;padding-left:clamp(0px,5vw,40px)}
-.drop-zones{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding-left:clamp(0px,5vw,40px)}
+.topic-card__passage{font-family:var(--font-sans);font-size:13px;color:var(--text-secondary);line-height:1.7;margin-bottom:16px}
+.drop-zones{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .drop-zone{min-height:96px;border:1px dashed var(--border-default);border-radius:6px;padding:10px;display:flex;align-items:center;justify-content:center;position:relative;transition:all 0.15s}
 .drop-zone--pro{border-color:var(--success-subtle)}.drop-zone--con{border-color:var(--error-subtle)}
 .drop-zone.drag-over{background:var(--bg-elevated)}
@@ -39,7 +37,9 @@
 .card-pool{background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:12px;min-height:120px;display:flex;flex-direction:column;gap:8px}
 .card-pool.drag-over{border-color:var(--accent);background:var(--accent-subtle)}
 .card-pool__empty{font-family:var(--font-sans);font-size:12px;color:var(--text-tertiary);text-align:center;padding:20px 0}
-.result-banner__score{font-size:18px}
+.result-banner{padding:20px;margin-top:20px;border:1px solid var(--border-default);border-left:3px solid var(--success);background:var(--bg-surface);border-radius:var(--radius-md)}
+.result-banner.error{border-left-color:var(--error)}
+.result-banner__score{font-size:16px;font-weight:600}.result-banner__msg{font-size:14px;letter-spacing:0.25px;margin-top:8px}
 @media(max-width:768px){.game-area{grid-template-columns:1fr}.card-pool-section{order:-1;position:static}}
 @media(max-width:480px){.game-page{padding:20px 1rem 40px}.topic-card{padding:14px}.drop-zone{min-height:60px}}
 @media(max-width:380px){.drop-zones{grid-template-columns:1fr}}
@@ -50,75 +50,94 @@
 <div class="how-to"><strong>Cách chơi:</strong> Mỗi chủ đề có 2 ô: Ưu điểm (xanh) và Nhược điểm (đỏ). Kéo thẻ vào ô đúng. Nhấp "Check" khi xong.</div>
 <div class="control-bar">
 <div class="control-bar__row">
-<span class="control-bar__stat" id="progDisp">0 / 0 đặt</span>
+<span class="control-bar__stat" id="setDisp">Bộ: 1 / 1</span>
 <button class="control-bar__check" id="checkBtn">Check<span class="check-toggle" id="checkToggle" title="Toggle: check all sets / check this set only">⚙</span></button>
 <button class="control-bar__continue" id="contBtn" style="display:none">Tiếp tục</button>
-<span class="control-bar__stat" id="scoreDisp">Điểm: —</span></div></div>
+<span class="control-bar__stat" id="scoreDisp">Điểm: 0</span></div>
+<div class="control-bar__nav">
+<button class="control-bar__prev" id="prevBtn">←</button>
+<div class="control-bar__dots" id="ctrlDots"></div>
+<button class="control-bar__next" id="nextBtn">→</button></div></div>
 <div class="game-area"><div class="topics-col" id="topicsCol"></div>
 <div class="card-pool-section"><div class="card-pool-header">Thẻ còn lại</div>
-<div class="card-pool" id="cardPool" ondragover="hDragOver(event)" ondrop="hDropPool(event)">
+<div class="card-pool" id="cardPool">
 <div class="card-pool__empty" id="poolEmpty">Tất cả thẻ đã được đặt!</div></div></div></div>
 <div class="result-banner" id="resultBanner"><div class="result-banner__score" id="resultScore"></div><div class="result-banner__msg" id="resultMsg"></div></div></main>
+<div class="toast" id="toast"></div>
 <script>
-let gd=[],dragId=null,selId=null,dropSt={},chk=false;
+let gd=[],cs=0,dragId=null,selId=null,sDropSt={},chk=false;
 const gameState={sets:[],currentSetIdx:0,checkMode:'all',setResults:[],globalResults:{correct:0,total:0,pct:0}};
 function clrSel(){selId=null;document.querySelectorAll('.drag-card.selected').forEach(c=>c.classList.remove('selected'));document.querySelectorAll('.drop-zone.accepting').forEach(z=>z.classList.remove('accepting'))}
-function initDrop(){dropSt={};gd.forEach(t=>{dropSt[t.id]={pro:null,con:null}})}
-function buildGame(){chk=false;initDrop();renderTopics();renderPool();upProg();
-document.getElementById('resultBanner').style.display='none';document.getElementById('contBtn').style.display='none';document.getElementById('checkBtn').style.display=''}
-function renderTopics(){const col=document.getElementById('topicsCol');col.innerHTML='';
-gd.forEach((t,i)=>{const a=document.createElement('article');a.className='topic-card';a.id='topic-'+t.id;
-a.innerHTML=`<div class="topic-card__hdr"><span class="topic-card__num">${String(i+1).padStart(2,'0')}.</span><span class="topic-card__title">${PV.escHtml(t.topic)}</span></div>
+function getDropSt(){if(!sDropSt[cs])sDropSt[cs]={pro:null,con:null};return sDropSt[cs]}
+function buildGame(){const t=gd[cs];if(!t)return;chk=false;if(!sDropSt[cs])sDropSt[cs]={pro:null,con:null};
+renderTopic();renderPool();upSetNav()}
+function renderTopic(){const col=document.getElementById('topicsCol');col.innerHTML='';const t=gd[cs],ds=getDropSt();
+const a=document.createElement('article');a.className='topic-card';a.id='topic-'+t.id;
+a.innerHTML=`<div class="topic-card__hdr"><span class="topic-card__num">${String(cs+1).padStart(2,'0')}.</span><span class="topic-card__title">${PV.escHtml(t.topic)}</span></div>
 <p class="topic-card__passage">${PV.escHtml(t.passage)}</p>
-<div class="drop-zones"><div class="drop-zone drop-zone--pro" id="dz-${t.id}-pro" ondragover="hDragOver(event)" ondrop="hDropZone(event,'${t.id}','pro')" ondragleave="hDragLeave(event)"><span class="drop-zone__label">Ưu</span><span class="drop-zone__empty">Kéo / nhấn thẻ</span></div>
-<div class="drop-zone drop-zone--con" id="dz-${t.id}-con" ondragover="hDragOver(event)" ondrop="hDropZone(event,'${t.id}','con')" ondragleave="hDragLeave(event)"><span class="drop-zone__label">Nhược</span><span class="drop-zone__empty">Kéo / nhấn thẻ</span></div></div>`;
-col.appendChild(a);a.querySelectorAll('.drop-zone').forEach(z=>{const[,tid,tp]=z.id.split('-');
-z.addEventListener('click',e=>{e.stopPropagation();if(!selId||chk)return;dragId=selId;clrSel();SFX.place();doDrop(tid,tp)})})});
+<div class="drop-zones"><div class="drop-zone drop-zone--pro" id="dz-pro"><span class="drop-zone__label">Ưu</span><span class="drop-zone__empty">Kéo / nhấn thẻ</span></div>
+<div class="drop-zone drop-zone--con" id="dz-con"><span class="drop-zone__label">Nhược</span><span class="drop-zone__empty">Kéo / nhấn thẻ</span></div></div>`;
+col.appendChild(a);
+['pro','con'].forEach(tp=>{const z=document.getElementById('dz-'+tp);
+z.addEventListener('dragover',e=>{e.preventDefault();z.classList.add('drag-over')});
+z.addEventListener('dragleave',e=>{z.classList.remove('drag-over')});
+z.addEventListener('drop',e=>{e.preventDefault();z.classList.remove('drag-over');if(!dragId||chk)return;doDrop(tp)});
+z.addEventListener('click',e=>{e.stopPropagation();if(!selId||chk)return;dragId=selId;clrSel();SFX.place();doDrop(tp)});
+if(ds[tp]){const c=getCard(ds[tp]);if(c){const el=mkCard(c);z.appendChild(el);z.querySelector('.drop-zone__empty').style.display='none'}}});
 document.addEventListener('click',()=>clrSel(),{capture:false})}
 function renderPool(){const pool=document.getElementById('cardPool'),emp=document.getElementById('poolEmpty');
-pool.querySelectorAll('.drag-card').forEach(c=>c.remove());const placed=new Set();
-Object.values(dropSt).forEach(s=>{if(s.pro)placed.add(s.pro);if(s.con)placed.add(s.con)});
-let cards=[];gd.forEach(t=>{cards.push({id:t.pro.id,text:t.pro.text,tid:t.id,tp:'pro'});cards.push({id:t.con.id,text:t.con.text,tid:t.id,tp:'con'})});
+pool.querySelectorAll('.drag-card').forEach(c=>c.remove());const t=gd[cs],ds=getDropSt();
+const placed=new Set();if(ds.pro)placed.add(ds.pro);if(ds.con)placed.add(ds.con);
+let cards=[{id:t.pro.id,text:t.pro.text,tp:'pro'},{id:t.con.id,text:t.con.text,tp:'con'}];
 cards=PV.shuffle(cards).filter(c=>!placed.has(c.id));emp.style.display=cards.length===0?'block':'none';
-cards.forEach(c=>pool.appendChild(mkCard(c)))}
+cards.forEach(c=>pool.appendChild(mkCard(c)));
+pool.addEventListener('dragover',e=>{e.preventDefault();pool.classList.add('drag-over')});
+pool.addEventListener('dragleave',e=>{if(!pool.contains(e.relatedTarget))pool.classList.remove('drag-over')});
+pool.addEventListener('drop',e=>{e.preventDefault();pool.classList.remove('drag-over');if(!dragId||chk)return;const ds=getDropSt();
+if(ds.pro===dragId)ds.pro=null;if(ds.con===dragId)ds.con=null;dragId=null;renderTopic();renderPool();upSetDots()})}
 function mkCard(card){const d=document.createElement('div');d.className='drag-card';d.draggable=true;d.dataset.cardId=card.id;d.textContent=card.text;
 d.addEventListener('click',e=>{e.stopPropagation();if(chk)return;if(selId===card.id)clrSel();else{clrSel();selId=card.id;d.classList.add('selected');SFX.select();document.querySelectorAll('.drop-zone').forEach(z=>z.classList.add('accepting'))}});
 d.addEventListener('dragstart',e=>{clrSel();dragId=card.id;d.classList.add('dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',card.id)});
 d.addEventListener('dragend',()=>d.classList.remove('dragging'));
-let tx,ty;d.addEventListener('touchstart',e=>{const t=e.touches[0];tx=t.clientX;ty=t.clientY;dragId=card.id},{passive:true});
-d.addEventListener('touchend',e=>{const t=e.changedTouches[0],el=document.elementFromPoint(t.clientX,t.clientY),z=el?el.closest('.drop-zone'):null;
-if(z){const[,tid,tp]=z.id.split('-');doDrop(tid,tp)}dragId=null});return d}
-function getCard(cid){for(const t of gd){if(t.pro.id===cid)return{id:t.pro.id,text:t.pro.text,tid:t.id,tp:'pro'};if(t.con.id===cid)return{id:t.con.id,text:t.con.text,tid:t.id,tp:'con'}}return null}
-function hDragOver(e){e.preventDefault();e.currentTarget.classList.add('drag-over')}
-function hDragLeave(e){e.currentTarget.classList.remove('drag-over')}
-function hDropZone(e,tid,tp){e.preventDefault();e.currentTarget.classList.remove('drag-over');if(!dragId)return;doDrop(tid,tp)}
-function doDrop(tid,tp){if(!dragId||chk)return;const inc=dragId;if(dropSt[tid][tp])dropSt[tid][tp]=null;
-for(const k of Object.keys(dropSt)){if(dropSt[k].pro===inc)dropSt[k].pro=null;if(dropSt[k].con===inc)dropSt[k].con=null}
-dropSt[tid][tp]=inc;dragId=null;SFX.place();refZone(tid,'pro');refZone(tid,'con');renderPool();upProg()}
-function hDropPool(e){e.preventDefault();e.currentTarget.classList.remove('drag-over');if(!dragId||chk)return;
-for(const k of Object.keys(dropSt)){if(dropSt[k].pro===dragId){dropSt[k].pro=null;refZone(k,'pro')}if(dropSt[k].con===dragId){dropSt[k].con=null;refZone(k,'con')}}dragId=null;renderPool();upProg()}
-function refZone(tid,tp){const z=document.getElementById(`dz-${tid}-${tp}`);if(!z)return;const cid=dropSt[tid][tp];
-z.querySelector('.drag-card')?.remove();const emp=z.querySelector('.drop-zone__empty');
-if(cid){const c=getCard(cid);if(c){const el=mkCard(c);el.addEventListener('dragstart',ev=>{dragId=cid;el.classList.add('dragging');ev.dataTransfer.effectAllowed='move';ev.dataTransfer.setData('text/plain',cid)});
-z.appendChild(el);if(emp)emp.style.display='none'}}else{if(emp)emp.style.display=''}}
-function upProg(){let f=0;const tot=gd.length*2;Object.values(dropSt).forEach(s=>{if(s.pro)f++;if(s.con)f++});document.getElementById('progDisp').textContent=`${f} / ${tot} PLACED`}
+d.addEventListener('touchstart',e=>{dragId=card.id},{passive:true});
+d.addEventListener('touchend',e=>{const tc=e.changedTouches[0],el=document.elementFromPoint(tc.clientX,tc.clientY),z=el?el.closest('.drop-zone'):null;
+if(z){const tp=z.id.replace('dz-','');doDrop(tp)}dragId=null});return d}
+function getCard(cid){const t=gd[cs];if(t.pro.id===cid)return{id:t.pro.id,text:t.pro.text,tp:'pro'};if(t.con.id===cid)return{id:t.con.id,text:t.con.text,tp:'con'};return null}
+function doDrop(tp){if(!dragId||chk)return;const ds=getDropSt();
+if(ds.pro===dragId)ds.pro=null;if(ds.con===dragId)ds.con=null;
+ds[tp]=dragId;dragId=null;SFX.place();renderTopic();renderPool();upSetDots()}
+function buildSetDots(){PV.buildDots(gd.length,'ctrlDots');
+document.querySelectorAll('#ctrlDots .control-bar__dot').forEach((d,i)=>{d.addEventListener('click',e=>{e.stopPropagation();if(i!==cs){SFX.navigate();goTo(i)}})})}
+function upSetDots(){const states=gd.map((_,i)=>{if(i===cs)return'active';if(gameState.setResults[i])return gameState.setResults[i].pct===100?'answered':'wrong-q';
+const ds=sDropSt[i];if(ds&&(ds.pro||ds.con))return'drafted';return null});PV.setAllDots(states,'ctrlDots')}
+function goTo(i){cs=i;gameState.currentSetIdx=i;chk=false;document.getElementById('resultBanner').style.display='none';document.getElementById('resultBanner').classList.remove('show');document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none';buildGame()}
+function upSetNav(){document.getElementById('setDisp').textContent=`Bộ: ${cs+1} / ${gd.length}`;document.getElementById('prevBtn').disabled=cs===0;document.getElementById('nextBtn').disabled=cs===gd.length-1;upSetDots()}
+function prevSet(){if(cs>0){SFX.navigate();goTo(cs-1)}}function nextSet(){if(cs<gd.length-1){SFX.navigate();goTo(cs+1)}}
 function checkAnswers(){if(gameState.checkMode==='all'){checkAllSets()}else{checkCurrentSet()}}
-function checkCurrentSet(){let ok=0;const tot=gd.length*2;gd.forEach(t=>{const s=dropSt[t.id];
-['pro','con'].forEach(tp=>{const z=document.getElementById(`dz-${t.id}-${tp}`);if(!z)return;z.classList.remove('correct','wrong');
-const pid=s[tp],cid=tp==='pro'?t.pro.id:t.con.id;if(pid===cid){z.classList.add('correct');ok++}else z.classList.add('wrong')})});
-chk=true;const pct=Math.round(ok/tot*100);gameState.setResults[0]={correct:ok,total:tot,pct};SFX[pct===100?'correct':'wrong']();
-document.getElementById('scoreDisp').textContent=`SCORE: ${ok}/${tot}`;PV.showResult(ok,tot,PV.checkMsg(pct));
-document.getElementById('checkBtn').style.display='none';document.getElementById('contBtn').style.display=''}
-function checkAllSets(){let ok=0;const tot=gd.length*2;gd.forEach(t=>{const s=dropSt[t.id];
-['pro','con'].forEach(tp=>{const z=document.getElementById(`dz-${t.id}-${tp}`);if(!z)return;z.classList.remove('correct','wrong');
-const pid=s[tp],cid=tp==='pro'?t.pro.id:t.con.id;if(pid===cid){z.classList.add('correct');ok++}else z.classList.add('wrong')})});
-chk=true;const pct=Math.round(ok/tot*100);gameState.setResults[0]={correct:ok,total:tot,pct};gameState.globalResults={correct:ok,total:tot,pct};SFX[pct===100?'correct':'wrong']();
-document.getElementById('scoreDisp').textContent=`SCORE: ${ok}/${tot}`;PV.showResult(ok,tot,PV.checkMsg(pct));
-document.getElementById('checkBtn').style.display='none';document.getElementById('contBtn').style.display=''}
+function checkCurrentSet(){const t=gd[cs],ds=getDropSt();chk=true;let ok=0;const tot=2;
+['pro','con'].forEach(tp=>{const z=document.getElementById('dz-'+tp);if(!z)return;z.classList.remove('correct','wrong');
+const pid=ds[tp],cid=tp==='pro'?t.pro.id:t.con.id;if(pid===cid){z.classList.add('correct');ok++}else z.classList.add('wrong')});
+const pct=Math.round(ok/tot*100);gameState.setResults[cs]={correct:ok,total:tot,pct};SFX[pct===100?'correct':'wrong']();
+document.getElementById('scoreDisp').textContent=`Điểm: ${ok}/${tot}`;PV.showResult(ok,tot,PV.checkMsg(pct));
+document.getElementById('checkBtn').style.display='none';document.getElementById('contBtn').style.display='';upSetDots()}
+function checkAllSets(){chk=true;let globalOk=0,globalTot=0;
+gd.forEach((t,idx)=>{const ds=sDropSt[idx]||{pro:null,con:null};let ok=0;
+['pro','con'].forEach(tp=>{const pid=ds[tp],cid=tp==='pro'?t.pro.id:t.con.id;if(pid===cid)ok++});
+gameState.setResults[idx]={correct:ok,total:2,pct:Math.round(ok/2*100)};globalOk+=ok;globalTot+=2});
+const t=gd[cs],ds=getDropSt();
+['pro','con'].forEach(tp=>{const z=document.getElementById('dz-'+tp);if(!z)return;z.classList.remove('correct','wrong');
+const pid=ds[tp],cid=tp==='pro'?t.pro.id:t.con.id;if(pid===cid)z.classList.add('correct');else z.classList.add('wrong')});
+const globalPct=globalTot===0?100:Math.round(globalOk/globalTot*100);
+gameState.globalResults={correct:globalOk,total:globalTot,pct:globalPct};SFX[globalPct===100?'correct':'wrong']();
+document.getElementById('scoreDisp').textContent=`Điểm: ${globalOk}/${globalTot}`;PV.showResult(globalOk,globalTot,PV.checkMsg(globalPct));
+document.getElementById('checkBtn').style.display='none';document.getElementById('contBtn').style.display='';upSetDots()}
 function contGame(){chk=false;document.querySelectorAll('.drop-zone').forEach(z=>z.classList.remove('correct','wrong'));
 document.getElementById('resultBanner').style.display='none';document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none'}
 document.getElementById('checkBtn').addEventListener('click',checkAnswers);
 document.getElementById('checkToggle').addEventListener('click',e=>{e.stopPropagation();SFX.click();PV.toggleCheckMode(gameState)});
 document.getElementById('contBtn').addEventListener('click',contGame);
-(async()=>{gd=await PV.loadData('prosCons')||[];gameState.sets=[{id:'set-0',questions:gd}];gameState.currentSetIdx=0;gameState.checkMode='all';buildGame()})();
+document.getElementById('prevBtn').addEventListener('click',prevSet);
+document.getElementById('nextBtn').addEventListener('click',nextSet);
+(async()=>{gd=await PV.loadData('prosCons')||[];if(!gd.length)return;
+gameState.sets=gd;gameState.currentSetIdx=0;gameState.checkMode='all';cs=0;sDropSt={};buildSetDots();buildGame()})();
 </script></body></html>

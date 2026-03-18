@@ -23,6 +23,9 @@
 .ans-btn.r-ok{border-color:var(--success)!important;color:var(--success)!important;background:var(--success-subtle)!important}
 .ans-btn.r-bad{border-color:var(--error)!important;color:var(--error)!important;background:var(--error-subtle)!important}
 .mece-empty{text-align:center;padding:60px 20px;color:var(--text-tertiary);font-size:13px;letter-spacing:0.25px}
+.result-banner{padding:20px;margin-top:20px;border:1px solid var(--border-default);border-left:3px solid var(--success);background:var(--bg-surface);border-radius:var(--radius-md)}
+.result-banner.error{border-left-color:var(--error)}
+.result-banner__score{font-size:16px;font-weight:600}.result-banner__msg{font-size:14px;letter-spacing:0.25px;margin-top:8px}
 @media(max-width:600px){.game-page{padding:16px 1rem 60px}.qcard{padding:16px}.cats,.ans-group,.qcard__concept{padding-left:0}.ans-btn{font-size:12px;padding:6px 10px}}
 </style></head>
 <body><main class="game-page">
@@ -32,56 +35,66 @@
 <div class="how-to"><strong>Cách chơi:</strong> Chọn loại phân loại phù hợp cho mỗi ví dụ. Các tùy chọn: MECE đúng, Sai ME (chồng chéo), Sai CE (chưa bao hết), hoặc không MECE.</div></div>
 <div class="control-bar">
 <div class="control-bar__row">
-<span class="control-bar__stat" id="pDisp">0 / 0 trả lời</span>
+<span class="control-bar__stat" id="setDisp">Bộ: 1 / 1</span>
 <button class="control-bar__check" id="checkBtn">Check<span class="check-toggle" id="checkToggle" title="Toggle: check all sets / check this set only">⚙</span></button>
 <button class="control-bar__continue" id="contBtn" style="display:none">Tiếp tục</button>
-<span class="control-bar__stat" id="sDisp">Điểm: —</span></div></div>
+<span class="control-bar__stat" id="scoreDisp">Điểm: 0</span></div>
+<div class="control-bar__nav">
+<button class="control-bar__prev" id="prevBtn">←</button>
+<div class="control-bar__dots" id="ctrlDots"></div>
+<button class="control-bar__next" id="nextBtn">→</button></div></div>
 <div id="qCont"></div><div id="meceEmpty" class="mece-empty" style="display:none">Chưa có câu hỏi nào. Thêm trong Admin.</div>
 <div class="result-banner" id="resultBanner"><div class="result-banner__score" id="resultScore"></div><div class="result-banner__msg" id="resultMsg"></div></div></main>
+<div class="toast" id="toast"></div>
 <script>
 const AK=['mece','not_me','not_ce','not_mece'],AL={mece:'✓ MECE',not_me:'✗ Sai ME',not_ce:'✗ Sai CE',not_mece:'✗ Sai MECE'};
-let gd=[],ans={},chk=false,tC=0,tA=0;
+let gd=[],cs=0,ans={},chk=false;
 const gameState={sets:[],currentSetIdx:0,checkMode:'all',setResults:[],globalResults:{correct:0,total:0,pct:0}};
-function build(){const c=document.getElementById('qCont');c.innerHTML='';ans={};chk=false;tC=0;tA=0;
-if(!gd.length){document.getElementById('meceEmpty').style.display='';document.getElementById('checkBtn').style.display='none';upd();return}
-document.getElementById('meceEmpty').style.display='none';document.getElementById('checkBtn').style.display='';
-document.getElementById('contBtn').style.display='none';document.getElementById('resultBanner').style.display='none';
-gd.forEach((q,i)=>{const card=document.createElement('div');card.className='qcard';card.id='qc-'+q.id;
+function buildGame(){const q=gd[cs];if(!q)return;chk=false;const c=document.getElementById('qCont');c.innerHTML='';
+const card=document.createElement('div');card.className='qcard';card.id='qc-'+q.id;
 const hdr=document.createElement('div');hdr.className='qcard__hdr';
-hdr.innerHTML=`<span class="qcard__num">#${i+1}</span><span class="qcard__topic">${PV.escHtml(q.topic)}</span>`;card.appendChild(hdr);
+hdr.innerHTML=`<span class="qcard__num">#${cs+1}</span><span class="qcard__topic">${PV.escHtml(q.topic)}</span>`;card.appendChild(hdr);
 if(q.topicConcept){const cp=document.createElement('div');cp.className='qcard__concept';cp.textContent=q.topicConcept;card.appendChild(cp)}
 const cats=document.createElement('div');cats.className='cats';
 (q.categories||[]).forEach(cat=>{const ch=document.createElement('span');ch.className='cat-chip';ch.textContent=cat.name;if(cat.concept)ch.title=cat.concept;cats.appendChild(ch)});card.appendChild(cats);
 const gr=document.createElement('div');gr.className='ans-group';gr.dataset.qid=q.id;
 AK.forEach(k=>{const b=document.createElement('button');b.className='ans-btn';b.dataset.answer=k;b.textContent=AL[k];
-b.addEventListener('click',()=>{if(chk)return;SFX.click();if(ans[q.id]===k)delete ans[q.id];else ans[q.id]=k;
-gr.querySelectorAll('.ans-btn').forEach(x=>x.classList.toggle('selected',x.dataset.answer===ans[q.id]));upd()});gr.appendChild(b)});
-card.appendChild(gr);c.appendChild(card)});upd();uScore()}
-function upd(){document.getElementById('pDisp').textContent=gd.filter(q=>ans[q.id]!==undefined).length+' / '+gd.length+' ANSWERED'}
-function uScore(){document.getElementById('sDisp').textContent=tA===0?'SCORE: —':'SCORE: '+tC+'/'+tA}
-function doCheck(){if(gameState.checkMode==='all'){doCheckAllSets()}else{doCheckCurrentSet()}}
-function doCheckCurrentSet(){chk=true;let ok=0;gd.forEach(q=>{const card=document.getElementById('qc-'+q.id);const gr=card.querySelector('.ans-group');
-const ua=ans[q.id],isOk=ua===q.answer;if(isOk){ok++;card.classList.add('correct')}else card.classList.add('wrong');
-gr.querySelectorAll('.ans-btn').forEach(b=>{const k=b.dataset.answer;b.classList.remove('selected');
-if(k===q.answer)b.classList.add('r-ok');if(k===ua&&!isOk)b.classList.add('r-bad')})});
-const pct=Math.round(ok/gd.length*100);gameState.setResults[0]={correct:ok,total:gd.length,pct};
-tC+=ok;tA+=gd.length;SFX[pct===100?'correct':'wrong']();
-PV.showResult(ok,gd.length,PV.checkMsg(pct));document.getElementById('checkBtn').style.display='none';
-document.getElementById('contBtn').style.display='';uScore()}
-function doCheckAllSets(){chk=true;let ok=0;gd.forEach(q=>{const card=document.getElementById('qc-'+q.id);const gr=card.querySelector('.ans-group');
-const ua=ans[q.id],isOk=ua===q.answer;if(isOk){ok++;card.classList.add('correct')}else card.classList.add('wrong');
-gr.querySelectorAll('.ans-btn').forEach(b=>{const k=b.dataset.answer;b.classList.remove('selected');
-if(k===q.answer)b.classList.add('r-ok');if(k===ua&&!isOk)b.classList.add('r-bad')})});
-const pct=Math.round(ok/gd.length*100);gameState.setResults[0]={correct:ok,total:gd.length,pct};gameState.globalResults={correct:ok,total:gd.length,pct};
-tC+=ok;tA+=gd.length;SFX[pct===100?'correct':'wrong']();
-PV.showResult(ok,gd.length,PV.checkMsg(pct));document.getElementById('checkBtn').style.display='none';
-document.getElementById('contBtn').style.display='';uScore()}
-function doCont(){chk=false;document.querySelectorAll('.qcard').forEach(c=>c.classList.remove('correct','wrong'));
-document.querySelectorAll('.ans-btn').forEach(b=>{b.classList.remove('r-ok','r-bad');const gr=b.closest('.ans-group');
-b.classList.toggle('selected',b.dataset.answer===ans[+gr.dataset.qid])});
+if(ans[cs]===k)b.classList.add('selected');
+b.addEventListener('click',()=>{if(chk)return;SFX.click();if(ans[cs]===k)delete ans[cs];else ans[cs]=k;
+gr.querySelectorAll('.ans-btn').forEach(x=>x.classList.toggle('selected',x.dataset.answer===ans[cs]));upSetDots()});gr.appendChild(b)});
+card.appendChild(gr);c.appendChild(card);upSetNav()}
+function buildSetDots(){PV.buildDots(gd.length,'ctrlDots');
+document.querySelectorAll('#ctrlDots .control-bar__dot').forEach((d,i)=>{d.addEventListener('click',e=>{e.stopPropagation();if(i!==cs){SFX.navigate();goTo(i)}})})}
+function upSetDots(){const states=gd.map((_,i)=>{if(i===cs)return'active';if(gameState.setResults[i])return gameState.setResults[i].pct===100?'answered':'wrong-q';if(ans[i]!==undefined)return'drafted';return null});PV.setAllDots(states,'ctrlDots')}
+function goTo(i){cs=i;gameState.currentSetIdx=i;chk=false;document.getElementById('resultBanner').style.display='none';document.getElementById('resultBanner').classList.remove('show');document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none';buildGame()}
+function upSetNav(){document.getElementById('setDisp').textContent=`Bộ: ${cs+1} / ${gd.length}`;document.getElementById('prevBtn').disabled=cs===0;document.getElementById('nextBtn').disabled=cs===gd.length-1;upSetDots()}
+function prevSet(){if(cs>0){SFX.navigate();goTo(cs-1)}}function nextSet(){if(cs<gd.length-1){SFX.navigate();goTo(cs+1)}}
+function checkAnswers(){if(gameState.checkMode==='all'){checkAllSets()}else{checkCurrentSet()}}
+function checkCurrentSet(){const q=gd[cs];chk=true;const card=document.getElementById('qc-'+q.id);const gr=card.querySelector('.ans-group');
+const ua=ans[cs],isOk=ua===q.answer,ok=isOk?1:0;
+if(isOk)card.classList.add('correct');else card.classList.add('wrong');
+gr.querySelectorAll('.ans-btn').forEach(b=>{const k=b.dataset.answer;b.classList.remove('selected');if(k===q.answer)b.classList.add('r-ok');if(k===ua&&!isOk)b.classList.add('r-bad')});
+gameState.setResults[cs]={correct:ok,total:1,pct:ok*100};SFX[isOk?'correct':'wrong']();
+document.getElementById('scoreDisp').textContent=`Điểm: ${ok}/1`;PV.showResult(ok,1,PV.checkMsg(ok*100));
+document.getElementById('checkBtn').style.display='none';document.getElementById('contBtn').style.display='';upSetDots()}
+function checkAllSets(){chk=true;let globalOk=0;
+gd.forEach((q,idx)=>{const ua=ans[idx],isOk=ua===q.answer;if(isOk)globalOk++;gameState.setResults[idx]={correct:isOk?1:0,total:1,pct:isOk?100:0}});
+const q=gd[cs];const card=document.getElementById('qc-'+q.id);const gr=card.querySelector('.ans-group');
+const ua=ans[cs],isOk=ua===q.answer;if(isOk)card.classList.add('correct');else card.classList.add('wrong');
+gr.querySelectorAll('.ans-btn').forEach(b=>{const k=b.dataset.answer;b.classList.remove('selected');if(k===q.answer)b.classList.add('r-ok');if(k===ua&&!isOk)b.classList.add('r-bad')});
+const globalTot=gd.length,globalPct=globalTot===0?100:Math.round(globalOk/globalTot*100);
+gameState.globalResults={correct:globalOk,total:globalTot,pct:globalPct};SFX[globalPct===100?'correct':'wrong']();
+document.getElementById('scoreDisp').textContent=`Điểm: ${globalOk}/${globalTot}`;PV.showResult(globalOk,globalTot,PV.checkMsg(globalPct));
+document.getElementById('checkBtn').style.display='none';document.getElementById('contBtn').style.display='';upSetDots()}
+function contGame(){chk=false;document.querySelectorAll('.qcard').forEach(c=>c.classList.remove('correct','wrong'));
+document.querySelectorAll('.ans-btn').forEach(b=>{b.classList.remove('r-ok','r-bad');b.classList.toggle('selected',b.dataset.answer===ans[cs])});
 document.getElementById('resultBanner').style.display='none';document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none'}
-document.getElementById('checkBtn').addEventListener('click',doCheck);
+document.getElementById('checkBtn').addEventListener('click',checkAnswers);
 document.getElementById('checkToggle').addEventListener('click',e=>{e.stopPropagation();SFX.click();PV.toggleCheckMode(gameState)});
-document.getElementById('contBtn').addEventListener('click',doCont);
-(async()=>{const d=await PV.loadData('mece');gd=d?JSON.parse(JSON.stringify(d)):[];gameState.sets=[{id:'set-0',questions:gd}];gameState.currentSetIdx=0;gameState.checkMode='all';build()})();
+document.getElementById('contBtn').addEventListener('click',contGame);
+document.getElementById('prevBtn').addEventListener('click',prevSet);
+document.getElementById('nextBtn').addEventListener('click',nextSet);
+(async()=>{const d=await PV.loadData('mece');gd=d?JSON.parse(JSON.stringify(d)):[];
+if(!gd.length){document.getElementById('meceEmpty').style.display='';return}
+gameState.sets=gd;gameState.currentSetIdx=0;gameState.checkMode='all';cs=0;buildSetDots();buildGame()})();
 </script></body></html>

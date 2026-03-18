@@ -3,8 +3,6 @@
 <link rel="stylesheet" href="style.css"/><script src="app.js"></script>
 <style>.game-page{padding:28px 1.5rem 40px;max-width:1200px}
 .po-title{font-family:var(--font-serif);font-size:clamp(18px,4vw,28px);font-weight:700;color:var(--text-primary);letter-spacing:0.5px;margin-bottom:16px}
-.po-q-header{font-size:15px;color:var(--text-secondary);font-weight:500}
-.po-q-number{color:var(--accent);font-weight:600}
 .game-area{display:grid;grid-template-columns:1fr 260px;gap:20px;align-items:start}
 .types-col{display:flex;flex-direction:column;gap:8px}
 .type-row{display:flex;align-items:flex-start;gap:10px;background:var(--bg-surface);border:2px solid var(--border-subtle);padding:10px 12px}
@@ -37,10 +35,10 @@
 <div class="how-to"><strong>Cách chơi:</strong> Kéo từng thẻ vào cột loại đúng của nó. Nhấp "Check" khi xong.</div>
 <div class="control-bar">
 <div class="control-bar__row">
-<span class="control-bar__stat" id="scoreDisp">Điểm: — / —</span>
+<span class="control-bar__stat" id="setDisp">Bộ: 1 / 1</span>
 <button class="control-bar__check" id="checkBtn">Check<span class="check-toggle" id="checkToggle" title="Toggle: check all sets / check this set only">⚙</span></button>
 <button class="control-bar__continue" id="contBtn" style="display:none">Tiếp tục</button>
-<span class="control-bar__stat po-q-header">Câu <span class="po-q-number" id="qNum">1</span></span></div>
+<span class="control-bar__stat" id="scoreDisp">Điểm: 0</span></div>
 <div class="control-bar__nav">
 <button class="control-bar__prev" id="prevBtn">←</button>
 <div class="control-bar__dots" id="ctrlDots"></div>
@@ -93,42 +91,45 @@ pool.addEventListener('dragover',e=>{e.preventDefault();pool.classList.add('drag
 pool.addEventListener('dragleave',e=>{if(!pool.contains(e.relatedTarget))pool.classList.remove('drag-over')});
 pool.addEventListener('drop',e=>{e.preventDefault();pool.classList.remove('drag-over');if(dpIdx===null||chk)return;rmFromPl(cq,dpIdx);SFX.click();renderRows();renderPool();dpIdx=null});
 document.addEventListener('click',clrSel);
-function goToQ(i){cq=i;document.getElementById('qNum').textContent=i+1;document.getElementById('prevBtn').disabled=i===0;document.getElementById('nextBtn').disabled=i===tq-1;clrSel();renderRows();renderPool();upDots()}
-function buildDots(){PV.buildDots(tq,'ctrlDots');
-document.querySelectorAll('#ctrlDots .control-bar__dot').forEach((d,i)=>{d.addEventListener('click',()=>{SFX.click();goToQ(i)})})}
+function goTo(i){cq=i;gameState.currentSetIdx=i;chk=false;document.getElementById('resultBanner').style.display='none';document.getElementById('resultBanner').classList.remove('show');document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none';clrSel();renderRows();renderPool();upSetNav()}
+function upSetNav(){document.getElementById('setDisp').textContent=`Bộ: ${cq+1} / ${tq}`;document.getElementById('prevBtn').disabled=cq===0;document.getElementById('nextBtn').disabled=cq===tq-1;upDots()}
+function buildSetDots(){PV.buildDots(tq,'ctrlDots');
+document.querySelectorAll('#ctrlDots .control-bar__dot').forEach((d,i)=>{d.addEventListener('click',e=>{e.stopPropagation();if(i!==cq){SFX.navigate();goTo(i)}})})}
 function upDots(){const states=[];for(let i=0;i<tq;i++){if(i===cq)states.push('active');
-else if(cr[i]!==undefined)states.push(cr[i].correct===cr[i].total?'answered':'wrong-q');
+else if(gameState.setResults[i])states.push(gameState.setResults[i].pct===100?'answered':'wrong-q');
+else if(getPlaced(i).size>0)states.push('drafted');
 else states.push(null)}PV.setAllDots(states,'ctrlDots')}
 function doCheck(){if(gameState.checkMode==='all'){doCheckAllSets()}else{doCheckCurrentSet()}}
-function doCheckCurrentSet(){chk=true;let qOk=0;qs.forEach((q,qi)=>{const pls=ap[qi],results={};let ok=0;
+function doCheckCurrentSet(){chk=true;const q=qs[cq],pls=ap[cq],results={};let ok=0;
+TO.forEach(tk=>{(pls[tk]||[]).forEach(pi=>{const isOk=q.parts[pi].type===tk;results[pi]=isOk;if(isOk)ok++})});
+const placed=getPlaced(cq);q.parts.forEach((_,i)=>{if(!placed.has(i))results[i]=false});
+cr[cq]={correct:ok,total:q.parts.length,results};
+const pct=q.parts.length===0?100:Math.round(ok/q.parts.length*100);
+gameState.setResults[cq]={correct:ok,total:q.parts.length,pct};
+SFX[pct===100?'correct':'wrong']();renderRows();renderPool();upDots();
+document.getElementById('scoreDisp').textContent=`Điểm: ${ok}/${q.parts.length}`;
+PV.showResult(ok,q.parts.length,PV.checkMsg(pct));document.getElementById('checkBtn').style.display='none';document.getElementById('contBtn').style.display=''}
+function doCheckAllSets(){chk=true;let globalOk=0,globalTot=0;
+qs.forEach((q,qi)=>{const pls=ap[qi],results={};let ok=0;
 TO.forEach(tk=>{(pls[tk]||[]).forEach(pi=>{const isOk=q.parts[pi].type===tk;results[pi]=isOk;if(isOk)ok++})});
 const placed=getPlaced(qi);q.parts.forEach((_,i)=>{if(!placed.has(i))results[i]=false});
-cr[qi]={correct:ok,total:q.parts.length,results};if(ok===q.parts.length)qOk++});
-SFX[qOk===tq?'correct':'wrong']();renderRows();renderPool();upDots();
-let cc=0,ct=0;qs.forEach((q,i)=>{ct+=q.parts.length;cc+=cr[i]?.correct||0});
-document.getElementById('scoreDisp').textContent=`SCORE: ${cc} / ${ct}`;
-const cor=Object.values(cr).filter(r=>r.correct===r.total).length,pct=Math.round(cor/tq*100);
-gameState.setResults[0]={correct:cor,total:tq,pct};
-PV.showResult(cor,tq,PV.checkMsg(pct));document.getElementById('checkBtn').style.display='none';document.getElementById('contBtn').style.display=''}
-function doCheckAllSets(){chk=true;let qOk=0;qs.forEach((q,qi)=>{const pls=ap[qi],results={};let ok=0;
-TO.forEach(tk=>{(pls[tk]||[]).forEach(pi=>{const isOk=q.parts[pi].type===tk;results[pi]=isOk;if(isOk)ok++})});
-const placed=getPlaced(qi);q.parts.forEach((_,i)=>{if(!placed.has(i))results[i]=false});
-cr[qi]={correct:ok,total:q.parts.length,results};if(ok===q.parts.length)qOk++});
-SFX[qOk===tq?'correct':'wrong']();renderRows();renderPool();upDots();
-let cc=0,ct=0;qs.forEach((q,i)=>{ct+=q.parts.length;cc+=cr[i]?.correct||0});
-document.getElementById('scoreDisp').textContent=`SCORE: ${cc} / ${ct}`;
-const cor=Object.values(cr).filter(r=>r.correct===r.total).length,pct=Math.round(cor/tq*100);
-gameState.setResults[0]={correct:cor,total:tq,pct};gameState.globalResults={correct:cor,total:tq,pct};
-PV.showResult(cor,tq,PV.checkMsg(pct));document.getElementById('checkBtn').style.display='none';document.getElementById('contBtn').style.display=''}
-function doCont(){chk=false;cr={};document.getElementById('resultBanner').style.display='none';document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none';
-document.getElementById('scoreDisp').textContent='SCORE: — / —';renderRows();renderPool();upDots()}
+cr[qi]={correct:ok,total:q.parts.length,results};
+const pct=q.parts.length===0?100:Math.round(ok/q.parts.length*100);
+gameState.setResults[qi]={correct:ok,total:q.parts.length,pct};globalOk+=ok;globalTot+=q.parts.length});
+const globalPct=globalTot===0?100:Math.round(globalOk/globalTot*100);
+gameState.globalResults={correct:globalOk,total:globalTot,pct:globalPct};
+SFX[globalPct===100?'correct':'wrong']();renderRows();renderPool();upDots();
+document.getElementById('scoreDisp').textContent=`Điểm: ${globalOk}/${globalTot}`;
+PV.showResult(globalOk,globalTot,PV.checkMsg(globalPct));document.getElementById('checkBtn').style.display='none';document.getElementById('contBtn').style.display=''}
+function doCont(){chk=false;cr={};document.getElementById('resultBanner').style.display='none';document.getElementById('resultBanner').classList.remove('show');document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none';
+document.getElementById('scoreDisp').textContent='Điểm: 0';renderRows();renderPool();upDots()}
 document.getElementById('checkBtn').addEventListener('click',doCheck);
 document.getElementById('checkToggle').addEventListener('click',e=>{e.stopPropagation();SFX.click();PV.toggleCheckMode(gameState)});
 document.getElementById('contBtn').addEventListener('click',doCont);
-document.getElementById('prevBtn').addEventListener('click',()=>{if(cq>0){SFX.navigate();goToQ(cq-1)}});
-document.getElementById('nextBtn').addEventListener('click',()=>{if(cq<tq-1){SFX.navigate();goToQ(cq+1)}});
+document.getElementById('prevBtn').addEventListener('click',()=>{if(cq>0){SFX.navigate();goTo(cq-1)}});
+document.getElementById('nextBtn').addEventListener('click',()=>{if(cq<tq-1){SFX.navigate();goTo(cq+1)}});
 (async()=>{qs=await PV.loadData('promptOrder')||[];if(!qs.length){document.getElementById('poEmpty').style.display='';return}
 tq=qs.length;qs.forEach((q,i)=>{ap[i]=initPl();const idx=q.parts.map((_,j)=>j);for(let k=idx.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[idx[k],idx[j]]=[idx[j],idx[k]]}so[i]=idx});
-gameState.sets=[{id:'set-0',questions:qs}];gameState.currentSetIdx=0;gameState.checkMode='all';
-buildDots();goToQ(0)})();
+gameState.sets=qs;gameState.currentSetIdx=0;gameState.checkMode='all';
+buildSetDots();goTo(0)})();
 </script></body></html>

@@ -47,22 +47,29 @@
 <div class="how-to"><strong>Bước 1:</strong> Kéo từ khóa từ bên phải vào hàng thích hợp · <strong>Bước 2:</strong> Ấn 2 từ khóa ở hàng khác nhau để nối chúng · <strong>Bước 3:</strong> Nhấp "Check" để kiểm tra</div>
 <div class="control-bar">
 <div class="control-bar__row">
-<span class="control-bar__stat" id="progDisp">0 / 0 đặt</span>
+<span class="control-bar__stat" id="setDisp">Bộ: 1 / 1</span>
 <button class="control-bar__check" id="checkBtn">Check<span class="check-toggle" id="checkToggle" title="Toggle: check all sets / check this set only">⚙</span></button>
 <button class="control-bar__continue" id="contBtn" style="display:none">Tiếp tục</button>
-<span class="control-bar__stat" id="scoreDisp">Điểm: —</span></div></div>
+<span class="control-bar__stat" id="scoreDisp">Điểm: 0</span></div>
+<div class="control-bar__nav">
+<button class="control-bar__prev" id="prevBtn">←</button>
+<div class="control-bar__dots" id="ctrlDots"></div>
+<button class="control-bar__next" id="nextBtn">→</button></div></div>
 <div class="map-layout"><div class="map-canvas" id="mapCanvas"><svg class="map-svg" id="mapSvg"></svg></div>
 <div class="kw-pool-section"><div class="kw-pool-header">Keywords <span class="kw-pool-count" id="poolCount"></span></div>
 <div class="kw-pool" id="kwPool"></div></div></div>
 <div class="result-banner" id="resultBanner"><div class="result-banner__score" id="resultScore"></div><div class="result-banner__msg" id="resultMsg"></div></div></main>
 <script>
 const SEP='|';function ck(a,b){return a<b?a+SEP+b:b+SEP+a}function cp(k){return k.split(SEP)}
-let gd=null,pl={},conns=new Set(),ro={},po=[],chk=false,selId=null,dkid=null;
+let allSets=[],gd=null,cs=0,pl={},conns=new Set(),ro={},po=[],chk=false,selId=null,dkid=null;
+let sPl={},sConns={},sRo={},sPo={};
 const gameState={sets:[],currentSetIdx:0,checkMode:'all',setResults:[],globalResults:{correct:0,total:0,pct:0}};
-function buildGame(){chk=false;pl={};conns=new Set();ro={};selId=null;po=PV.shuffle(gd.keywords.map(k=>k.id));
-renderRows();renderPool();refreshConns();upProg();
+function saveSetState(){sPl[cs]={...pl};sConns[cs]=new Set(conns);sRo[cs]=JSON.parse(JSON.stringify(ro));sPo[cs]=[...po]}
+function loadSetState(){pl=sPl[cs]?{...sPl[cs]}:{};conns=sConns[cs]?new Set(sConns[cs]):new Set();ro=sRo[cs]?JSON.parse(JSON.stringify(sRo[cs])):{};po=sPo[cs]?[...sPo[cs]]:PV.shuffle(gd.keywords.map(k=>k.id))}
+function buildGame(){gd=allSets[cs];if(!gd)return;chk=false;selId=null;loadSetState();
+renderRows();renderPool();refreshConns();upSetNav();
 document.getElementById('resultBanner').style.display='none';document.getElementById('contBtn').style.display='none';
-document.getElementById('checkBtn').style.display='';document.getElementById('scoreDisp').textContent='SCORE: —'}
+document.getElementById('checkBtn').style.display='';document.getElementById('scoreDisp').textContent='Điểm: —'}
 function renderRows(){const c=document.getElementById('mapCanvas');c.querySelectorAll('.map-row').forEach(r=>r.remove());
 for(let i=0;i<gd.rowCount;i++)c.appendChild(mkRow(i))}
 function mkRow(idx){const r=document.createElement('div');r.className='map-row';r.dataset.row=idx;r.id='row-'+idx;
@@ -73,7 +80,7 @@ r.addEventListener('drop',e=>{e.preventDefault();r.classList.remove('drag-over')
 const old=pl[dkid];if(old!==undefined&&ro[old])ro[old]=ro[old].filter(k=>k!==dkid);
 pl[dkid]=idx;if(!ro[idx])ro[idx]=[];if(!ro[idx].includes(dkid))ro[idx].push(dkid);dkid=null;SFX.place();
 conns.forEach(k=>{const[a,b]=cp(k);if(pl[a]!==undefined&&pl[b]!==undefined&&pl[a]===pl[b])conns.delete(k)});
-renderPool();renderPlaced();refreshConns();upProg()});return r}
+saveSetState();renderPool();renderPlaced();refreshConns();upSetNav()});return r}
 function renderPool(){const pool=document.getElementById('kwPool');pool.innerHTML='';
 const placed=new Set(Object.keys(pl));const rem=po.filter(id=>!placed.has(id));
 rem.forEach(id=>{const kw=gd.keywords.find(k=>k.id===id);if(kw)pool.appendChild(mkChip(kw))});
@@ -88,13 +95,13 @@ d.addEventListener('touchend',e=>{document.querySelectorAll(rs).forEach(r=>r.cla
 const t=e.changedTouches[0],el=document.elementFromPoint(t.clientX,t.clientY),row=el?.closest('.map-row');
 if(row){const ri=parseInt(row.dataset.row);const old=pl[kw.id];if(old!==undefined&&ro[old])ro[old]=ro[old].filter(k=>k!==kw.id);
 pl[kw.id]=ri;if(!ro[ri])ro[ri]=[];if(!ro[ri].includes(kw.id))ro[ri].push(kw.id);dkid=null;
-renderPool();renderPlaced();refreshConns();upProg()}else dkid=null});return d}
+saveSetState();renderPool();renderPlaced();refreshConns();upSetNav()}else dkid=null});return d}
 const kwPool=document.getElementById('kwPool');
 kwPool.addEventListener('dragover',e=>{if(dkid&&!chk)e.preventDefault();kwPool.classList.toggle('drag-over',!!dkid)});
 kwPool.addEventListener('dragleave',()=>kwPool.classList.remove('drag-over'));
 kwPool.addEventListener('drop',e=>{e.preventDefault();kwPool.classList.remove('drag-over');if(!dkid||chk)return;unplace(dkid);dkid=null});
 function unplace(kid){conns.forEach(k=>{const[a,b]=cp(k);if(a===kid||b===kid)conns.delete(k)});
-const row=pl[kid];if(row!==undefined&&ro[row])ro[row]=ro[row].filter(k=>k!==kid);delete pl[kid];renderPool();renderPlaced();refreshConns();upProg()}
+const row=pl[kid];if(row!==undefined&&ro[row])ro[row]=ro[row].filter(k=>k!==kid);delete pl[kid];saveSetState();renderPool();renderPlaced();refreshConns();upSetNav()}
 function renderPlaced(){for(let i=0;i<gd.rowCount;i++){const c=document.getElementById('nodes-'+i);if(c)c.innerHTML=''}
 for(let row=0;row<gd.rowCount;row++){const inR=gd.keywords.filter(kw=>pl[kw.id]===row);
 const ord=ro[row]||[];const sorted=[...ord.map(id=>inR.find(kw=>kw.id===id)).filter(Boolean),...inR.filter(kw=>!ord.includes(kw.id))];
@@ -113,7 +120,7 @@ function nodeClick(kid){if(chk)return;if(selId===null){selId=kid;document.queryS
 document.querySelector(`#mapCanvas .map-node[data-kid="${kid}"]`)?.classList.add('selected');SFX.select()}
 else if(selId===kid)clrSel();else{const rA=pl[selId],rB=pl[kid];if(rA===undefined||rB===undefined){clrSel();return}
 if(rA===rB){SFX.wrong();const n=document.querySelector(`#mapCanvas .map-node[data-kid="${kid}"]`);if(n){n.classList.add('shake');setTimeout(()=>n.classList.remove('shake'),400)}setTimeout(()=>clrSel(),600)}
-else{const key=ck(selId,kid);if(conns.has(key)){conns.delete(key);SFX.click()}else{conns.add(key);SFX.place()}refreshConns();upBadges();clrSel()}}}
+else{const key=ck(selId,kid);if(conns.has(key)){conns.delete(key);SFX.click()}else{conns.add(key);SFX.place()}saveSetState();refreshConns();upBadges();clrSel()}}}
 function clrSel(){selId=null;document.querySelectorAll('#mapCanvas .map-node').forEach(n=>n.classList.remove('selected'))}
 function upBadges(){const cc={};conns.forEach(k=>{const[a,b]=cp(k);cc[a]=(cc[a]||0)+1;cc[b]=(cc[b]||0)+1});
 document.querySelectorAll('#mapCanvas .map-node').forEach(n=>{const b=n.querySelector('.node-conn-count');if(!b)return;const c=cc[n.dataset.kid]||0;b.textContent=c;b.classList.toggle('has-conn',c>0)})}
@@ -130,42 +137,49 @@ const ln=document.createElementNS(ns,'line');ln.setAttribute('x1',p1.x);ln.setAt
 g.appendChild(hit);g.appendChild(ln);if(!chk){const dg=document.createElementNS(ns,'g');dg.setAttribute('class','conn-del-group');
 const bg=document.createElementNS(ns,'rect');bg.setAttribute('x',mx-9);bg.setAttribute('y',my-9);bg.setAttribute('width',18);bg.setAttribute('height',18);bg.setAttribute('rx',3);bg.setAttribute('class','conn-del-bg');
 const txt=document.createElementNS(ns,'text');txt.setAttribute('x',mx);txt.setAttribute('y',my);txt.setAttribute('class','conn-del-txt');txt.textContent='✕';
-dg.appendChild(bg);dg.appendChild(txt);g.appendChild(dg);g.addEventListener('click',e=>{e.stopPropagation();conns.delete(key);refreshConns();upProg()})}
+dg.appendChild(bg);dg.appendChild(txt);g.appendChild(dg);g.addEventListener('click',e=>{e.stopPropagation();conns.delete(key);saveSetState();refreshConns();upSetNav()})}
 svg.appendChild(g)});upBadges()}
 function hlConn(kid){document.querySelectorAll('#mapCanvas .map-node.highlight').forEach(n=>n.classList.remove('highlight'));
 conns.forEach(k=>{if(k.split('|').includes(kid)){const p=k.split('|').find(x=>x!==kid);document.querySelector(`#mapCanvas .map-node[data-kid="${p}"]`)?.classList.add('highlight')}})}
 function clrHl(){document.querySelectorAll('#mapCanvas .map-node.highlight').forEach(n=>n.classList.remove('highlight'))}
 window.addEventListener('resize',()=>refreshConns());
-function upProg(){const p=Object.keys(pl).length,t=gd?gd.keywords.length:0;document.getElementById('progDisp').textContent=`${p} / ${t} đặt`;upBadges()}
+function buildSetDots(){PV.buildDots(allSets.length,'ctrlDots');
+document.querySelectorAll('#ctrlDots .control-bar__dot').forEach((d,i)=>{d.addEventListener('click',e=>{e.stopPropagation();if(i!==cs){SFX.navigate();goTo(i)}})})}
+function upSetDots(){const states=allSets.map((_,i)=>{if(i===cs)return'active';if(gameState.setResults[i])return gameState.setResults[i].pct===100?'answered':'wrong-q';if(Object.keys(sPl[i]||{}).length)return'drafted';return null});PV.setAllDots(states,'ctrlDots')}
+function goTo(i){saveSetState();cs=i;gameState.currentSetIdx=i;chk=false;document.getElementById('resultBanner').style.display='none';document.getElementById('resultBanner').classList.remove('show');document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none';buildGame()}
+function upSetNav(){document.getElementById('setDisp').textContent=`Bộ: ${cs+1} / ${allSets.length}`;document.getElementById('prevBtn').disabled=cs===0;document.getElementById('nextBtn').disabled=cs===allSets.length-1;upSetDots();upBadges()}
+function prevSet(){if(cs>0){SFX.navigate();goTo(cs-1)}}function nextSet(){if(cs<allSets.length-1){SFX.navigate();goTo(cs+1)}}
 function checkAnswers(){if(gameState.checkMode==='all'){checkAllSets()}else{checkCurrentSet()}}
 function checkCurrentSet(){if(chk)return;const pk=Object.keys(pl);
 if(pk.length<gd.keywords.length){PV.showToast(`PLACE ALL KEYWORDS FIRST! (${gd.keywords.length-pk.length} left)`);return}
-const cs=new Set();conns.forEach(k=>{const[a,b]=cp(k);cs.add(a);cs.add(b)});
-const uc=gd.keywords.filter(kw=>!cs.has(kw.id));if(uc.length>0){PV.showToast(`${uc.length} NODES NOT CONNECTED!`);return}
-chk=true;const crm={};gd.keywords.forEach(kw=>{crm[kw.id]=kw.correctRow});const ccs=new Set(gd.connections.map(c=>ck(c.from,c.to)));
+const connSet=new Set();conns.forEach(k=>{const[a,b]=cp(k);connSet.add(a);connSet.add(b)});
+const uc=gd.keywords.filter(kw=>!connSet.has(kw.id));if(uc.length>0){PV.showToast(`${uc.length} NODES NOT CONNECTED!`);return}
+chk=true;saveSetState();const crm={};gd.keywords.forEach(kw=>{crm[kw.id]=kw.correctRow});const ccs=new Set(gd.connections.map(c=>ck(c.from,c.to)));
 let cPl=0,cCo=0;const tPl=gd.keywords.length,tCo=gd.connections.length;
 gd.keywords.forEach(kw=>{const ok=pl[kw.id]===crm[kw.id];if(ok)cPl++;const n=document.querySelector(`#mapCanvas .map-node[data-kid="${kw.id}"]`);if(n)n.classList.add(ok?'correct':'wrong')});
 conns.forEach(k=>{if(ccs.has(k))cCo++});refreshConns(ccs);
 const tot=tPl+tCo,cor=cPl+cCo,pct=tot===0?100:Math.round(cor/tot*100);
-gameState.setResults[0]={correct:cor,total:tot,pct};
+gameState.setResults[cs]={correct:cor,total:tot,pct};
 SFX[pct===100?'correct':'wrong']();
 document.getElementById('scoreDisp').textContent=`Điểm: ${cor}/${tot}`;PV.showResult(cor,tot,PV.checkMsg(pct));
 document.getElementById('checkBtn').style.display='none';document.getElementById('contBtn').style.display='';
-autoGroup(crm,ccs);clrSel()}
-function checkAllSets(){if(chk)return;const pk=Object.keys(pl);
-if(pk.length<gd.keywords.length){PV.showToast(`PLACE ALL KEYWORDS FIRST! (${gd.keywords.length-pk.length} left)`);return}
-const cs=new Set();conns.forEach(k=>{const[a,b]=cp(k);cs.add(a);cs.add(b)});
-const uc=gd.keywords.filter(kw=>!cs.has(kw.id));if(uc.length>0){PV.showToast(`${uc.length} NODES NOT CONNECTED!`);return}
-chk=true;const crm={};gd.keywords.forEach(kw=>{crm[kw.id]=kw.correctRow});const ccs=new Set(gd.connections.map(c=>ck(c.from,c.to)));
-let cPl=0,cCo=0;const tPl=gd.keywords.length,tCo=gd.connections.length;
-gd.keywords.forEach(kw=>{const ok=pl[kw.id]===crm[kw.id];if(ok)cPl++;const n=document.querySelector(`#mapCanvas .map-node[data-kid="${kw.id}"]`);if(n)n.classList.add(ok?'correct':'wrong')});
-conns.forEach(k=>{if(ccs.has(k))cCo++});refreshConns(ccs);
+autoGroup(crm,ccs);clrSel();upSetDots()}
+function checkAllSets(){if(chk)return;saveSetState();let globalCor=0,globalTot=0;
+allSets.forEach((setData,idx)=>{const sPl_i=sPl[idx]||{},sConns_i=sConns[idx]||new Set();
+const crm={};setData.keywords.forEach(kw=>{crm[kw.id]=kw.correctRow});const ccs=new Set(setData.connections.map(c=>ck(c.from,c.to)));
+let cPl=0,cCo=0;const tPl=setData.keywords.length,tCo=setData.connections.length;
+setData.keywords.forEach(kw=>{if(sPl_i[kw.id]===crm[kw.id])cPl++});
+sConns_i.forEach(k=>{if(ccs.has(k))cCo++});
 const tot=tPl+tCo,cor=cPl+cCo,pct=tot===0?100:Math.round(cor/tot*100);
-gameState.setResults[0]={correct:cor,total:tot,pct};gameState.globalResults={correct:cor,total:tot,pct};
-SFX[pct===100?'correct':'wrong']();
-document.getElementById('scoreDisp').textContent=`Điểm: ${cor}/${tot}`;PV.showResult(cor,tot,PV.checkMsg(pct));
+gameState.setResults[idx]={correct:cor,total:tot,pct};globalCor+=cor;globalTot+=tot});
+const globalPct=globalTot===0?100:Math.round(globalCor/globalTot*100);
+gameState.globalResults={correct:globalCor,total:globalTot,pct:globalPct};
+chk=true;const crm={};gd.keywords.forEach(kw=>{crm[kw.id]=kw.correctRow});const ccs=new Set(gd.connections.map(c=>ck(c.from,c.to)));
+gd.keywords.forEach(kw=>{const ok=pl[kw.id]===crm[kw.id];const n=document.querySelector(`#mapCanvas .map-node[data-kid="${kw.id}"]`);if(n)n.classList.add(ok?'correct':'wrong')});
+refreshConns(ccs);SFX[globalPct===100?'correct':'wrong']();
+document.getElementById('scoreDisp').textContent=`Điểm: ${globalCor}/${globalTot}`;PV.showResult(globalCor,globalTot,PV.checkMsg(globalPct));
 document.getElementById('checkBtn').style.display='none';document.getElementById('contBtn').style.display='';
-autoGroup(crm,ccs);clrSel()}
+autoGroup(crm,ccs);clrSel();upSetDots()}
 function autoGroup(crm,ccs){const ch={};conns.forEach(k=>{const[a,b]=cp(k);const rA=pl[a],rB=pl[b];
 if(rA!==undefined&&rB!==undefined){if(rA<rB){if(!ch[a])ch[a]=[];ch[a].push(b)}else if(rB<rA){if(!ch[b])ch[b]=[];ch[b].push(a)}}});
 const rows=Object.values(pl);if(!rows.length)return;const mx=Math.max(...rows);
@@ -173,9 +187,12 @@ for(let row=1;row<=mx;row++){const rk=(ro[row]||[]).filter(id=>pl[id]===row);if(
 const po=ro[row-1]||[];rk.sort((a,b)=>{const pA=po.findIndex(p=>(ch[p]||[]).includes(a)),pB=po.findIndex(p=>(ch[p]||[]).includes(b));return(pA===-1?9999:pA)-(pB===-1?9999:pB)});ro[row]=rk}
 renderPlaced();gd.keywords.forEach(kw=>{const ok=pl[kw.id]===crm[kw.id];const n=document.querySelector(`#mapCanvas .map-node[data-kid="${kw.id}"]`);if(n)n.classList.add(ok?'correct':'wrong')});refreshConns(ccs)}
 function contGame(){chk=false;document.querySelectorAll('#mapCanvas .map-node').forEach(n=>n.classList.remove('correct','wrong'));
-refreshConns();document.getElementById('resultBanner').style.display='none';document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none';upProg()}
+refreshConns();document.getElementById('resultBanner').style.display='none';document.getElementById('resultBanner').classList.remove('show');document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none';upSetNav()}
 document.getElementById('checkBtn').addEventListener('click',checkAnswers);
 document.getElementById('checkToggle').addEventListener('click',e=>{e.stopPropagation();SFX.click();PV.toggleCheckMode(gameState)});
 document.getElementById('contBtn').addEventListener('click',contGame);
-(async()=>{const d=await PV.loadData('mindMap');gd=d?d[0]||d:null;if(!gd){document.getElementById('progDisp').textContent='No data';return}gameState.sets=[{id:'set-0',data:gd}];gameState.currentSetIdx=0;gameState.checkMode='all';buildGame()})();
+document.getElementById('prevBtn').addEventListener('click',prevSet);
+document.getElementById('nextBtn').addEventListener('click',nextSet);
+(async()=>{const d=await PV.loadData('mindMap');if(!d){document.getElementById('setDisp').textContent='No data';return}
+allSets=Array.isArray(d)?d:[d];gameState.sets=allSets;gameState.currentSetIdx=0;gameState.checkMode='all';cs=0;buildSetDots();buildGame()})();
 </script></body></html>
