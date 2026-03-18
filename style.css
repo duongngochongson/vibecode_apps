@@ -51,14 +51,14 @@
   --font-serif:    'Merriweather', serif;
   --font-mono:     'JetBrains Mono', monospace;
 
-  /* Type scale */
-  --text-xs:   0.75rem;
-  --text-sm:   0.875rem;
-  --text-base: 1rem;
-  --text-lg:   1.125rem;
-  --text-xl:   1.25rem;
-  --text-2xl:  1.5rem;
-  --text-3xl:  2rem;
+  /* Type scale — Phase 2: Bigger, more readable */
+  --text-xs:   0.8125rem;  /* 13px */
+  --text-sm:   0.9375rem;  /* 15px */
+  --text-base: 1.0625rem;  /* 17px */
+  --text-lg:   1.125rem;   /* 18px */
+  --text-xl:   1.25rem;    /* 20px */
+  --text-2xl:  1.5rem;     /* 24px */
+  --text-3xl:  2rem;       /* 32px */
 
   /* Weights */
   --font-normal:    400;
@@ -89,7 +89,7 @@
   --container-lg: 1100px;
 
   /* Card & layout */
-  --card-padding:       var(--space-5);
+  --card-padding:       var(--space-6);  /* 24px (was 20px) */
   --section-padding:    var(--space-8);
   --page-padding-x:     var(--space-6);
 
@@ -529,17 +529,20 @@ section,
 
 .btn-sm{
   font-size:var(--text-sm);
-  padding:6px 12px;
+  padding:8px 16px;
+  min-height:40px;
 }
 
 .btn-md{
   font-size:var(--text-base);
-  padding:8px 16px;
+  padding:12px 24px;
+  min-height:48px;
 }
 
 .btn-lg{
   font-size:var(--text-lg);
-  padding:10px 20px;
+  padding:14px 32px;
+  min-height:56px;
 }
 
 .btn-primary{
@@ -606,8 +609,13 @@ section,
   font-family:var(--font-sans);
   font-size:var(--text-sm);
   color:var(--text-secondary);
-  padding:var(--space-2) var(--space-3);
+  padding:var(--space-3) var(--space-4);
   border-radius:var(--radius-full);
+  font-weight:600;
+  min-height:40px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
 }
 
 /* Drag and drop */
@@ -616,7 +624,7 @@ section,
   border-radius:var(--radius-md);
   padding:var(--space-5);
   transition:all var(--duration-normal) var(--ease-default);
-  min-height:100px;
+  min-height:96px;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -641,6 +649,9 @@ section,
   padding:var(--space-4);
   cursor:grab;
   transition:all var(--duration-normal) var(--ease-default);
+  min-height:56px;
+  display:flex;
+  align-items:center;
 }
 
 .drag-item:active{
@@ -679,8 +690,8 @@ section,
 }
 
 .dot{
-  width:10px;
-  height:10px;
+  width:14px;
+  height:14px;
   border-radius:50%;
   background:var(--border-default);
   border:none;
@@ -705,6 +716,24 @@ section,
   background:var(--text-tertiary);
 }
 
+/* Instruction banner */
+.how-to{
+  background:var(--bg-elevated);
+  border:1px solid var(--border-default);
+  border-left:3px solid var(--accent);
+  border-radius:var(--radius-md);
+  padding:var(--space-4) var(--space-5);
+  font-size:var(--text-sm);
+  color:var(--text-secondary);
+  margin-bottom:var(--space-6);
+  line-height:var(--leading-normal);
+}
+
+.how-to strong{
+  color:var(--text-primary);
+  font-weight:600;
+}
+
 /* Result banner */
 .result-banner{
   display:none;
@@ -713,8 +742,8 @@ section,
   border:1px solid var(--border-default);
   border-left:3px solid var(--success);
   border-radius:var(--radius-md);
-  padding:var(--space-5);
-  margin-top:var(--space-6);
+  padding:var(--space-8) var(--space-8);
+  margin-top:var(--space-8);
   text-align:center;
 }
 
@@ -728,10 +757,10 @@ section,
 
 .result-banner__score{
   font-family:var(--font-sans);
-  font-size:var(--text-lg);
-  font-weight:600;
+  font-size:1.75rem;
+  font-weight:700;
   color:var(--text-primary);
-  margin-bottom:var(--space-2);
+  margin-bottom:var(--space-4);
   letter-spacing:0.5px;
 }
 
@@ -739,6 +768,7 @@ section,
   font-family:var(--font-sans);
   font-size:var(--text-base);
   color:var(--text-secondary);
+  line-height:var(--leading-normal);
 }
 
 /* Toast notifications */
