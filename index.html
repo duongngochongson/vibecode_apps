@@ -1,40 +1,36 @@
 <!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>PIXELVERSE</title><link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' fill='%2300fff5'>◈</text></svg>">
 <link rel="stylesheet" href="style.css"/><script src="app.js"></script>
-<style>.hero-space{position:absolute;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse 60% 40% at 50% 50%,rgba(0,20,60,.4) 0%,transparent 70%),radial-gradient(circle 70px at 14% 28%,rgba(0,255,245,.09) 0%,transparent 65%),radial-gradient(circle 44px at 78% 18%,rgba(255,0,204,.1) 0%,transparent 65%);animation:sd 30s ease-in-out infinite alternate}
-@keyframes sd{from{transform:scale(1) translateX(0)}to{transform:scale(1.05) translateX(-8px)}}
-.hero-quote{margin-top:24px;max-width:560px;text-align:center;padding:0 1rem}
-.hero-quote__text{font-family:var(--fb);font-size:14px;font-style:italic;color:rgba(232,232,255,.55);line-height:1.7;margin-bottom:6px;transition:opacity .6s}
-.hero-quote__author{font-family:var(--fp);font-size:6px;color:var(--cyan);letter-spacing:2px;opacity:.7;transition:opacity .6s}
-.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(0,255,245,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,245,.06) 1px,transparent 1px);background-size:40px 40px;animation:gs 8s linear infinite;pointer-events:none}
-@keyframes gs{from{background-position:0 0}to{background-position:40px 40px}}
-.stats-bar{display:flex;justify-content:center;gap:clamp(16px,5vw,40px);flex-wrap:wrap;margin-top:20px;padding:20px}
-.stat-item{text-align:center;display:flex;flex-direction:column;gap:6px}
-.stat-item__value{font-size:clamp(16px,4vw,20px);color:var(--cyan)}
-.stat-item:nth-child(2) .stat-item__value{color:var(--magenta)}
-.stat-item:nth-child(3) .stat-item__value{color:var(--yellow)}
-.stat-item__label{font-size:7px;color:rgba(232,232,255,.5);letter-spacing:2px}</style></head>
+<style>
+.hero-quote{margin-top:32px;max-width:560px;text-align:center;padding:0 1rem}
+.hero-quote__text{font-family:var(--font-sans);font-size:16px;font-style:italic;color:var(--text-secondary);line-height:var(--leading-relaxed);margin-bottom:8px;transition:opacity 0.6s}
+.hero-quote__author{font-family:var(--font-sans);font-size:13px;color:var(--text-tertiary);letter-spacing:0.5px;opacity:0.7;transition:opacity 0.6s}
+.stats-bar{display:flex;justify-content:center;gap:clamp(24px,5vw,48px);flex-wrap:wrap;margin-top:32px;padding:0}
+.stat-item{text-align:center;display:flex;flex-direction:column;gap:8px}
+.stat-item__value{font-family:var(--font-serif);font-size:clamp(18px,4vw,24px);font-weight:700;color:var(--accent)}
+.stat-item__label{font-size:12px;color:var(--text-secondary);letter-spacing:0.5px;font-weight:500}
+</style></head>
 <body>
-<section class="hero"><div class="hero-space"></div><div class="hero-grid"></div>
-<div class="hero__badge">◀ PIXEL UNIVERSE ▶</div>
-<h1 class="hero__title">Welcome to universe of pixel</h1>
-<a href="#apps" class="hero__cta" onclick="SFX.navigate()">▶ EXPLORE</a>
+<section class="hero">
+<div class="hero__badge">PIXELVERSE</div>
+<h1 class="hero__title">Chào mừng đến PIXELVERSE</h1>
+<a href="#apps" class="hero__cta" onclick="SFX.navigate()">Khám phá</a>
 <div class="stats-bar"><div class="stat-item"><span class="stat-item__value" id="gameCount">4+</span><span class="stat-item__label">GAMES</span></div>
 <div class="stat-item"><span class="stat-item__value">∞</span><span class="stat-item__label">DEVELOPMENT</span></div>
 <div class="stat-item"><span class="stat-item__value" id="sessionTimer">0s</span><span class="stat-item__label" id="timerLabel">SECONDS</span></div></div>
 <div class="hero-quote"><p class="hero-quote__text" id="heroQuoteText"></p><span class="hero-quote__author" id="heroQuoteAuthor"></span></div></section>
-<section class="apps-section" id="apps"><h2 class="section-title">▦ ALL GAMES</h2><div class="section-divider"><span></span></div>
+<section class="apps-section" id="apps"><h2 class="section-title">Games</h2><div class="section-divider"><span></span></div>
 <div class="apps-grid" id="appsGrid"></div></section>
 <script>
-const cards=[['pros-cons','cyan','🐺','Đoán Ưu/Nhược','Kéo thả thẻ vào đúng ô. Phân tích ưu/nhược điểm.','PLAY'],
-['mind-map','magenta','🐙','Sơ đồ Tư Duy','Kéo thả từ khóa, nối quan hệ, hoàn thiện sơ đồ','PLAY'],
-['matching','green','🐿️','Nối Từ','Nối các từ khóa ở hai cột với nhau theo mối quan hệ đúng.','PLAY'],
-['file-naming','yellow','🐟','Đặt Tên File','Điền đường dẫn và kéo hành tinh vào đúng thư mục.','PLAY'],
-['prompt-order','cyan','🐜','Sắp xếp Prompt','Kéo thả các thành phần prompt AI vào đúng thứ tự chuẩn.','PLAY'],
-['calculator','magenta','🐬','Máy Tính','Công cụ tính toán nhanh với giao diện pixel.','OPEN'],
-['mece','green','🦊','MECE','Phân loại đúng MECE hay không? Rèn tư duy phân tích logic!','PLAY'],
-['noticeboard','yellow','🐝','Bảng Thông Báo','Đọc thông báo và thông tin quan trọng.','READ']];
-document.getElementById('appsGrid').innerHTML=cards.map(([id,c,e,t,d,b])=>`<article class="app-card pixel-box app-card--${c}" data-game="${id}" onclick="SFX.navigate();location.href='app.${id}.html'"><div class="app-card__icon">${e}</div><h3 class="app-card__title font-vi-h">${t}</h3><p class="app-card__desc font-vi">${d}</p><span class="app-card__btn">▶ ${b}</span></article>`).join('');
+const cards=[['pros-cons','🐺','Đoán Ưu/Nhược','Kéo thả thẻ vào đúng ô. Phân tích ưu/nhược điểm.','Chơi'],
+['mind-map','🐙','Sơ đồ Tư Duy','Kéo thả từ khóa, nối quan hệ, hoàn thiện sơ đồ','Chơi'],
+['matching','🐿️','Nối Từ','Nối các từ khóa ở hai cột với nhau theo mối quan hệ đúng.','Chơi'],
+['file-naming','🐟','Đặt Tên File','Điền đường dẫn và kéo hành tinh vào đúng thư mục.','Chơi'],
+['prompt-order','🐜','Sắp xếp Prompt','Kéo thả các thành phần prompt AI vào đúng thứ tự chuẩn.','Chơi'],
+['calculator','🐬','Máy Tính','Công cụ tính toán nhanh với giao diện pixel.','Mở'],
+['mece','🦊','MECE','Phân loại đúng MECE hay không? Rèn tư duy phân tích logic!','Chơi'],
+['noticeboard','🐝','Bảng Thông Báo','Đọc thông báo và thông tin quan trọng.','Đọc']];
+document.getElementById('appsGrid').innerHTML=cards.map(([id,e,t,d,b])=>`<article class="app-card" data-game="${id}" onclick="SFX.navigate();location.href='app.${id}.html'"><div class="app-card__icon">${e}</div><h3 class="app-card__title">${t}</h3><p class="app-card__desc">${d}</p><button class="app-card__btn">${b}</button></article>`).join('');
 document.getElementById('gameCount').textContent=cards.length+'+';
 const Q=[{t:"The universe is under no obligation to make sense to you.",a:"Neil deGrasse Tyson"},{t:"We are all made of star-stuff.",a:"Carl Sagan"},{t:"Space is big. You just won't believe how vastly, hugely, mind-bogglingly big it is.",a:"Douglas Adams"},{t:"Look up at the stars and not down at your feet.",a:"Stephen Hawking"},{t:"Two things are infinite: the universe and human stupidity; and I'm not sure about the universe.",a:"Albert Einstein"}];
 let qi=0;const qT=document.getElementById('heroQuoteText'),qA=document.getElementById('heroQuoteAuthor');
