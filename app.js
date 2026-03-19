@@ -53,11 +53,8 @@ Array.from(c.children).forEach((d,i)=>{d.className='control-bar__dot';if(states[
 toggleCheckMode(gameState){gameState.checkMode=gameState.checkMode==='all'?'set':'all';
 const isSel=gameState.checkMode==='set';
 const toggle=document.getElementById('checkToggle');
-if(toggle){toggle.classList.toggle('active',isSel);
-let lbl=document.getElementById('checkModeLabel');
-if(!lbl){lbl=document.createElement('span');lbl.id='checkModeLabel';lbl.className='check-mode-label';toggle.parentNode.insertBefore(lbl,toggle)}
-lbl.textContent=isSel?' · bộ này':'';lbl.classList.toggle('visible',isSel)}
-this.showToast(isSel?'⚙ Check: Bộ này':'⚙ Check: Tất cả bộ',1800)}
+if(toggle){toggle.textContent=isSel?'›set':'›all';toggle.classList.toggle('active',isSel)}
+this.showToast(isSel?'Check: Bộ này':'Check: Tất cả bộ',1800)}
 };
 document.addEventListener('DOMContentLoaded',()=>{
 const cur=location.pathname.split('/').pop()||'index.html';const isHome=cur==='index.html';

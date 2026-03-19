@@ -48,9 +48,9 @@
 <div class="control-bar">
 <div class="control-bar__row">
 <span class="control-bar__stat" id="setDisp">Bộ: 1 / 1</span>
-<button class="control-bar__check" id="checkBtn">Check<span class="check-toggle" id="checkToggle" title="Toggle: check all sets / check this set only">⚙</span></button>
+<button class="control-bar__check" id="checkBtn">Check<span class="check-toggle" id="checkToggle">›all</span></button>
 <button class="control-bar__continue" id="contBtn" style="display:none">Tiếp tục</button>
-<span class="control-bar__stat" id="scoreDisp">Điểm: 0</span></div>
+<span class="control-bar__stat" id="scoreDisp" style="display:none">Điểm: 0</span></div>
 <div class="control-bar__nav">
 <button class="control-bar__prev" id="prevBtn">←</button>
 <div class="control-bar__dots" id="ctrlDots"></div>
@@ -69,7 +69,7 @@ function loadSetState(){pl=sPl[cs]?{...sPl[cs]}:{};conns=sConns[cs]?new Set(sCon
 function buildGame(){gd=allSets[cs];if(!gd)return;chk=false;selId=null;loadSetState();
 renderRows();renderPool();refreshConns();upSetNav();
 document.getElementById('resultBanner').style.display='none';document.getElementById('contBtn').style.display='none';
-document.getElementById('checkBtn').style.display='';document.getElementById('scoreDisp').textContent='Điểm: —'}
+document.getElementById('checkBtn').style.display='';const sdmm0=document.getElementById('scoreDisp');sdmm0.style.display='none';sdmm0.textContent='Điểm: —'}
 function renderRows(){const c=document.getElementById('mapCanvas');c.querySelectorAll('.map-row').forEach(r=>r.remove());
 for(let i=0;i<gd.rowCount;i++)c.appendChild(mkRow(i))}
 function mkRow(idx){const r=document.createElement('div');r.className='map-row';r.dataset.row=idx;r.id='row-'+idx;
@@ -161,7 +161,7 @@ conns.forEach(k=>{if(ccs.has(k))cCo++});refreshConns(ccs);
 const tot=tPl+tCo,cor=cPl+cCo,pct=tot===0?100:Math.round(cor/tot*100);
 gameState.setResults[cs]={correct:cor,total:tot,pct};
 SFX[pct===100?'correct':'wrong']();
-document.getElementById('scoreDisp').textContent=`Điểm: ${cor}/${tot}`;PV.showResult(cor,tot,PV.checkMsg(pct));
+const sdmm=document.getElementById('scoreDisp');sdmm.style.display='';sdmm.textContent=`Điểm: ${cor}/${tot}`;PV.showResult(cor,tot,PV.checkMsg(pct));
 document.getElementById('checkBtn').style.display='none';document.getElementById('contBtn').style.display='';
 autoGroup(crm,ccs);clrSel();upSetDots()}
 function checkAllSets(){if(chk)return;saveSetState();let globalCor=0,globalTot=0;
@@ -177,7 +177,7 @@ gameState.globalResults={correct:globalCor,total:globalTot,pct:globalPct};
 chk=true;const crm={};gd.keywords.forEach(kw=>{crm[kw.id]=kw.correctRow});const ccs=new Set(gd.connections.map(c=>ck(c.from,c.to)));
 gd.keywords.forEach(kw=>{const ok=pl[kw.id]===crm[kw.id];const n=document.querySelector(`#mapCanvas .map-node[data-kid="${kw.id}"]`);if(n)n.classList.add(ok?'correct':'wrong')});
 refreshConns(ccs);SFX[globalPct===100?'correct':'wrong']();
-document.getElementById('scoreDisp').textContent=`Điểm: ${globalCor}/${globalTot}`;PV.showResult(globalCor,globalTot,PV.checkMsg(globalPct));
+const sdmm2=document.getElementById('scoreDisp');sdmm2.style.display='';sdmm2.textContent=`Điểm: ${globalCor}/${globalTot}`;PV.showResult(globalCor,globalTot,PV.checkMsg(globalPct));
 document.getElementById('checkBtn').style.display='none';document.getElementById('contBtn').style.display='';
 autoGroup(crm,ccs);clrSel();upSetDots()}
 function autoGroup(crm,ccs){const ch={};conns.forEach(k=>{const[a,b]=cp(k);const rA=pl[a],rB=pl[b];
@@ -187,7 +187,7 @@ for(let row=1;row<=mx;row++){const rk=(ro[row]||[]).filter(id=>pl[id]===row);if(
 const po=ro[row-1]||[];rk.sort((a,b)=>{const pA=po.findIndex(p=>(ch[p]||[]).includes(a)),pB=po.findIndex(p=>(ch[p]||[]).includes(b));return(pA===-1?9999:pA)-(pB===-1?9999:pB)});ro[row]=rk}
 renderPlaced();gd.keywords.forEach(kw=>{const ok=pl[kw.id]===crm[kw.id];const n=document.querySelector(`#mapCanvas .map-node[data-kid="${kw.id}"]`);if(n)n.classList.add(ok?'correct':'wrong')});refreshConns(ccs)}
 function contGame(){chk=false;document.querySelectorAll('#mapCanvas .map-node').forEach(n=>n.classList.remove('correct','wrong'));
-refreshConns();document.getElementById('resultBanner').style.display='none';document.getElementById('resultBanner').classList.remove('show');document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none';upSetNav()}
+refreshConns();document.getElementById('resultBanner').style.display='none';document.getElementById('resultBanner').classList.remove('show');document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none';const sdmmc=document.getElementById('scoreDisp');sdmmc.style.display='none';upSetNav()}
 document.getElementById('checkBtn').addEventListener('click',checkAnswers);
 document.getElementById('checkToggle').addEventListener('click',e=>{e.stopPropagation();SFX.click();PV.toggleCheckMode(gameState)});
 document.getElementById('contBtn').addEventListener('click',contGame);

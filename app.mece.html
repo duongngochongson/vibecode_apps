@@ -36,9 +36,9 @@
 <div class="control-bar">
 <div class="control-bar__row">
 <span class="control-bar__stat" id="setDisp">Bộ: 1 / 1</span>
-<button class="control-bar__check" id="checkBtn">Check<span class="check-toggle" id="checkToggle" title="Toggle: check all sets / check this set only">⚙</span></button>
+<button class="control-bar__check" id="checkBtn">Check<span class="check-toggle" id="checkToggle">›all</span></button>
 <button class="control-bar__continue" id="contBtn" style="display:none">Tiếp tục</button>
-<span class="control-bar__stat" id="scoreDisp">Điểm: 0</span></div>
+<span class="control-bar__stat" id="scoreDisp" style="display:none">Điểm: 0</span></div>
 <div class="control-bar__nav">
 <button class="control-bar__prev" id="prevBtn">←</button>
 <div class="control-bar__dots" id="ctrlDots"></div>
@@ -75,7 +75,7 @@ const ua=ans[cs],isOk=ua===q.answer,ok=isOk?1:0;
 if(isOk)card.classList.add('correct');else card.classList.add('wrong');
 gr.querySelectorAll('.ans-btn').forEach(b=>{const k=b.dataset.answer;b.classList.remove('selected');if(k===q.answer)b.classList.add('r-ok');if(k===ua&&!isOk)b.classList.add('r-bad')});
 gameState.setResults[cs]={correct:ok,total:1,pct:ok*100};SFX[isOk?'correct':'wrong']();
-document.getElementById('scoreDisp').textContent=`Điểm: ${ok}/1`;PV.showResult(ok,1,PV.checkMsg(ok*100));
+const sd=document.getElementById('scoreDisp');sd.style.display='';sd.textContent=`Điểm: ${ok}/1`;PV.showResult(ok,1,PV.checkMsg(ok*100));
 document.getElementById('checkBtn').style.display='none';document.getElementById('contBtn').style.display='';upSetDots()}
 function checkAllSets(){chk=true;let globalOk=0;
 gd.forEach((q,idx)=>{const ua=ans[idx],isOk=ua===q.answer;if(isOk)globalOk++;gameState.setResults[idx]={correct:isOk?1:0,total:1,pct:isOk?100:0}});
@@ -84,11 +84,11 @@ const ua=ans[cs],isOk=ua===q.answer;if(isOk)card.classList.add('correct');else c
 gr.querySelectorAll('.ans-btn').forEach(b=>{const k=b.dataset.answer;b.classList.remove('selected');if(k===q.answer)b.classList.add('r-ok');if(k===ua&&!isOk)b.classList.add('r-bad')});
 const globalTot=gd.length,globalPct=globalTot===0?100:Math.round(globalOk/globalTot*100);
 gameState.globalResults={correct:globalOk,total:globalTot,pct:globalPct};SFX[globalPct===100?'correct':'wrong']();
-document.getElementById('scoreDisp').textContent=`Điểm: ${globalOk}/${globalTot}`;PV.showResult(globalOk,globalTot,PV.checkMsg(globalPct));
+const sd2=document.getElementById('scoreDisp');sd2.style.display='';sd2.textContent=`Điểm: ${globalOk}/${globalTot}`;PV.showResult(globalOk,globalTot,PV.checkMsg(globalPct));
 document.getElementById('checkBtn').style.display='none';document.getElementById('contBtn').style.display='';upSetDots()}
 function contGame(){chk=false;document.querySelectorAll('.qcard').forEach(c=>c.classList.remove('correct','wrong'));
 document.querySelectorAll('.ans-btn').forEach(b=>{b.classList.remove('r-ok','r-bad');b.classList.toggle('selected',b.dataset.answer===ans[cs])});
-document.getElementById('resultBanner').style.display='none';document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none'}
+document.getElementById('resultBanner').style.display='none';document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none';document.getElementById('scoreDisp').style.display='none'}
 document.getElementById('checkBtn').addEventListener('click',checkAnswers);
 document.getElementById('checkToggle').addEventListener('click',e=>{e.stopPropagation();SFX.click();PV.toggleCheckMode(gameState)});
 document.getElementById('contBtn').addEventListener('click',contGame);

@@ -657,44 +657,28 @@ section,
 }
 
 .check-toggle{
-  position:relative;
   display:inline-flex;
   align-items:center;
-  justify-content:center;
-  margin-left:6px;
-  width:24px;
-  height:24px;
-  font-size:14px;
-  opacity:0.7;
-  transition:all var(--duration-normal) var(--ease-default);
+  margin-left:5px;
+  font-family:var(--font-sans);
+  font-size:9px;
+  letter-spacing:0.5px;
+  font-weight:500;
+  opacity:0.5;
+  transition:opacity var(--duration-normal) var(--ease-default),
+             color var(--duration-normal) var(--ease-default);
   cursor:pointer;
+  padding:1px 3px;
 }
 
 .check-toggle:hover{
-  opacity:1;
-  transform:rotate(20deg);
+  opacity:0.85;
 }
 
 .check-toggle.active{
-  opacity:1;
+  opacity:0.9;
   color:var(--accent);
-  text-shadow:0 0 6px rgba(232,168,73,0.4);
-  transform:rotate(20deg);
 }
-.check-mode-label{
-  font-family:var(--font-sans);
-  font-size:12px;
-  font-weight:500;
-  color:var(--accent);
-  opacity:0;
-  max-width:0;
-  overflow:hidden;
-  transition:opacity var(--duration-normal) var(--ease-default),
-             max-width var(--duration-normal) var(--ease-default);
-  white-space:nowrap;
-  vertical-align:middle;
-}
-.check-mode-label.visible{opacity:1;max-width:80px}
 
 .control-bar__continue{
   font-family:var(--font-sans);

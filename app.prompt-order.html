@@ -36,9 +36,9 @@
 <div class="control-bar">
 <div class="control-bar__row">
 <span class="control-bar__stat" id="setDisp">Bộ: 1 / 1</span>
-<button class="control-bar__check" id="checkBtn">Check<span class="check-toggle" id="checkToggle" title="Toggle: check all sets / check this set only">⚙</span></button>
+<button class="control-bar__check" id="checkBtn">Check<span class="check-toggle" id="checkToggle">›all</span></button>
 <button class="control-bar__continue" id="contBtn" style="display:none">Tiếp tục</button>
-<span class="control-bar__stat" id="scoreDisp">Điểm: 0</span></div>
+<span class="control-bar__stat" id="scoreDisp" style="display:none">Điểm: 0</span></div>
 <div class="control-bar__nav">
 <button class="control-bar__prev" id="prevBtn">←</button>
 <div class="control-bar__dots" id="ctrlDots"></div>
@@ -107,7 +107,7 @@ cr[cq]={correct:ok,total:q.parts.length,results};
 const pct=q.parts.length===0?100:Math.round(ok/q.parts.length*100);
 gameState.setResults[cq]={correct:ok,total:q.parts.length,pct};
 SFX[pct===100?'correct':'wrong']();renderRows();renderPool();upDots();
-document.getElementById('scoreDisp').textContent=`Điểm: ${ok}/${q.parts.length}`;
+const sdpo=document.getElementById('scoreDisp');sdpo.style.display='';sdpo.textContent=`Điểm: ${ok}/${q.parts.length}`;
 PV.showResult(ok,q.parts.length,PV.checkMsg(pct));document.getElementById('checkBtn').style.display='none';document.getElementById('contBtn').style.display=''}
 function doCheckAllSets(){chk=true;let globalOk=0,globalTot=0;
 qs.forEach((q,qi)=>{const pls=ap[qi],results={};let ok=0;
@@ -119,10 +119,10 @@ gameState.setResults[qi]={correct:ok,total:q.parts.length,pct};globalOk+=ok;glob
 const globalPct=globalTot===0?100:Math.round(globalOk/globalTot*100);
 gameState.globalResults={correct:globalOk,total:globalTot,pct:globalPct};
 SFX[globalPct===100?'correct':'wrong']();renderRows();renderPool();upDots();
-document.getElementById('scoreDisp').textContent=`Điểm: ${globalOk}/${globalTot}`;
+const sdpo2=document.getElementById('scoreDisp');sdpo2.style.display='';sdpo2.textContent=`Điểm: ${globalOk}/${globalTot}`;
 PV.showResult(globalOk,globalTot,PV.checkMsg(globalPct));document.getElementById('checkBtn').style.display='none';document.getElementById('contBtn').style.display=''}
 function doCont(){chk=false;cr={};document.getElementById('resultBanner').style.display='none';document.getElementById('resultBanner').classList.remove('show');document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none';
-document.getElementById('scoreDisp').textContent='Điểm: 0';renderRows();renderPool();upDots()}
+const sdpo3=document.getElementById('scoreDisp');sdpo3.style.display='none';sdpo3.textContent='Điểm: 0';renderRows();renderPool();upDots()}
 document.getElementById('checkBtn').addEventListener('click',doCheck);
 document.getElementById('checkToggle').addEventListener('click',e=>{e.stopPropagation();SFX.click();PV.toggleCheckMode(gameState)});
 document.getElementById('contBtn').addEventListener('click',doCont);
