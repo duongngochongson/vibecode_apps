@@ -68,65 +68,70 @@
 let gd=[],cs=0,dragId=null,selId=null,sDropSt={},chk=false;
 const gameState={sets:[],currentSetIdx:0,checkMode:'all',setResults:[],globalResults:{correct:0,total:0,pct:0}};
 function clrSel(){selId=null;document.querySelectorAll('.drag-card.selected').forEach(c=>c.classList.remove('selected'));document.querySelectorAll('.drop-zone.accepting').forEach(z=>z.classList.remove('accepting'))}
-function getDropSt(){if(!sDropSt[cs])sDropSt[cs]={pro:null,con:null};return sDropSt[cs]}
-function buildGame(){const t=gd[cs];if(!t)return;chk=false;if(!sDropSt[cs])sDropSt[cs]={pro:null,con:null};
-renderTopic();renderPool();upSetNav()}
-function renderTopic(){const col=document.getElementById('topicsCol');col.innerHTML='';const t=gd[cs],ds=getDropSt();
-const a=document.createElement('article');a.className='topic-card';a.id='topic-'+t.id;
-a.innerHTML=`<div class="topic-card__hdr"><span class="topic-card__num">${String(cs+1).padStart(2,'0')}.</span><span class="topic-card__title">${PV.escHtml(t.topic)}</span></div>
+function getDropSt(qId){if(!sDropSt[cs])sDropSt[cs]={};if(!sDropSt[cs][qId])sDropSt[cs][qId]={pro:null,con:null};return sDropSt[cs][qId]}
+function buildGame(){if(!gd[cs])return;chk=false;if(!sDropSt[cs])sDropSt[cs]={};renderTopics();renderPool();upSetNav()}
+function renderTopics(){const col=document.getElementById('topicsCol');col.innerHTML='';
+(gd[cs].questions||[]).forEach((t,qi)=>{
+const ds=getDropSt(t.id);const a=document.createElement('article');a.className='topic-card';a.id='topic-'+t.id;
+a.innerHTML=`<div class="topic-card__hdr"><span class="topic-card__num">${String(qi+1).padStart(2,'0')}.</span><span class="topic-card__title">${PV.escHtml(t.topic)}</span></div>
 <p class="topic-card__passage">${PV.escHtml(t.passage)}</p>
-<div class="drop-zones"><div class="drop-zone drop-zone--pro" id="dz-pro"><span class="drop-zone__label">Ưu</span><span class="drop-zone__empty">Kéo / nhấn thẻ</span></div>
-<div class="drop-zone drop-zone--con" id="dz-con"><span class="drop-zone__label">Nhược</span><span class="drop-zone__empty">Kéo / nhấn thẻ</span></div></div>`;
+<div class="drop-zones"><div class="drop-zone drop-zone--pro" id="dz-pro-${t.id}"><span class="drop-zone__label">Ưu</span><span class="drop-zone__empty">Kéo / nhấn thẻ</span></div>
+<div class="drop-zone drop-zone--con" id="dz-con-${t.id}"><span class="drop-zone__label">Nhược</span><span class="drop-zone__empty">Kéo / nhấn thẻ</span></div></div>`;
 col.appendChild(a);
-['pro','con'].forEach(tp=>{const z=document.getElementById('dz-'+tp);
+['pro','con'].forEach(tp=>{const z=document.getElementById(`dz-${tp}-${t.id}`);
 z.addEventListener('dragover',e=>{e.preventDefault();z.classList.add('drag-over')});
 z.addEventListener('dragleave',e=>{z.classList.remove('drag-over')});
-z.addEventListener('drop',e=>{e.preventDefault();z.classList.remove('drag-over');if(!dragId||chk)return;doDrop(tp)});
-z.addEventListener('click',e=>{e.stopPropagation();if(!selId||chk)return;dragId=selId;clrSel();SFX.place();doDrop(tp)});
-if(ds[tp]){const c=getCard(ds[tp]);if(c){const el=mkCard(c);z.appendChild(el);z.querySelector('.drop-zone__empty').style.display='none'}}});
+z.addEventListener('drop',e=>{e.preventDefault();z.classList.remove('drag-over');if(!dragId||chk)return;doDrop(tp,t.id)});
+z.addEventListener('click',e=>{e.stopPropagation();if(!selId||chk)return;dragId=selId;clrSel();SFX.place();doDrop(tp,t.id)});
+if(ds[tp]){const c=getCard(ds[tp]);if(c){const el=mkCard(c);z.appendChild(el);z.querySelector('.drop-zone__empty').style.display='none'}}})});
 document.addEventListener('click',()=>clrSel(),{capture:false})}
 function renderPool(){const pool=document.getElementById('cardPool'),emp=document.getElementById('poolEmpty');
-pool.querySelectorAll('.drag-card').forEach(c=>c.remove());const t=gd[cs],ds=getDropSt();
-const placed=new Set();if(ds.pro)placed.add(ds.pro);if(ds.con)placed.add(ds.con);
-let cards=[{id:t.pro.id,text:t.pro.text,tp:'pro'},{id:t.con.id,text:t.con.text,tp:'con'}];
+pool.querySelectorAll('.drag-card').forEach(c=>c.remove());
+const qs=gd[cs].questions||[];const placed=new Set();
+qs.forEach(t=>{const ds=getDropSt(t.id);if(ds.pro)placed.add(ds.pro);if(ds.con)placed.add(ds.con)});
+let cards=[];qs.forEach(t=>{cards.push({id:t.pro.id,text:t.pro.text,tp:'pro'},{id:t.con.id,text:t.con.text,tp:'con'})});
 cards=PV.shuffle(cards).filter(c=>!placed.has(c.id));emp.style.display=cards.length===0?'block':'none';
 cards.forEach(c=>pool.appendChild(mkCard(c)));
 pool.addEventListener('dragover',e=>{e.preventDefault();pool.classList.add('drag-over')});
 pool.addEventListener('dragleave',e=>{if(!pool.contains(e.relatedTarget))pool.classList.remove('drag-over')});
-pool.addEventListener('drop',e=>{e.preventDefault();pool.classList.remove('drag-over');if(!dragId||chk)return;const ds=getDropSt();
-if(ds.pro===dragId)ds.pro=null;if(ds.con===dragId)ds.con=null;dragId=null;renderTopic();renderPool();upSetDots()})}
+pool.addEventListener('drop',e=>{e.preventDefault();pool.classList.remove('drag-over');if(!dragId||chk)return;
+(gd[cs].questions||[]).forEach(t=>{const ds=getDropSt(t.id);if(ds.pro===dragId)ds.pro=null;if(ds.con===dragId)ds.con=null});
+dragId=null;renderTopics();renderPool();upSetDots()})}
 function mkCard(card){const d=document.createElement('div');d.className='drag-card';d.draggable=true;d.dataset.cardId=card.id;d.textContent=card.text;
 d.addEventListener('click',e=>{e.stopPropagation();if(chk)return;if(selId===card.id)clrSel();else{clrSel();selId=card.id;d.classList.add('selected');SFX.select();document.querySelectorAll('.drop-zone').forEach(z=>z.classList.add('accepting'))}});
 d.addEventListener('dragstart',e=>{clrSel();dragId=card.id;d.classList.add('dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',card.id)});
 d.addEventListener('dragend',()=>d.classList.remove('dragging'));
 d.addEventListener('touchstart',e=>{dragId=card.id},{passive:true});
 d.addEventListener('touchend',e=>{const tc=e.changedTouches[0],el=document.elementFromPoint(tc.clientX,tc.clientY),z=el?el.closest('.drop-zone'):null;
-if(z){const tp=z.id.replace('dz-','');doDrop(tp)}dragId=null});return d}
-function getCard(cid){const t=gd[cs];if(t.pro.id===cid)return{id:t.pro.id,text:t.pro.text,tp:'pro'};if(t.con.id===cid)return{id:t.con.id,text:t.con.text,tp:'con'};return null}
-function doDrop(tp){if(!dragId||chk)return;const ds=getDropSt();
-if(ds.pro===dragId)ds.pro=null;if(ds.con===dragId)ds.con=null;
-ds[tp]=dragId;dragId=null;SFX.place();renderTopic();renderPool();upSetDots()}
+if(z){const m=z.id.match(/^dz-(pro|con)-(.+)$/);if(m)doDrop(m[1],m[2])}dragId=null});return d}
+function getCard(cid){for(const t of(gd[cs].questions||[])){if(t.pro.id===cid)return{id:t.pro.id,text:t.pro.text,tp:'pro'};if(t.con.id===cid)return{id:t.con.id,text:t.con.text,tp:'con'}}return null}
+function doDrop(tp,qId){if(!dragId||chk)return;
+(gd[cs].questions||[]).forEach(t=>{const ds=getDropSt(t.id);if(ds.pro===dragId)ds.pro=null;if(ds.con===dragId)ds.con=null});
+const ds=getDropSt(qId);ds[tp]=dragId;dragId=null;SFX.place();renderTopics();renderPool();upSetDots()}
 function buildSetDots(){PV.buildDots(gd.length,'ctrlDots');
 document.querySelectorAll('#ctrlDots .control-bar__dot').forEach((d,i)=>{d.addEventListener('click',e=>{e.stopPropagation();if(i!==cs){SFX.navigate();goTo(i)}})})}
 function upSetDots(){const states=gd.map((_,i)=>{if(i===cs)return'active';if(gameState.setResults[i])return gameState.setResults[i].pct===100?'answered':'wrong-q';
-const ds=sDropSt[i];if(ds&&(ds.pro||ds.con))return'drafted';return null});PV.setAllDots(states,'ctrlDots')}
+const ds=sDropSt[i];if(ds&&Object.values(ds).some(q=>q&&(q.pro||q.con)))return'drafted';return null});PV.setAllDots(states,'ctrlDots')}
 function goTo(i){cs=i;gameState.currentSetIdx=i;chk=false;document.getElementById('resultBanner').style.display='none';document.getElementById('resultBanner').classList.remove('show');document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none';buildGame()}
 function upSetNav(){document.getElementById('setDisp').textContent=`Bộ: ${cs+1} / ${gd.length}`;document.getElementById('prevBtn').disabled=cs===0;document.getElementById('nextBtn').disabled=cs===gd.length-1;upSetDots()}
 function prevSet(){if(cs>0){SFX.navigate();goTo(cs-1)}}function nextSet(){if(cs<gd.length-1){SFX.navigate();goTo(cs+1)}}
 function checkAnswers(){if(gameState.checkMode==='all'){checkAllSets()}else{checkCurrentSet()}}
-function checkCurrentSet(){const t=gd[cs],ds=getDropSt();chk=true;let ok=0;const tot=2;
-['pro','con'].forEach(tp=>{const z=document.getElementById('dz-'+tp);if(!z)return;z.classList.remove('correct','wrong');
-const pid=ds[tp],cid=tp==='pro'?t.pro.id:t.con.id;if(pid===cid){z.classList.add('correct');ok++}else z.classList.add('wrong')});
-const pct=Math.round(ok/tot*100);gameState.setResults[cs]={correct:ok,total:tot,pct};SFX[pct===100?'correct':'wrong']();
+function checkCurrentSet(){chk=true;let ok=0,tot=0;
+(gd[cs].questions||[]).forEach(t=>{const ds=getDropSt(t.id);
+['pro','con'].forEach(tp=>{const z=document.getElementById(`dz-${tp}-${t.id}`);if(!z)return;
+z.classList.remove('correct','wrong');const pid=ds[tp],cid=tp==='pro'?t.pro.id:t.con.id;tot++;
+if(pid===cid){z.classList.add('correct');ok++}else z.classList.add('wrong')})});
+const pct=tot===0?100:Math.round(ok/tot*100);gameState.setResults[cs]={correct:ok,total:tot,pct};SFX[pct===100?'correct':'wrong']();
 const sdp=document.getElementById('scoreDisp');sdp.style.display='';sdp.textContent=`Điểm: ${ok}/${tot}`;PV.showResult(ok,tot,PV.checkMsg(pct));
 document.getElementById('checkBtn').style.display='none';document.getElementById('contBtn').style.display='';upSetDots()}
 function checkAllSets(){chk=true;let globalOk=0,globalTot=0;
-gd.forEach((t,idx)=>{const ds=sDropSt[idx]||{pro:null,con:null};let ok=0;
-['pro','con'].forEach(tp=>{const pid=ds[tp],cid=tp==='pro'?t.pro.id:t.con.id;if(pid===cid)ok++});
-gameState.setResults[idx]={correct:ok,total:2,pct:Math.round(ok/2*100)};globalOk+=ok;globalTot+=2});
-const t=gd[cs],ds=getDropSt();
-['pro','con'].forEach(tp=>{const z=document.getElementById('dz-'+tp);if(!z)return;z.classList.remove('correct','wrong');
-const pid=ds[tp],cid=tp==='pro'?t.pro.id:t.con.id;if(pid===cid)z.classList.add('correct');else z.classList.add('wrong')});
+gd.forEach((set,idx)=>{if(!sDropSt[idx])sDropSt[idx]={};let ok=0,tot=0;
+(set.questions||[]).forEach(t=>{const ds=sDropSt[idx][t.id]||{pro:null,con:null};
+['pro','con'].forEach(tp=>{tot++;if(ds[tp]===(tp==='pro'?t.pro.id:t.con.id))ok++})});
+const pct=tot===0?100:Math.round(ok/tot*100);gameState.setResults[idx]={correct:ok,total:tot,pct};globalOk+=ok;globalTot+=tot});
+(gd[cs].questions||[]).forEach(t=>{const ds=getDropSt(t.id);
+['pro','con'].forEach(tp=>{const z=document.getElementById(`dz-${tp}-${t.id}`);if(!z)return;
+z.classList.remove('correct','wrong');if(ds[tp]===(tp==='pro'?t.pro.id:t.con.id))z.classList.add('correct');else z.classList.add('wrong')})});
 const globalPct=globalTot===0?100:Math.round(globalOk/globalTot*100);
 gameState.globalResults={correct:globalOk,total:globalTot,pct:globalPct};SFX[globalPct===100?'correct':'wrong']();
 const sdp2=document.getElementById('scoreDisp');sdp2.style.display='';sdp2.textContent=`Điểm: ${globalOk}/${globalTot}`;PV.showResult(globalOk,globalTot,PV.checkMsg(globalPct));
@@ -138,6 +143,8 @@ document.getElementById('checkToggle').addEventListener('click',e=>{e.stopPropag
 document.getElementById('contBtn').addEventListener('click',contGame);
 document.getElementById('prevBtn').addEventListener('click',prevSet);
 document.getElementById('nextBtn').addEventListener('click',nextSet);
-(async()=>{gd=await PV.loadData('prosCons')||[];if(!gd.length)return;
+(async()=>{let raw=await PV.loadData('prosCons')||[];
+if(raw.length&&raw[0].topic!==undefined){raw=[{id:Date.now(),setTitle:'BỘ 1',questions:raw}]}
+gd=raw;if(!gd.length)return;
 gameState.sets=gd;gameState.currentSetIdx=0;gameState.checkMode='all';cs=0;sDropSt={};buildSetDots();buildGame()})();
 </script></body></html>
