@@ -21,7 +21,7 @@
 .type-row__zone .drag-card{font-size:12px;padding:6px 10px;width:auto;flex-grow:1;max-width:100%}
 .drag-card.po-correct{border-color:var(--success);box-shadow:0 0 8px rgba(34,197,94,.3)}.drag-card.po-wrong{border-color:var(--error);box-shadow:0 0 8px rgba(239,68,68,.3)}
 .drag-card__badge{font-family:var(--font-sans);font-size:11px;font-weight:600;padding:3px 8px;border:1px solid;flex-shrink:0;white-space:nowrap;border-radius:3px}
-.card-pool-section{position:sticky;top:80px}
+.card-pool-section{position:sticky;top:80px}.po-q-section{margin-bottom:24px;border:1px solid var(--border-subtle);border-radius:6px;padding:14px 16px}.po-q-section+.po-q-section{border-top-color:var(--border-subtle)}.po-q-num{font-family:var(--font-sans);font-size:11px;color:var(--text-secondary);letter-spacing:1.5px;font-weight:600;margin-bottom:10px}
 .card-pool-header{font-family:var(--font-sans);font-size:13px;font-weight:600;color:var(--accent);letter-spacing:0.5px;margin-bottom:12px}
 .card-pool{background:var(--bg-surface);border:2px solid var(--border-default);padding:12px;min-height:120px;display:flex;flex-direction:column;gap:8px;border-radius:var(--radius-md)}
 .card-pool.drag-over{border-color:var(--accent);box-shadow:0 0 8px rgba(255,193,7,.2)}
@@ -43,93 +43,47 @@
 <button class="control-bar__prev" id="prevBtn">←</button>
 <div class="control-bar__dots" id="ctrlDots"></div>
 <button class="control-bar__next" id="nextBtn">→</button></div></div>
-<div class="game-area"><div class="types-col" id="typesCol"></div>
-<div class="card-pool-section"><div class="card-pool-header">Thẻ còn lại</div>
-<div class="card-pool" id="cardPool"><div class="card-pool__empty" id="poolEmpty">Tất cả thẻ đã được phân loại!</div></div></div></div>
+<div id="gameArea"></div>
 <div class="result-banner" id="resultBanner"><div class="result-banner__score" id="resultScore"></div><div class="result-banner__msg" id="resultMsg"></div></div>
 <div class="po-empty" id="poEmpty" style="display:none;text-align:center;padding:60px 20px;color:var(--text-tertiary);font-size:13px">Chưa có câu hỏi nào. Thêm trong admin.</div></main>
+<div class="toast" id="toast"></div>
 <script>
-const TO=['role','context','task','output','style','reference','other'];
-const TL={role:'Vai trò',context:'Bối cảnh',task:'Nhiệm vụ',output:'Đầu ra',style:'Phong cách',reference:'Tham khảo',other:'Khác'};
+const TO=['role','context','task','output','style','reference','other'];const TL={role:'Vai trò',context:'Bối cảnh',task:'Nhiệm vụ',output:'Đầu ra',style:'Phong cách',reference:'Tham khảo',other:'Khác'};
 const TC={role:'var(--info)',context:'var(--game-octopus)',task:'var(--success)',output:'var(--accent)',style:'var(--game-fox)',reference:'var(--game-octopus)',other:'var(--text-tertiary)'};
-let qs=[],ap={},so={},cr={},cq=0,tq=0,chk=false,dpIdx=null,spIdx=null;
-const gameState={sets:[],currentSetIdx:0,checkMode:'all',setResults:[],globalResults:{correct:0,total:0,pct:0}};
+let qs=[],ap={},so={},cr={},cq=0,tq=0,chk=false,dpQid=null,dpIdx=null,spQid=null,spIdx=null;const gameState={sets:[],currentSetIdx:0,checkMode:'all',setResults:[],globalResults:{correct:0,total:0,pct:0}};
+function migrate(d){if(!d.length||d[0].questions)return d;return[{id:Date.now(),title:'Bộ 1',questions:d}]}
 function initPl(){const p={};TO.forEach(t=>p[t]=[]);return p}
-function getPlaced(qi){const s=new Set(),p=ap[qi];if(p)TO.forEach(t=>(p[t]||[]).forEach(i=>s.add(i)));return s}
-function rmFromPl(qi,pi){const p=ap[qi];if(!p)return null;for(const t of TO){const a=p[t],i=a.indexOf(pi);if(i!==-1){a.splice(i,1);return t}}return null}
-function clrSel(){spIdx=null;document.querySelectorAll('.drag-card.selected').forEach(c=>c.classList.remove('selected'));document.querySelectorAll('.type-row__zone.accepting').forEach(z=>z.classList.remove('accepting'))}
-function mkCard(pi,fromType){const part=qs[cq].parts[pi],d=document.createElement('div');d.className='drag-card';d.draggable=true;d.dataset.pi=pi;
-const s=document.createElement('span');s.textContent=part.text;d.appendChild(s);
-d.addEventListener('click',e=>{e.stopPropagation();if(chk)return;if(spIdx===pi)clrSel();else{clrSel();spIdx=pi;d.classList.add('selected');SFX.click();document.querySelectorAll('.type-row__zone').forEach(z=>z.classList.add('accepting'))}});
-d.addEventListener('dragstart',e=>{dpIdx=pi;d.classList.add('dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',String(pi));clrSel()});
-d.addEventListener('dragend',()=>{dpIdx=null;d.classList.remove('dragging');document.querySelectorAll('.drag-over').forEach(el=>el.classList.remove('drag-over'))});
-d.addEventListener('touchend',e=>{if(chk)return;const t=e.changedTouches[0],el=document.elementFromPoint(t.clientX,t.clientY);
-const z=el?el.closest('.type-row__zone'):null,pool=el?el.closest('.card-pool'):null;
-if(z)doPlace(z.dataset.type,pi);else if(pool&&fromType!==null){rmFromPl(cq,pi);SFX.click();renderRows();renderPool()}},{passive:true});return d}
-function doPlace(tk,pi){if(chk)return;rmFromPl(cq,pi);ap[cq][tk].push(pi);SFX.click();renderRows();renderPool()}
-function renderRows(){const col=document.getElementById('typesCol');col.innerHTML='';const pls=ap[cq],res=cr[cq];
-TO.forEach(tk=>{const row=document.createElement('div');row.className=`type-row type-row--${tk}`;
-const lbl=document.createElement('span');lbl.className='type-row__label';lbl.textContent=TL[tk];row.appendChild(lbl);
-const zone=document.createElement('div');zone.className='type-row__zone';zone.dataset.type=tk;
-const emp=document.createElement('span');emp.className='type-row__zone-empty';emp.textContent='Kéo thẻ vào đây';zone.appendChild(emp);
-const cis=pls[tk]||[];if(cis.length>0)emp.style.display='none';
-cis.forEach(pi=>{const card=mkCard(pi,tk);if(res){card.classList.add(res.results[pi]?'po-correct':'po-wrong');
-const part=qs[cq].parts[pi],badge=document.createElement('span');badge.className='drag-card__badge';badge.textContent=TL[part.type];badge.style.color=TC[part.type];badge.style.borderColor=TC[part.type];card.insertBefore(badge,card.firstChild)}
-zone.appendChild(card)});
-zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('drag-over')});
-zone.addEventListener('dragleave',e=>{if(!zone.contains(e.relatedTarget))zone.classList.remove('drag-over')});
-zone.addEventListener('drop',e=>{e.preventDefault();zone.classList.remove('drag-over');if(dpIdx===null||chk)return;doPlace(tk,dpIdx);dpIdx=null});
-zone.addEventListener('click',e=>{e.stopPropagation();if(spIdx===null||chk)return;doPlace(tk,spIdx);clrSel()});
+function getPlaced(qi,qid){const s=new Set(),p=(ap[qi]||{})[qid];if(p)TO.forEach(t=>(p[t]||[]).forEach(i=>s.add(i)));return s}
+function rmFromPl(qi,qid,pi){const p=(ap[qi]||{})[qid];if(!p)return null;for(const t of TO){const a=p[t],i=a.indexOf(pi);if(i!==-1){a.splice(i,1);return t}}return null}
+function clrSel(){spQid=null;spIdx=null;document.querySelectorAll('.drag-card.selected').forEach(c=>c.classList.remove('selected'));document.querySelectorAll('.type-row__zone.accepting').forEach(z=>z.classList.remove('accepting'))}
+function mkCard(qid,pi,question,fromType){const part=question.parts[pi],d=document.createElement('div');d.className='drag-card';d.draggable=true;d.dataset.pi=pi;d.dataset.qid=qid;const s=document.createElement('span');s.textContent=part.text;d.appendChild(s);
+d.addEventListener('click',e=>{e.stopPropagation();if(chk)return;if(spQid===qid&&spIdx===pi)clrSel();else{clrSel();spQid=qid;spIdx=pi;d.classList.add('selected');SFX.click();document.querySelectorAll(`.type-row__zone[data-qid="${qid}"]`).forEach(z=>z.classList.add('accepting'))}});
+d.addEventListener('dragstart',e=>{dpQid=qid;dpIdx=pi;d.classList.add('dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',String(pi));clrSel()});
+d.addEventListener('dragend',()=>{dpQid=null;dpIdx=null;d.classList.remove('dragging');document.querySelectorAll('.drag-over').forEach(el=>el.classList.remove('drag-over'))});
+d.addEventListener('touchend',e=>{if(chk)return;const t=e.changedTouches[0],el=document.elementFromPoint(t.clientX,t.clientY);const z=el?el.closest(`.type-row__zone[data-qid="${qid}"]`):null,pool=el?el.closest(`.card-pool[data-qid="${qid}"]`):null;if(z)doPlace(qid,z.dataset.type,pi,question);else if(pool&&fromType!==null){rmFromPl(cq,qid,pi);SFX.click();rebuildQ(qid)}},{passive:true});return d}
+function doPlace(qid,tk,pi,question){if(chk)return;rmFromPl(cq,qid,pi);ap[cq][qid][tk].push(pi);SFX.click();rebuildQ(qid)}
+function rebuildQ(qid){const q=qs[cq].questions.find(x=>x.id===qid);if(!q)return;const sec=document.getElementById('posec-'+qid);if(!sec)return;const tc=sec.querySelector('.types-col'),pp=sec.querySelector('.card-pool'),pe=sec.querySelector('.card-pool__empty');renderTypes(tc,qid,q);renderPool(pp,pe,qid,q)}
+function renderTypes(col,qid,question){col.innerHTML='';const pls=ap[cq][qid]||initPl(),res=cr[cq]?cr[cq][qid]:null;
+TO.forEach(tk=>{const row=document.createElement('div');row.className=`type-row type-row--${tk}`;const lbl=document.createElement('span');lbl.className='type-row__label';lbl.textContent=TL[tk];row.appendChild(lbl);const zone=document.createElement('div');zone.className='type-row__zone';zone.dataset.type=tk;zone.dataset.qid=qid;const emp=document.createElement('span');emp.className='type-row__zone-empty';emp.textContent='Kéo thẻ vào đây';zone.appendChild(emp);const cis=pls[tk]||[];if(cis.length>0)emp.style.display='none';
+cis.forEach(pi=>{const card=mkCard(qid,pi,question,tk);if(res){card.classList.add(res.results[pi]?'po-correct':'po-wrong');const part=question.parts[pi],badge=document.createElement('span');badge.className='drag-card__badge';badge.textContent=TL[part.type];badge.style.color=TC[part.type];badge.style.borderColor=TC[part.type];card.insertBefore(badge,card.firstChild)}zone.appendChild(card)});
+zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('drag-over')});zone.addEventListener('dragleave',e=>{if(!zone.contains(e.relatedTarget))zone.classList.remove('drag-over')});zone.addEventListener('drop',e=>{e.preventDefault();zone.classList.remove('drag-over');if(dpIdx===null||dpQid!==qid||chk)return;doPlace(qid,tk,dpIdx,question);dpIdx=null;dpQid=null});zone.addEventListener('click',e=>{e.stopPropagation();if(spQid!==qid||spIdx===null||chk)return;doPlace(qid,tk,spIdx,question);clrSel()});
 row.appendChild(zone);col.appendChild(row)})}
-function renderPool(){const pool=document.getElementById('cardPool'),emp=document.getElementById('poolEmpty');
-pool.querySelectorAll('.drag-card').forEach(c=>c.remove());const placed=getPlaced(cq),res=cr[cq];
-const unpl=so[cq].filter(i=>!placed.has(i));emp.style.display=unpl.length===0?'block':'none';
-unpl.forEach(pi=>{const card=mkCard(pi,null);if(res){card.classList.add('po-wrong');const part=qs[cq].parts[pi],badge=document.createElement('span');badge.className='drag-card__badge';badge.textContent=TL[part.type];badge.style.color=TC[part.type];badge.style.borderColor=TC[part.type];card.insertBefore(badge,card.firstChild)}
-pool.appendChild(card)})}
-const pool=document.getElementById('cardPool');
-pool.addEventListener('dragover',e=>{e.preventDefault();pool.classList.add('drag-over')});
-pool.addEventListener('dragleave',e=>{if(!pool.contains(e.relatedTarget))pool.classList.remove('drag-over')});
-pool.addEventListener('drop',e=>{e.preventDefault();pool.classList.remove('drag-over');if(dpIdx===null||chk)return;rmFromPl(cq,dpIdx);SFX.click();renderRows();renderPool();dpIdx=null});
-document.addEventListener('click',clrSel);
-function goTo(i){cq=i;gameState.currentSetIdx=i;chk=false;document.getElementById('resultBanner').style.display='none';document.getElementById('resultBanner').classList.remove('show');document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none';clrSel();renderRows();renderPool();upSetNav()}
+function renderPool(pool,poolEmp,qid,question){pool.querySelectorAll('.drag-card').forEach(c=>c.remove());const placed=getPlaced(cq,qid),res=cr[cq]?cr[cq][qid]:null;const unpl=(so[cq][qid]||[]).filter(i=>!placed.has(i));poolEmp.style.display=unpl.length===0?'block':'none';
+unpl.forEach(pi=>{const card=mkCard(qid,pi,question,null);if(res){card.classList.add('po-wrong');const part=question.parts[pi],badge=document.createElement('span');badge.className='drag-card__badge';badge.textContent=TL[part.type];badge.style.color=TC[part.type];badge.style.borderColor=TC[part.type];card.insertBefore(badge,card.firstChild)}pool.appendChild(card)})}
+function buildGame(){const ga=document.getElementById('gameArea');ga.innerHTML='';if(!qs[cq])return;
+qs[cq].questions.forEach((q,qi)=>{const sec=document.createElement('div');sec.className='po-q-section';sec.id='posec-'+q.id;if(qs[cq].questions.length>1){const hdr=document.createElement('div');hdr.className='po-q-num';hdr.textContent=`CÂU ${qi+1}`;sec.appendChild(hdr)}const area=document.createElement('div');area.className='game-area';const tc=document.createElement('div');tc.className='types-col';const ps=document.createElement('div');ps.className='card-pool-section';const ph=document.createElement('div');ph.className='card-pool-header';ph.textContent='Thẻ còn lại';const pp=document.createElement('div');pp.className='card-pool';pp.dataset.qid=q.id;const pe=document.createElement('div');pe.className='card-pool__empty';pe.textContent='Tất cả thẻ đã được phân loại!';pp.appendChild(pe);ps.appendChild(ph);ps.appendChild(pp);area.appendChild(tc);area.appendChild(ps);sec.appendChild(area);ga.appendChild(sec);
+pp.addEventListener('dragover',e=>{e.preventDefault();pp.classList.add('drag-over')});pp.addEventListener('dragleave',e=>{if(!pp.contains(e.relatedTarget))pp.classList.remove('drag-over')});pp.addEventListener('drop',e=>{e.preventDefault();pp.classList.remove('drag-over');if(dpIdx===null||dpQid!==q.id||chk)return;rmFromPl(cq,q.id,dpIdx);SFX.click();rebuildQ(q.id);dpIdx=null;dpQid=null});
+renderTypes(tc,q.id,q);renderPool(pp,pe,q.id,q)});upSetNav()}
+function buildSetDots(){PV.buildDots(tq,'ctrlDots');document.querySelectorAll('#ctrlDots .control-bar__dot').forEach((d,i)=>{d.addEventListener('click',e=>{e.stopPropagation();if(i!==cq){SFX.navigate();goTo(i)}})})}
+function upDots(){const states=[];for(let i=0;i<tq;i++){if(i===cq)states.push('active');else if(gameState.setResults[i])states.push(gameState.setResults[i].pct===100?'answered':'wrong-q');else{const qi=ap[i];const hasAny=qi&&Object.values(qi).some(qd=>TO.some(t=>(qd[t]||[]).length>0));states.push(hasAny?'drafted':null)}}PV.setAllDots(states,'ctrlDots')}
+function goTo(i){cq=i;gameState.currentSetIdx=i;chk=false;document.getElementById('resultBanner').style.display='none';document.getElementById('resultBanner').classList.remove('show');document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none';clrSel();buildGame()}
 function upSetNav(){document.getElementById('setDisp').textContent=`Bộ: ${cq+1} / ${tq}`;document.getElementById('prevBtn').disabled=cq===0;document.getElementById('nextBtn').disabled=cq===tq-1;upDots()}
-function buildSetDots(){PV.buildDots(tq,'ctrlDots');
-document.querySelectorAll('#ctrlDots .control-bar__dot').forEach((d,i)=>{d.addEventListener('click',e=>{e.stopPropagation();if(i!==cq){SFX.navigate();goTo(i)}})})}
-function upDots(){const states=[];for(let i=0;i<tq;i++){if(i===cq)states.push('active');
-else if(gameState.setResults[i])states.push(gameState.setResults[i].pct===100?'answered':'wrong-q');
-else if(getPlaced(i).size>0)states.push('drafted');
-else states.push(null)}PV.setAllDots(states,'ctrlDots')}
 function doCheck(){if(gameState.checkMode==='all'){doCheckAllSets()}else{doCheckCurrentSet()}}
-function doCheckCurrentSet(){chk=true;const q=qs[cq],pls=ap[cq],results={};let ok=0;
-TO.forEach(tk=>{(pls[tk]||[]).forEach(pi=>{const isOk=q.parts[pi].type===tk;results[pi]=isOk;if(isOk)ok++})});
-const placed=getPlaced(cq);q.parts.forEach((_,i)=>{if(!placed.has(i))results[i]=false});
-cr[cq]={correct:ok,total:q.parts.length,results};
-const pct=q.parts.length===0?100:Math.round(ok/q.parts.length*100);
-gameState.setResults[cq]={correct:ok,total:q.parts.length,pct};
-SFX[pct===100?'correct':'wrong']();renderRows();renderPool();upDots();
-const sdpo=document.getElementById('scoreDisp');sdpo.style.display='';sdpo.textContent=`Điểm: ${ok}/${q.parts.length}`;
-PV.showResult(ok,q.parts.length,PV.checkMsg(pct));document.getElementById('checkBtn').style.display='none';document.getElementById('contBtn').style.display=''}
-function doCheckAllSets(){chk=true;let globalOk=0,globalTot=0;
-qs.forEach((q,qi)=>{const pls=ap[qi],results={};let ok=0;
-TO.forEach(tk=>{(pls[tk]||[]).forEach(pi=>{const isOk=q.parts[pi].type===tk;results[pi]=isOk;if(isOk)ok++})});
-const placed=getPlaced(qi);q.parts.forEach((_,i)=>{if(!placed.has(i))results[i]=false});
-cr[qi]={correct:ok,total:q.parts.length,results};
-const pct=q.parts.length===0?100:Math.round(ok/q.parts.length*100);
-gameState.setResults[qi]={correct:ok,total:q.parts.length,pct};globalOk+=ok;globalTot+=q.parts.length});
-const globalPct=globalTot===0?100:Math.round(globalOk/globalTot*100);
-gameState.globalResults={correct:globalOk,total:globalTot,pct:globalPct};
-SFX[globalPct===100?'correct':'wrong']();renderRows();renderPool();upDots();
-const sdpo2=document.getElementById('scoreDisp');sdpo2.style.display='';sdpo2.textContent=`Điểm: ${globalOk}/${globalTot}`;
-PV.showResult(globalOk,globalTot,PV.checkMsg(globalPct));document.getElementById('checkBtn').style.display='none';document.getElementById('contBtn').style.display=''}
-function doCont(){chk=false;cr={};document.getElementById('resultBanner').style.display='none';document.getElementById('resultBanner').classList.remove('show');document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none';
-const sdpo3=document.getElementById('scoreDisp');sdpo3.style.display='none';sdpo3.textContent='Điểm: 0';renderRows();renderPool();upDots()}
-document.getElementById('checkBtn').addEventListener('click',doCheck);
-document.getElementById('checkToggle').addEventListener('click',e=>{e.stopPropagation();SFX.click();PV.toggleCheckMode(gameState)});
-document.getElementById('contBtn').addEventListener('click',doCont);
-document.getElementById('prevBtn').addEventListener('click',()=>{if(cq>0){SFX.navigate();goTo(cq-1)}});
-document.getElementById('nextBtn').addEventListener('click',()=>{if(cq<tq-1){SFX.navigate();goTo(cq+1)}});
-(async()=>{qs=await PV.loadData('promptOrder')||[];if(!qs.length){document.getElementById('poEmpty').style.display='';return}
-tq=qs.length;qs.forEach((q,i)=>{ap[i]=initPl();const idx=q.parts.map((_,j)=>j);for(let k=idx.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[idx[k],idx[j]]=[idx[j],idx[k]]}so[i]=idx});
-gameState.sets=qs;gameState.currentSetIdx=0;gameState.checkMode='all';
-buildSetDots();goTo(0)})();
+function doCheckCurrentSet(){chk=true;const set=qs[cq];let ok=0,tot=0;const setCr={};set.questions.forEach(q=>{const pls=ap[cq][q.id]||initPl(),results={};let qok=0;TO.forEach(tk=>{(pls[tk]||[]).forEach(pi=>{const isOk=q.parts[pi].type===tk;results[pi]=isOk;if(isOk)qok++})});const placed=getPlaced(cq,q.id);q.parts.forEach((_,i)=>{if(!placed.has(i))results[i]=false});setCr[q.id]={correct:qok,total:q.parts.length,results};ok+=qok;tot+=q.parts.length});
+cr[cq]=setCr;const pct=tot===0?100:Math.round(ok/tot*100);gameState.setResults[cq]={correct:ok,total:tot,pct};SFX[pct===100?'correct':'wrong']();buildGame();upDots();const sd=document.getElementById('scoreDisp');sd.style.display='';sd.textContent=`Điểm: ${ok}/${tot}`;PV.showResult(ok,tot,PV.checkMsg(pct));document.getElementById('checkBtn').style.display='none';document.getElementById('contBtn').style.display=''}
+function doCheckAllSets(){chk=true;let globalOk=0,globalTot=0;qs.forEach((set,si)=>{let ok=0,tot=0;const setCr={};set.questions.forEach(q=>{const pls=(ap[si]||{})[q.id]||initPl(),results={};let qok=0;TO.forEach(tk=>{(pls[tk]||[]).forEach(pi=>{const isOk=q.parts[pi].type===tk;results[pi]=isOk;if(isOk)qok++})});const placed=getPlaced(si,q.id);q.parts.forEach((_,i)=>{if(!placed.has(i))results[i]=false});setCr[q.id]={correct:qok,total:q.parts.length,results};ok+=qok;tot+=q.parts.length});cr[si]=setCr;const pct=tot===0?100:Math.round(ok/tot*100);gameState.setResults[si]={correct:ok,total:tot,pct};globalOk+=ok;globalTot+=tot});
+const globalPct=globalTot===0?100:Math.round(globalOk/globalTot*100);gameState.globalResults={correct:globalOk,total:globalTot,pct:globalPct};SFX[globalPct===100?'correct':'wrong']();buildGame();upDots();const sd2=document.getElementById('scoreDisp');sd2.style.display='';sd2.textContent=`Điểm: ${globalOk}/${globalTot}`;PV.showResult(globalOk,globalTot,PV.checkMsg(globalPct));document.getElementById('checkBtn').style.display='none';document.getElementById('contBtn').style.display=''}
+function doCont(){chk=false;cr={};document.getElementById('resultBanner').style.display='none';document.getElementById('resultBanner').classList.remove('show');document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none';document.getElementById('scoreDisp').style.display='none';buildGame();upDots()}
+document.getElementById('checkBtn').addEventListener('click',doCheck);document.getElementById('checkToggle').addEventListener('click',e=>{e.stopPropagation();SFX.click();PV.toggleCheckMode(gameState)});document.getElementById('contBtn').addEventListener('click',doCont);document.getElementById('prevBtn').addEventListener('click',()=>{if(cq>0){SFX.navigate();goTo(cq-1)}});document.getElementById('nextBtn').addEventListener('click',()=>{if(cq<tq-1){SFX.navigate();goTo(cq+1)}});document.addEventListener('click',clrSel);
+(async()=>{const raw=await PV.loadData('promptOrder');const d=raw?JSON.parse(JSON.stringify(raw)):[];qs=migrate(d);if(!qs.length){document.getElementById('poEmpty').style.display='';return}tq=qs.length;qs.forEach((set,si)=>{ap[si]={};so[si]={};set.questions.forEach(q=>{ap[si][q.id]=initPl();const idx=q.parts.map((_,j)=>j);for(let k=idx.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[idx[k],idx[j]]=[idx[j],idx[k]]}so[si][q.id]=idx})});gameState.sets=qs;gameState.currentSetIdx=0;gameState.checkMode='all';buildSetDots();goTo(0)})();
 </script></body></html>
