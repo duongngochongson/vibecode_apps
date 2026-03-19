@@ -148,7 +148,7 @@ window.addEventListener('resize',()=>refreshConns());
 function buildSetDots(){PV.buildDots(allSets.length,'ctrlDots');
 document.querySelectorAll('#ctrlDots .control-bar__dot').forEach((d,i)=>{d.addEventListener('click',e=>{e.stopPropagation();if(i!==cs){SFX.navigate();goTo(i)}})})}
 function upSetDots(){const states=allSets.map((_,i)=>{if(i===cs)return'active';if(gameState.setResults[i])return gameState.setResults[i].pct===100?'answered':'wrong-q';if(Object.keys(sPl[i]||{}).length)return'drafted';return null});PV.setAllDots(states,'ctrlDots')}
-function goTo(i){saveSetState();cs=i;gameState.currentSetIdx=i;chk=false;document.getElementById('resultBanner').style.display='none';document.getElementById('resultBanner').classList.remove('show');document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none';buildGame()}
+function goTo(i){saveSetState();cs=i;gameState.currentSetIdx=i;chk=false;document.getElementById('resultBanner').classList.remove('show','error');document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none';buildGame()}
 function upSetNav(){document.getElementById('setDisp').textContent=`Bộ: ${cs+1} / ${allSets.length}`;document.getElementById('prevBtn').disabled=cs===0;document.getElementById('nextBtn').disabled=cs===allSets.length-1;upSetDots();upBadges()}
 function prevSet(){if(cs>0){SFX.navigate();goTo(cs-1)}}function nextSet(){if(cs<allSets.length-1){SFX.navigate();goTo(cs+1)}}
 function checkAnswers(){if(gameState.checkMode==='all'){checkAllSets()}else{checkCurrentSet()}}
@@ -189,7 +189,7 @@ for(let row=1;row<=mx;row++){const rk=(ro[row]||[]).filter(id=>pl[id]===row);if(
 const po=ro[row-1]||[];rk.sort((a,b)=>{const pA=po.findIndex(p=>(ch[p]||[]).includes(a)),pB=po.findIndex(p=>(ch[p]||[]).includes(b));return(pA===-1?9999:pA)-(pB===-1?9999:pB)});ro[row]=rk}
 renderPlaced();gd.keywords.forEach(kw=>{const ok=pl[kw.id]===crm[kw.id];const n=document.querySelector(`#mapCanvas .map-node[data-kid="${kw.id}"]`);if(n)n.classList.add(ok?'correct':'wrong')});refreshConns(ccs)}
 function contGame(){chk=false;document.querySelectorAll('#mapCanvas .map-node').forEach(n=>n.classList.remove('correct','wrong'));
-refreshConns();document.getElementById('resultBanner').style.display='none';document.getElementById('resultBanner').classList.remove('show');document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none';const sdmmc=document.getElementById('scoreDisp');sdmmc.style.display='none';upSetNav()}
+refreshConns();document.getElementById('resultBanner').classList.remove('show','error');document.getElementById('checkBtn').style.display='';document.getElementById('contBtn').style.display='none';const sdmmc=document.getElementById('scoreDisp');sdmmc.style.display='none';upSetNav()}
 document.getElementById('checkBtn').addEventListener('click',checkAnswers);
 document.getElementById('checkToggle').addEventListener('click',e=>{e.stopPropagation();SFX.click();PV.toggleCheckMode(gameState)});
 document.getElementById('contBtn').addEventListener('click',contGame);

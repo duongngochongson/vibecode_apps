@@ -101,7 +101,16 @@
 <div class="game-block"><button class="game-header" onclick="toggleSection('pc')"><span class="game-header-left"><span>🐺</span><span>Đoán Ưu / Nhược</span></span><span class="game-arrow" id="arrow-pc">▶</span></button>
 <div class="game-content" id="content-pc"><div id="pc-list"></div><div class="add-btn-row"><button class="add-btn" id="pc-add" title="Thêm bộ đề">+</button><span>Thêm bộ đề</span></div></div></div>
 <div class="game-block"><button class="game-header" onclick="toggleSection('mm')"><span class="game-header-left"><span>🐙</span><span>Sơ đồ Tư Duy</span></span><span class="game-arrow" id="arrow-mm">▶</span></button>
-<div class="game-content" id="content-mm"><div class="sec-label">▸ Từ khóa</div><div id="mm-kw-list"></div>
+<div class="game-content" id="content-mm">
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+<div class="add-btn-row"><button class="add-btn" id="mm-add-set" title="Thêm bộ đề">+</button><span>Thêm bộ đề</span></div>
+<div style="display:flex;align-items:center;gap:6px;margin-left:auto">
+<button class="mm-row-btn" id="mm-prev-set" style="font-size:14px">←</button>
+<span id="mm-set-disp" style="font-size:12px;color:var(--cyan);letter-spacing:1px;min-width:60px;text-align:center">Bộ 1 / 1</span>
+<button class="mm-row-btn" id="mm-next-set" style="font-size:14px">→</button>
+<button class="mt-del-set-btn" id="mm-del-set" title="Xóa bộ đề">✕</button></div></div>
+<div style="margin-bottom:10px"><input class="field-input" id="mm-set-title" placeholder="Tên bộ đề" style="width:100%;box-sizing:border-box"/></div>
+<div class="sec-label">▸ Từ khóa</div><div id="mm-kw-list"></div>
 <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:6px"><div class="add-btn-row"><button class="add-btn" id="mm-add-kw" title="Thêm từ khóa">+</button><span>Thêm từ khóa</span></div>
 <div class="mm-row-ctrl"><span style="font-size:12px;letter-spacing:1px">Số hàng:</span><button class="mm-row-btn" id="mm-row-minus">−</button><span id="mm-row-count" style="color:var(--white);min-width:18px;text-align:center">3</span><button class="mm-row-btn" id="mm-row-plus">+</button></div></div>
 <div class="sec-label" style="margin-top:24px">▸ Bố cục sơ đồ <small style="color:var(--grey);font-size:11px">kéo vào hàng · bấm 2 node để nối</small></div>
@@ -139,13 +148,13 @@ function doLogout(){localStorage.removeItem('adminLoggedIn');location.reload()}
 function showSections(){document.getElementById('authSection').innerHTML='<div class="auth-title" style="margin-bottom:0">⚙ ADMIN SETTING</div><div class="auth-ok">✓ Đã đăng nhập</div>';
 document.getElementById('gameSections').style.display='block';document.getElementById('gBarTop').classList.add('visible');document.getElementById('gBarBot').classList.add('visible');
 document.getElementById('logoutBtnT').addEventListener('click',doLogout);document.getElementById('logoutBtnB').addEventListener('click',doLogout);initAll()}
-let gLastJson='',rawFileNaming={},poData=[],pcData=[],meceData=[],nbData=[];
+let gLastJson='',rawFileNaming={},poData=[],pcData=[],meceData=[],nbData=[],mmSets=[],mmSi=0;
 function enableGlobal(){['gCopyT','gCopyB'].forEach(id=>document.getElementById(id).classList.add('on'));['gDlT','gDlB'].forEach(id=>document.getElementById(id).classList.add('on'))}
 function flashMsg(msg){['gMsgT','gMsgB'].forEach(id=>{const el=document.getElementById(id);el.textContent=msg;setTimeout(()=>el.textContent='',2500)})}
 document.getElementById('gSaveT').addEventListener('click',globalSave);document.getElementById('gSaveB').addEventListener('click',globalSave);
 document.getElementById('gCopyT').addEventListener('click',()=>doCopy('gCopyT'));document.getElementById('gCopyB').addEventListener('click',()=>doCopy('gCopyB'));
 document.getElementById('gDlT').addEventListener('click',doDownload);document.getElementById('gDlB').addEventListener('click',doDownload);
-function globalSave(){const content={enabledGames,fileNaming:rawFileNaming,promptOrder:poData,prosCons:pcData,mindMap:[mmBuildSave()],matching:buildMTData(),mece:meceData,noticeboard:nbData};
+function globalSave(){mmSaveSet(mmSi);const content={enabledGames,fileNaming:rawFileNaming,promptOrder:poData,prosCons:pcData,mindMap:mmSets,matching:buildMTData(),mece:meceData,noticeboard:nbData};
 ['enabledGames','promptOrder','prosCons','mindMap','matching','mece','noticeboard'].forEach(k=>localStorage.setItem(k,JSON.stringify(content[k])));
 gLastJson=JSON.stringify(content,null,2);enableGlobal();flashMsg('✓ Đã lưu!')}
 function doCopy(btnId){if(!gLastJson)return;navigator.clipboard?.writeText(gLastJson).catch(()=>{const ta=document.createElement('textarea');ta.value=gLastJson;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta)});
@@ -191,12 +200,18 @@ div.appendChild(mkFG('Tên chủ đề',topicInp));div.appendChild(mkFG('Đoạn
 // MIND-MAP
 let mmData=null,mmPlacements={},mmConnections=new Set(),mmDragKid=null,mmSelectedNode=null;
 const mmCk=(a,b)=>a<b?a+'|'+b:b+'|'+a,mmPair=k=>k.split('|');
-async function initMM(){const s=localStorage.getItem('mindMap');if(s)try{mmData=JSON.parse(s)[0]}catch(e){}
-if(!mmData){try{const r=await fetch('data.json');if(r.ok){const d=await r.json();mmData=(d.mindMap||[])[0]||null}}catch(e){}}
-if(!mmData)mmData={id:Date.now(),title:'Sơ đồ 1',rowCount:3,keywords:[],connections:[]};
-mmPlacements={};mmData.keywords.forEach(kw=>{if(kw.correctRow!=null)mmPlacements[kw.id]=kw.correctRow});
-mmConnections=new Set(mmData.connections.map(c=>mmCk(c.from,c.to)));document.getElementById('mm-row-count').textContent=mmData.rowCount;
-mmRenderKwList();mmRenderCanvas();
+function mmSaveSet(si){if(!mmSets[si]||!mmData)return;mmSets[si]=mmBuildSave()}
+function mmLoadSet(si){mmData=JSON.parse(JSON.stringify(mmSets[si]));mmPlacements={};mmData.keywords.forEach(kw=>{if(kw.correctRow!=null)mmPlacements[kw.id]=kw.correctRow});mmConnections=new Set(mmData.connections.map(c=>mmCk(c.from,c.to)));document.getElementById('mm-row-count').textContent=mmData.rowCount;document.getElementById('mm-set-title').value=mmData.title||'';mmRenderKwList();mmRenderCanvas();mmUpSetNav()}
+function mmUpSetNav(){document.getElementById('mm-set-disp').textContent=`Bộ ${mmSi+1} / ${mmSets.length}`;document.getElementById('mm-prev-set').disabled=mmSi===0;document.getElementById('mm-next-set').disabled=mmSi===mmSets.length-1;document.getElementById('mm-del-set').disabled=mmSets.length<=1}
+async function initMM(){const s=localStorage.getItem('mindMap');if(s)try{mmSets=JSON.parse(s)}catch(e){}
+if(!mmSets.length){try{const r=await fetch('data.json');if(r.ok){const d=await r.json();mmSets=d.mindMap||[]}}catch(e){}}
+if(!mmSets.length)mmSets=[{id:Date.now(),title:'Sơ đồ 1',rowCount:3,keywords:[],connections:[]}];
+mmSi=0;mmLoadSet(0);
+document.getElementById('mm-set-title').addEventListener('input',()=>{mmData.title=document.getElementById('mm-set-title').value;mmSets[mmSi].title=mmData.title});
+document.getElementById('mm-add-set').addEventListener('click',()=>{mmSaveSet(mmSi);const id=Date.now();mmSets.push({id,title:`Sơ đồ ${mmSets.length+1}`,rowCount:3,keywords:[],connections:[]});mmSi=mmSets.length-1;mmLoadSet(mmSi)});
+document.getElementById('mm-del-set').addEventListener('click',()=>{if(mmSets.length<=1)return;mmSets.splice(mmSi,1);mmSi=Math.min(mmSi,mmSets.length-1);mmLoadSet(mmSi)});
+document.getElementById('mm-prev-set').addEventListener('click',()=>{if(mmSi>0){mmSaveSet(mmSi);mmSi--;mmLoadSet(mmSi)}});
+document.getElementById('mm-next-set').addEventListener('click',()=>{if(mmSi<mmSets.length-1){mmSaveSet(mmSi);mmSi++;mmLoadSet(mmSi)}});
 document.getElementById('mm-add-kw').addEventListener('click',()=>{mmData.keywords.push({id:'k'+Date.now(),text:'',correctRow:null});mmRenderKwList();mmRenderPool();
 const inputs=document.querySelectorAll('#mm-kw-list .field-input');if(inputs.length)inputs[inputs.length-1].focus()});
 document.getElementById('mm-row-minus').addEventListener('click',()=>mmChangeRows(-1));document.getElementById('mm-row-plus').addEventListener('click',()=>mmChangeRows(1));
