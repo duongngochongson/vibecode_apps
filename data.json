@@ -716,48 +716,99 @@
   "promptOrder": [
     {
       "id": 1,
-      "title": "Bộ 1",
+      "setTitle": "BỘ 1",
       "questions": [
         {
-          "id": "q1",
+          "id": 1,
           "parts": [
-            { "type": "role", "text": "Bạn là trợ lý AI thông minh và thân thiện." },
-            { "type": "task", "text": "Tóm tắt đoạn văn sau thành 3 gạch đầu dòng ngắn gọn." }
+            {
+              "type": "role",
+              "text": "Bạn là trợ lý AI thông minh và thân thiện."
+            },
+            {
+              "type": "task",
+              "text": "Tóm tắt đoạn văn sau thành 3 gạch đầu dòng ngắn gọn."
+            }
           ]
         },
         {
-          "id": "q2",
+          "id": 2,
           "parts": [
-            { "type": "role", "text": "Bạn là chuyên gia marketing kỹ thuật số." },
-            { "type": "context", "text": "Công ty đang ra mắt ứng dụng học ngôn ngữ mới dành cho học sinh cấp 2." },
-            { "type": "task", "text": "Viết bài mô tả sản phẩm cho trang landing page." },
-            { "type": "output", "text": "Bài viết dài 150–200 từ, hấp dẫn và có lời kêu gọi hành động rõ ràng." }
+            {
+              "type": "role",
+              "text": "Bạn là chuyên gia marketing kỹ thuật số."
+            },
+            {
+              "type": "context",
+              "text": "Công ty đang ra mắt ứng dụng học ngôn ngữ mới dành cho học sinh cấp 2."
+            },
+            {
+              "type": "task",
+              "text": "Viết bài mô tả sản phẩm cho trang landing page."
+            },
+            {
+              "type": "output",
+              "text": "Bài viết dài 150–200 từ, hấp dẫn và có lời kêu gọi hành động rõ ràng."
+            }
           ]
         },
         {
-          "id": "q3",
+          "id": 3,
           "parts": [
-            { "type": "role", "text": "Bạn là nhà báo công nghệ với 10 năm kinh nghiệm." },
-            { "type": "context", "text": "AI đang thay đổi ngành báo chí toàn cầu một cách nhanh chóng." },
-            { "type": "task", "text": "Viết bài phân tích tác động của AI đối với nghề báo hiện đại." },
-            { "type": "output", "text": "Bài viết khoảng 500 từ, chia thành 3–4 đoạn có tiêu đề phụ." },
-            { "type": "style", "text": "Văn phong chuyên nghiệp nhưng dễ hiểu cho người đọc phổ thông." }
+            {
+              "type": "role",
+              "text": "Bạn là nhà báo công nghệ với 10 năm kinh nghiệm."
+            },
+            {
+              "type": "context",
+              "text": "AI đang thay đổi ngành báo chí toàn cầu một cách nhanh chóng."
+            },
+            {
+              "type": "task",
+              "text": "Viết bài phân tích tác động của AI đối với nghề báo hiện đại."
+            },
+            {
+              "type": "output",
+              "text": "Bài viết khoảng 500 từ, chia thành 3–4 đoạn có tiêu đề phụ."
+            },
+            {
+              "type": "style",
+              "text": "Văn phong chuyên nghiệp nhưng dễ hiểu cho người đọc phổ thông."
+            }
           ]
         },
         {
-          "id": "q4",
+          "id": 4,
           "parts": [
-            { "type": "context", "text": "Người dùng muốn học cách nấu phở tại nhà lần đầu tiên." },
-            { "type": "task", "text": "Liệt kê nguyên liệu và các bước nấu phở bò cơ bản." }
+            {
+              "type": "context",
+              "text": "Người dùng muốn học cách nấu phở tại nhà lần đầu tiên."
+            },
+            {
+              "type": "task",
+              "text": "Liệt kê nguyên liệu và các bước nấu phở bò cơ bản."
+            }
           ]
         },
         {
-          "id": "q5",
+          "id": 5,
           "parts": [
-            { "type": "role", "text": "Bạn là giáo viên tiếng Anh cấp trung học cơ sở." },
-            { "type": "task", "text": "Chữa lỗi ngữ pháp trong đoạn văn tiếng Anh sau của học sinh." },
-            { "type": "output", "text": "Trình bày bản chữa và giải thích ngắn gọn từng lỗi sai." },
-            { "type": "reference", "text": "Dựa theo quy tắc ngữ pháp trong Cambridge Grammar in Use (Elementary)." }
+            {
+              "type": "role",
+              "text": "Bạn là giáo viên tiếng Anh cấp trung học cơ sở."
+            },
+            {
+              "type": "task",
+              "text": "Chữa lỗi ngữ pháp trong đoạn văn tiếng Anh sau của học sinh."
+            },
+            {
+              "type": "output",
+              "text": "Trình bày bản chữa và giải thích ngắn gọn từng lỗi sai."
+            },
+            {
+              "type": "reference",
+              "text": "Dựa theo quy tắc ngữ pháp trong Cambridge Grammar in Use (Elementary)."
+            }
           ]
         }
       ]
@@ -766,35 +817,59 @@
   "prosCons": [
     {
       "id": 1,
-      "title": "Bộ 1",
+      "setTitle": "BỘ 1",
       "questions": [
         {
-          "id": "q1",
+          "id": 1,
           "topic": "Lưu trữ Offline (Cục bộ):",
           "passage": "Lưu trên ổ cứng máy tính, USB.",
-          "pro": { "id": "p1", "text": "Truy cập nhanh, không cần mạng, bảo mật cá nhân cao." },
-          "con": { "id": "c1", "text": "Hỏng thiết bị là mất dữ liệu, chỉ xem được trên đúng thiết bị đó." }
+          "pro": {
+            "id": "p1",
+            "text": "Truy cập nhanh, không cần mạng, bảo mật cá nhân cao."
+          },
+          "con": {
+            "id": "c1",
+            "text": "Hỏng thiết bị là mất dữ liệu, chỉ xem được trên đúng thiết bị đó."
+          }
         },
         {
-          "id": "q2",
+          "id": 2,
           "topic": "Lưu trữ Online (Đám mây - Cloud):",
           "passage": "Google Drive, OneDrive, iCloud.",
-          "pro": { "id": "p2", "text": "Truy cập mọi lúc mọi nơi, đồng bộ nhiều thiết bị, không sợ mất máy tính." },
-          "con": { "id": "c2", "text": "Cần có Internet, giới hạn dung lượng miễn phí." }
+          "pro": {
+            "id": "p2",
+            "text": "Truy cập mọi lúc mọi nơi, đồng bộ nhiều thiết bị, không sợ mất máy tính."
+          },
+          "con": {
+            "id": "c2",
+            "text": "Cần có Internet, giới hạn dung lượng miễn phí."
+          }
         },
         {
-          "id": "q3",
+          "id": 3,
           "topic": "Lưu trữ Hệ thống:",
-          "passage": "Tạo cây thư mục nhiều cấp (VD: Cha > Con > Cháu).",
-          "pro": { "id": "p3", "text": "Dễ tìm theo logic." },
-          "con": { "id": "c3", "text": "Tốn thời gian sắp xếp." }
+          "passage": "Tạo cây thư mục nhiều cấp (VD: Cha > Con > Cháu). ",
+          "pro": {
+            "id": "p3",
+            "text": "Dễ tìm theo logic."
+          },
+          "con": {
+            "id": "c3",
+            "text": "Tốn thời gian sắp xếp."
+          }
         },
         {
-          "id": "q4",
+          "id": 1773582375419,
           "topic": "Lưu trữ Tự do:",
-          "passage": "Lưu tất cả vào một nơi và dựa vào công cụ \"Search\" (Tìm kiếm) để lấy ra.",
-          "pro": { "id": "p4", "text": "Rất nhanh gọn và dễ." },
-          "con": { "id": "c4", "text": "Nhưng dễ lộn xộn và dễ quên từ khóa." }
+          "passage": "Lưu tất cả vào một nơi và dựa vào công cụ \"Search\" (Tìm kiếm) để lấy ra. ",
+          "pro": {
+            "id": "p1773582375419",
+            "text": "Rất nhanh gọn và dễ."
+          },
+          "con": {
+            "id": "c1773582375419",
+            "text": "Nhưng dễ lộn xộn và dễ quên từ khóa."
+          }
         }
       ]
     }
@@ -1050,61 +1125,109 @@
   "mece": [
     {
       "id": 1,
-      "title": "Bộ 1",
+      "setTitle": "BỘ 1",
       "questions": [
         {
-          "id": "q1",
+          "id": 1,
           "topic": "Phương tiện giao thông",
           "topicConcept": "Các phương tiện con người sử dụng để di chuyển từ nơi này đến nơi khác.",
           "categories": [
-            { "name": "Đường bộ", "concept": "Xe máy, ô tô, xe đạp, xe buýt..." },
-            { "name": "Đường thủy", "concept": "Tàu, thuyền, ca nô..." },
-            { "name": "Đường hàng không", "concept": "Máy bay, trực thăng..." }
+            {
+              "name": "Đường bộ",
+              "concept": "Xe máy, ô tô, xe đạp, xe buýt..."
+            },
+            {
+              "name": "Đường thủy",
+              "concept": "Tàu, thuyền, ca nô..."
+            },
+            {
+              "name": "Đường hàng không",
+              "concept": "Máy bay, trực thăng..."
+            }
           ],
           "answer": "mece"
         },
         {
-          "id": "q2",
+          "id": 2,
           "topic": "Loại trái cây",
           "topicConcept": "",
           "categories": [
-            { "name": "Trái cây nhiệt đới", "concept": "Xoài, dừa, chuối..." },
-            { "name": "Trái cây ôn đới", "concept": "Táo, lê, nho..." },
-            { "name": "Trái cây họ cam", "concept": "Cam, quýt, bưởi..." }
+            {
+              "name": "Trái cây nhiệt đới",
+              "concept": "Xoài, dừa, chuối..."
+            },
+            {
+              "name": "Trái cây ôn đới",
+              "concept": "Táo, lê, nho..."
+            },
+            {
+              "name": "Trái cây họ cam",
+              "concept": "Cam, quýt, bưởi..."
+            }
           ],
           "answer": "not_me"
         },
         {
-          "id": "q3",
+          "id": 3,
           "topic": "Cấp học tại Việt Nam",
           "topicConcept": "Hệ thống giáo dục phổ thông Việt Nam.",
           "categories": [
-            { "name": "Tiểu học", "concept": "Lớp 1–5" },
-            { "name": "Trung học cơ sở", "concept": "Lớp 6–9" }
+            {
+              "name": "Tiểu học",
+              "concept": "Lớp 1–5"
+            },
+            {
+              "name": "Trung học cơ sở",
+              "concept": "Lớp 6–9"
+            }
           ],
           "answer": "not_ce"
         },
         {
-          "id": "q4",
+          "id": 4,
           "topic": "Trạng thái vật chất",
           "topicConcept": "Các dạng tồn tại của vật chất trong tự nhiên.",
           "categories": [
-            { "name": "Rắn", "concept": "Có hình dạng và thể tích cố định" },
-            { "name": "Lỏng", "concept": "Có thể tích cố định, không có hình dạng cố định" },
-            { "name": "Khí", "concept": "Không có hình dạng và thể tích cố định" },
-            { "name": "Nước", "concept": "H₂O — có thể tồn tại ở cả 3 trạng thái" }
+            {
+              "name": "Rắn",
+              "concept": "Có hình dạng và thể tích cố định"
+            },
+            {
+              "name": "Lỏng",
+              "concept": "Có thể tích cố định, không có hình dạng cố định"
+            },
+            {
+              "name": "Khí",
+              "concept": "Không có hình dạng và thể tích cố định"
+            },
+            {
+              "name": "Nước",
+              "concept": "H₂O — có thể tồn tại ở cả 3 trạng thái"
+            }
           ],
           "answer": "not_mece"
         },
         {
-          "id": "q5",
+          "id": 5,
           "topic": "Nhóm máu hệ ABO",
           "topicConcept": "Phân loại máu người theo kháng nguyên trên bề mặt hồng cầu.",
           "categories": [
-            { "name": "Nhóm A", "concept": "Có kháng nguyên A" },
-            { "name": "Nhóm B", "concept": "Có kháng nguyên B" },
-            { "name": "Nhóm AB", "concept": "Có cả kháng nguyên A và B" },
-            { "name": "Nhóm O", "concept": "Không có kháng nguyên A hoặc B" }
+            {
+              "name": "Nhóm A",
+              "concept": "Có kháng nguyên A"
+            },
+            {
+              "name": "Nhóm B",
+              "concept": "Có kháng nguyên B"
+            },
+            {
+              "name": "Nhóm AB",
+              "concept": "Có cả kháng nguyên A và B"
+            },
+            {
+              "name": "Nhóm O",
+              "concept": "Không có kháng nguyên A hoặc B"
+            }
           ],
           "answer": "mece"
         }

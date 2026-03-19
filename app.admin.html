@@ -99,7 +99,7 @@
 <div class="game-block"><button class="game-header" onclick="toggleSection('settings')"><span class="game-header-left"><span>⚙</span><span>Cài đặt Games</span></span><span class="game-arrow" id="arrow-settings">▶</span></button>
 <div class="game-content" id="content-settings"><p style="color:var(--grey);font-size:13px;margin-bottom:16px;line-height:1.6">Bật/tắt hiển thị game. Sau khi thay đổi, nhấn 💾 Lưu rồi tải xuống JSON.</p><div id="game-toggles"></div></div></div>
 <div class="game-block"><button class="game-header" onclick="toggleSection('pc')"><span class="game-header-left"><span>🐺</span><span>Đoán Ưu / Nhược</span></span><span class="game-arrow" id="arrow-pc">▶</span></button>
-<div class="game-content" id="content-pc"><div id="pc-list"></div><div class="add-btn-row"><button class="add-btn" id="pc-add" title="Thêm chủ đề">+</button><span>Thêm chủ đề</span></div></div></div>
+<div class="game-content" id="content-pc"><div id="pc-list"></div><div class="add-btn-row"><button class="add-btn" id="pc-add" title="Thêm bộ đề">+</button><span>Thêm bộ đề</span></div></div></div>
 <div class="game-block"><button class="game-header" onclick="toggleSection('mm')"><span class="game-header-left"><span>🐙</span><span>Sơ đồ Tư Duy</span></span><span class="game-arrow" id="arrow-mm">▶</span></button>
 <div class="game-content" id="content-mm"><div class="sec-label">▸ Từ khóa</div><div id="mm-kw-list"></div>
 <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:6px"><div class="add-btn-row"><button class="add-btn" id="mm-add-kw" title="Thêm từ khóa">+</button><span>Thêm từ khóa</span></div>
@@ -113,11 +113,11 @@
 <div class="game-block"><button class="game-header" onclick="toggleSection('fn')"><span class="game-header-left"><span>🐟</span><span>Đặt Tên File</span></span><span class="game-arrow" id="arrow-fn">▶</span></button>
 <div class="game-content" id="content-fn"><p style="color:var(--grey);font-size:15px;line-height:1.7">Cấu trúc vũ trụ trong <code style="color:var(--cyan)">fileNaming</code> của <code style="color:var(--cyan)">data.json</code>. Mỗi lần chơi hỏi ngẫu nhiên 10 hành tinh.</p></div></div>
 <div class="game-block"><button class="game-header" onclick="toggleSection('po')"><span class="game-header-left"><span>🐜</span><span>Sắp xếp Prompt</span></span><span class="game-arrow" id="arrow-po">▶</span></button>
-<div class="game-content" id="content-po"><div id="po-list"></div><div class="add-btn-row"><button class="add-btn" id="po-add" title="Thêm câu hỏi">+</button><span>Thêm câu hỏi</span></div></div></div>
+<div class="game-content" id="content-po"><div id="po-list"></div><div class="add-btn-row"><button class="add-btn" id="po-add" title="Thêm bộ đề">+</button><span>Thêm bộ đề</span></div></div></div>
 <div class="game-block"><button class="game-header" onclick="toggleSection('calc')"><span class="game-header-left"><span>🐬</span><span>Máy Tính</span></span><span class="game-arrow" id="arrow-calc">▶</span></button>
 <div class="game-content" id="content-calc"><p style="color:var(--grey);font-size:15px;line-height:1.7">Công cụ tính toán không có nội dung cần chỉnh sửa.</p></div></div>
 <div class="game-block"><button class="game-header" onclick="toggleSection('mece')"><span class="game-header-left"><span>🦊</span><span>MECE</span></span><span class="game-arrow" id="arrow-mece">▶</span></button>
-<div class="game-content" id="content-mece"><div id="mece-list"></div><div class="add-btn-row"><button class="add-btn" id="mece-add" title="Thêm câu hỏi">+</button><span>Thêm câu hỏi</span></div></div></div>
+<div class="game-content" id="content-mece"><div id="mece-list"></div><div class="add-btn-row"><button class="add-btn" id="mece-add" title="Thêm bộ đề">+</button><span>Thêm bộ đề</span></div></div></div>
 <div class="game-block"><button class="game-header" onclick="toggleSection('nb')"><span class="game-header-left"><span>🐝</span><span>Bảng Thông Báo</span></span><span class="game-arrow" id="arrow-nb">▶</span></button>
 <div class="game-content" id="content-nb"><div id="nb-list"></div><div class="add-btn-row"><button class="add-btn" id="nb-add" title="Thêm thông báo">+</button><span>Thêm thông báo</span></div></div></div>
 </div>
@@ -161,18 +161,33 @@ function initAll(){fetch('data.json').then(r=>r.ok?r.json():null).then(d=>{if(d)
 // PROS-CONS
 async function initPC(){const s=localStorage.getItem('prosCons');if(s)try{pcData=JSON.parse(s)}catch(e){}
 if(!pcData.length){try{const r=await fetch('data.json');if(r.ok){const d=await r.json();pcData=d.prosCons||[]}}catch(e){}}
-renderPC();document.getElementById('pc-add').addEventListener('click',()=>{const id=Date.now();pcData.push({id,topic:'',passage:'',pro:{id:'p'+id,text:''},con:{id:'c'+id,text:''}});renderPC()})}
+if(pcData.length&&pcData[0].topic!==undefined){pcData=[{id:Date.now(),setTitle:'BỘ 1',questions:pcData}]}
+renderPC();document.getElementById('pc-add').addEventListener('click',()=>{const id=Date.now();pcData.push({id,setTitle:`BỘ ${pcData.length+1}`,questions:[{id:id+'q',topic:'',passage:'',pro:{id:'p'+id,text:''},con:{id:'c'+id,text:''}}]});renderPC()})}
 function renderPC(){const list=document.getElementById('pc-list');list.innerHTML='';
-pcData.forEach((item,idx)=>{const div=document.createElement('div');div.className='entry-card';
-div.innerHTML=`<div class="entry-head"><span class="entry-num">CHỦ ĐỀ ${idx+1}</span><button class="entry-remove" title="Xóa">✕</button></div>
-<div class="field-group"><label class="field-label">Tên chủ đề</label><input class="field-input" data-pc="${idx}" data-f="topic" value="${escHtml(item.topic)}"/></div>
-<div class="field-group"><label class="field-label">Đoạn văn mô tả</label><textarea class="field-textarea" data-pc="${idx}" data-f="passage">${escHtml(item.passage)}</textarea></div>
-<div class="field-group"><label class="field-label">Ưu điểm</label><input class="field-input" data-pc="${idx}" data-f="pro" value="${escHtml(item.pro.text)}"/></div>
-<div class="field-group"><label class="field-label">Nhược điểm</label><input class="field-input" data-pc="${idx}" data-f="con" value="${escHtml(item.con.text)}"/></div>`;
-div.querySelector('.entry-remove').addEventListener('click',()=>{pcData.splice(idx,1);renderPC()});
-div.querySelectorAll('[data-pc]').forEach(el=>{el.addEventListener('input',()=>{const i=+el.dataset.pc,f=el.dataset.f;
-if(f==='topic')pcData[i].topic=el.value;if(f==='passage')pcData[i].passage=el.value;if(f==='pro')pcData[i].pro.text=el.value;if(f==='con')pcData[i].con.text=el.value;
-if(el.tagName==='TEXTAREA')autoResize(el)})});div.querySelectorAll('textarea').forEach(ta=>autoResize(ta));list.appendChild(div)})}
+pcData.forEach((set,si)=>{const card=document.createElement('div');card.className='mt-set-card';
+const tr=document.createElement('div');tr.className='mt-set-title-row';
+const lbl=document.createElement('span');lbl.className='set-label';lbl.textContent=`BỘ ${si+1}:`;
+const ti=document.createElement('input');ti.value=set.setTitle||`BỘ ${si+1}`;ti.addEventListener('input',()=>{pcData[si].setTitle=ti.value});
+const db=document.createElement('button');db.className='mt-del-set-btn';db.title='Xóa bộ đề';db.textContent='✕';db.addEventListener('click',()=>{pcData.splice(si,1);renderPC()});
+tr.appendChild(lbl);tr.appendChild(ti);tr.appendChild(db);card.appendChild(tr);
+(set.questions||[]).forEach((_,qi)=>card.appendChild(mkPCQ(si,qi)));
+const addQ=document.createElement('div');addQ.className='add-btn-row';
+const addQBtn=document.createElement('button');addQBtn.className='add-btn';addQBtn.textContent='+';
+addQBtn.addEventListener('click',()=>{const id=Date.now();(pcData[si].questions=pcData[si].questions||[]).push({id,topic:'',passage:'',pro:{id:'p'+id,text:''},con:{id:'c'+id,text:''}});renderPC()});
+const addQSpan=document.createElement('span');addQSpan.textContent='Thêm câu hỏi';
+addQ.appendChild(addQBtn);addQ.appendChild(addQSpan);card.appendChild(addQ);list.appendChild(card)})}
+function mkPCQ(si,qi){const item=(pcData[si].questions||[])[qi];if(!item)return document.createElement('div');
+const div=document.createElement('div');div.className='entry-card';div.style.marginTop='10px';
+const hdr=document.createElement('div');hdr.className='entry-head';
+const num=document.createElement('span');num.className='entry-num';num.textContent=`CHỦ ĐỀ ${qi+1}`;
+const del=document.createElement('button');del.className='entry-remove';del.title='Xóa';del.textContent='✕';del.addEventListener('click',()=>{pcData[si].questions.splice(qi,1);renderPC()});
+hdr.appendChild(num);hdr.appendChild(del);div.appendChild(hdr);
+const mkFG=(lbl,el)=>{const fg=document.createElement('div');fg.className='field-group';const lb=document.createElement('label');lb.className='field-label';lb.textContent=lbl;fg.appendChild(lb);fg.appendChild(el);return fg};
+const topicInp=document.createElement('input');topicInp.className='field-input';topicInp.value=item.topic;topicInp.addEventListener('input',()=>{pcData[si].questions[qi].topic=topicInp.value});
+const passTA=document.createElement('textarea');passTA.className='field-textarea';passTA.value=item.passage;passTA.addEventListener('input',()=>{pcData[si].questions[qi].passage=passTA.value;autoResize(passTA)});
+const proInp=document.createElement('input');proInp.className='field-input';proInp.value=item.pro.text;proInp.addEventListener('input',()=>{pcData[si].questions[qi].pro.text=proInp.value});
+const conInp=document.createElement('input');conInp.className='field-input';conInp.value=item.con.text;conInp.addEventListener('input',()=>{pcData[si].questions[qi].con.text=conInp.value});
+div.appendChild(mkFG('Tên chủ đề',topicInp));div.appendChild(mkFG('Đoạn văn mô tả',passTA));div.appendChild(mkFG('Ưu điểm',proInp));div.appendChild(mkFG('Nhược điểm',conInp));autoResize(passTA);return div}
 // MIND-MAP
 let mmData=null,mmPlacements={},mmConnections=new Set(),mmDragKid=null,mmSelectedNode=null;
 const mmCk=(a,b)=>a<b?a+'|'+b:b+'|'+a,mmPair=k=>k.split('|');
@@ -347,46 +362,88 @@ const PO_TYPES=['role','context','task','output','style','reference','other'];
 const PO_LABELS={role:'Vai trò',context:'Bối cảnh',task:'Nhiệm vụ',output:'Đầu ra',style:'Phong cách',reference:'Tham khảo',other:'Khác'};
 async function initPO(){const s=localStorage.getItem('promptOrder');if(s)try{poData=JSON.parse(s)}catch(e){}
 if(!poData.length){try{const r=await fetch('data.json');if(r.ok){const d=await r.json();poData=d.promptOrder||[]}}catch(e){}}
-renderPO();document.getElementById('po-add').addEventListener('click',()=>{poData.push({id:Date.now(),parts:[{type:'task',text:''}]});renderPO()})}
+if(poData.length&&poData[0].parts!==undefined){poData=[{id:Date.now(),setTitle:'BỘ 1',questions:poData}]}
+renderPO();document.getElementById('po-add').addEventListener('click',()=>{const id=Date.now();poData.push({id,setTitle:`BỘ ${poData.length+1}`,questions:[{id:id+'q',parts:[{type:'task',text:''}]}]});renderPO()})}
 function renderPO(){const list=document.getElementById('po-list');list.innerHTML='';
-poData.forEach((q,qi)=>{const div=document.createElement('div');div.className='entry-card';
-div.innerHTML=`<div class="entry-head"><span class="entry-num">CÂU ${qi+1}</span><button class="entry-remove po-del-q" title="Xóa câu">✕</button></div><div id="po-parts-${qi}"></div>
-<div class="add-btn-row" style="margin-top:8px"><button class="add-btn po-add-part" data-qi="${qi}" title="Thêm thành phần">+</button><span>Thêm thành phần</span></div>`;
-div.querySelector('.po-del-q').addEventListener('click',()=>{poData.splice(qi,1);renderPO()});
-div.querySelector('.po-add-part').addEventListener('click',()=>{poData[qi].parts.push({type:'task',text:''});renderPO()});list.appendChild(div);renderPOParts(qi)})}
-function renderPOParts(qi){const c=document.getElementById(`po-parts-${qi}`);if(!c)return;c.innerHTML='';
-poData[qi].parts.forEach((part,pi)=>{const row=document.createElement('div');row.style.cssText='display:flex;gap:8px;align-items:flex-start;margin-bottom:8px';
+poData.forEach((set,si)=>{const card=document.createElement('div');card.className='mt-set-card';
+const tr=document.createElement('div');tr.className='mt-set-title-row';
+const lbl=document.createElement('span');lbl.className='set-label';lbl.textContent=`BỘ ${si+1}:`;
+const ti=document.createElement('input');ti.value=set.setTitle||`BỘ ${si+1}`;ti.addEventListener('input',()=>{poData[si].setTitle=ti.value});
+const db=document.createElement('button');db.className='mt-del-set-btn';db.title='Xóa bộ đề';db.textContent='✕';db.addEventListener('click',()=>{poData.splice(si,1);renderPO()});
+tr.appendChild(lbl);tr.appendChild(ti);tr.appendChild(db);card.appendChild(tr);
+(set.questions||[]).forEach((_,qi)=>card.appendChild(mkPOQ(si,qi)));
+const addQ=document.createElement('div');addQ.className='add-btn-row';
+const addQBtn=document.createElement('button');addQBtn.className='add-btn';addQBtn.textContent='+';
+addQBtn.addEventListener('click',()=>{(poData[si].questions=poData[si].questions||[]).push({id:Date.now(),parts:[{type:'task',text:''}]});renderPO()});
+const addQSpan=document.createElement('span');addQSpan.textContent='Thêm câu hỏi';
+addQ.appendChild(addQBtn);addQ.appendChild(addQSpan);card.appendChild(addQ);list.appendChild(card)})}
+function mkPOQ(si,qi){const q=(poData[si].questions||[])[qi];if(!q)return document.createElement('div');
+const div=document.createElement('div');div.className='entry-card';div.style.marginTop='10px';
+const hdr=document.createElement('div');hdr.className='entry-head';
+const num=document.createElement('span');num.className='entry-num';num.textContent=`CÂU ${qi+1}`;
+const del=document.createElement('button');del.className='entry-remove';del.title='Xóa câu';del.textContent='✕';del.addEventListener('click',()=>{poData[si].questions.splice(qi,1);renderPO()});
+hdr.appendChild(num);hdr.appendChild(del);div.appendChild(hdr);
+const partsDiv=document.createElement('div');partsDiv.id=`po-parts-${si}-${qi}`;div.appendChild(partsDiv);
+const addPart=document.createElement('div');addPart.className='add-btn-row';addPart.style.marginTop='8px';
+const addPartBtn=document.createElement('button');addPartBtn.className='add-btn';addPartBtn.textContent='+';
+addPartBtn.addEventListener('click',()=>{poData[si].questions[qi].parts.push({type:'task',text:''});renderPO()});
+const addPartSpan=document.createElement('span');addPartSpan.textContent='Thêm thành phần';
+addPart.appendChild(addPartBtn);addPart.appendChild(addPartSpan);div.appendChild(addPart);renderPOParts(si,qi);return div}
+function renderPOParts(si,qi){const c=document.getElementById(`po-parts-${si}-${qi}`);if(!c)return;c.innerHTML='';
+((poData[si].questions||[])[qi]?.parts||[]).forEach((part,pi)=>{const row=document.createElement('div');row.style.cssText='display:flex;gap:8px;align-items:flex-start;margin-bottom:8px';
 const sel=document.createElement('select');sel.className='field-input';sel.style.cssText='width:130px;flex-shrink:0;padding:6px 8px;cursor:pointer';
 PO_TYPES.forEach(t=>{const opt=document.createElement('option');opt.value=t;opt.textContent=PO_LABELS[t]||t;if(t===part.type)opt.selected=true;sel.appendChild(opt)});
-sel.addEventListener('change',()=>{poData[qi].parts[pi].type=sel.value});
+sel.addEventListener('change',()=>{poData[si].questions[qi].parts[pi].type=sel.value});
 const ta=document.createElement('textarea');ta.className='field-textarea';ta.style.cssText='flex:1;min-height:40px';ta.value=part.text;
-ta.addEventListener('input',()=>{poData[qi].parts[pi].text=ta.value;autoResize(ta)});
+ta.addEventListener('input',()=>{poData[si].questions[qi].parts[pi].text=ta.value;autoResize(ta)});
 const del=document.createElement('button');del.className='entry-remove';del.textContent='✕';del.style.cssText='flex-shrink:0;margin-top:4px';
-del.addEventListener('click',()=>{poData[qi].parts.splice(pi,1);renderPO()});
+del.addEventListener('click',()=>{poData[si].questions[qi].parts.splice(pi,1);renderPO()});
 row.appendChild(sel);row.appendChild(ta);row.appendChild(del);c.appendChild(row);autoResize(ta)})}
 // MECE
 const MECE_AO=[{value:'mece',label:'✓ MECE (đúng)'},{value:'not_me',label:'✗ Sai ME'},{value:'not_ce',label:'✗ Sai CE'},{value:'not_mece',label:'✗ Sai MECE'}];
 async function initMECE(){const s=localStorage.getItem('mece');if(s)try{meceData=JSON.parse(s)}catch(e){}
 if(!meceData.length){try{const r=await fetch('data.json');if(r.ok){const d=await r.json();meceData=d.mece||[]}}catch(e){}}
-renderMECE();document.getElementById('mece-add').addEventListener('click',()=>{meceData.push({id:Date.now(),topic:'',topicConcept:'',categories:[{name:'',concept:''}],answer:'mece'});renderMECE()})}
+if(meceData.length&&meceData[0].topic!==undefined){meceData=[{id:Date.now(),setTitle:'BỘ 1',questions:meceData}]}
+renderMECE();document.getElementById('mece-add').addEventListener('click',()=>{const id=Date.now();meceData.push({id,setTitle:`BỘ ${meceData.length+1}`,questions:[{id:id+'q',topic:'',topicConcept:'',categories:[{name:'',concept:''}],answer:'mece'}]});renderMECE()})}
 function renderMECE(){const list=document.getElementById('mece-list');list.innerHTML='';
-meceData.forEach((item,idx)=>{const div=document.createElement('div');div.className='entry-card';
-div.innerHTML=`<div class="entry-head"><span class="entry-num">CÂU HỎI ${idx+1}</span><button class="entry-remove mece-del-q" title="Xóa câu">✕</button></div>
-<div class="field-group"><label class="field-label">Chủ đề</label><input class="field-input" data-mece="${idx}" data-f="topic" value="${escHtml(item.topic)}" placeholder="Tên chủ đề"/></div>
-<div class="field-group"><label class="field-label">Khái niệm chủ đề (tùy chọn)</label><textarea class="field-textarea" data-mece="${idx}" data-f="topicConcept" placeholder="Giải thích ngắn">${escHtml(item.topicConcept||'')}</textarea></div>
-<div class="field-group"><label class="field-label">Danh mục phân loại</label><div id="mece-cats-${idx}"></div>
-<div class="add-btn-row" style="margin-top:6px"><button class="add-btn mece-add-cat" data-idx="${idx}" title="Thêm danh mục">+</button><span>Thêm danh mục</span></div></div>
-<div class="field-group"><label class="field-label">Đáp án</label><select class="field-input mece-answer-sel" data-idx="${idx}" style="width:200px;cursor:pointer"></select></div>`;
-div.querySelector('.mece-del-q').addEventListener('click',()=>{meceData.splice(idx,1);renderMECE()});
-div.querySelectorAll('[data-mece]').forEach(el=>{el.addEventListener('input',()=>{meceData[+el.dataset.mece][el.dataset.f]=el.value})});
-div.querySelector('.mece-add-cat').addEventListener('click',()=>{meceData[idx].categories.push({name:'',concept:''});renderMECE()});
-const sel=div.querySelector('.mece-answer-sel');MECE_AO.forEach(opt=>{const o=document.createElement('option');o.value=opt.value;o.textContent=opt.label;if(opt.value===item.answer)o.selected=true;sel.appendChild(o)});
-sel.addEventListener('change',()=>{meceData[idx].answer=sel.value});list.appendChild(div);renderMECECats(idx)})}
-function renderMECECats(idx){const c=document.getElementById(`mece-cats-${idx}`);if(!c)return;c.innerHTML='';
-(meceData[idx].categories||[]).forEach((cat,ci)=>{const row=document.createElement('div');row.style.cssText='display:flex;gap:8px;align-items:center;margin-bottom:6px';
-const ni=document.createElement('input');ni.className='field-input';ni.style.cssText='flex:1';ni.placeholder='Tên danh mục';ni.value=cat.name;ni.addEventListener('input',()=>{meceData[idx].categories[ci].name=ni.value});
-const ci2=document.createElement('input');ci2.className='field-input';ci2.style.cssText='flex:1';ci2.placeholder='Khái niệm (tùy chọn)';ci2.value=cat.concept||'';ci2.addEventListener('input',()=>{meceData[idx].categories[ci].concept=ci2.value});
-const del=document.createElement('button');del.className='entry-remove';del.textContent='✕';del.style.cssText='flex-shrink:0';del.addEventListener('click',()=>{meceData[idx].categories.splice(ci,1);renderMECE()});
+meceData.forEach((set,si)=>{const card=document.createElement('div');card.className='mt-set-card';
+const tr=document.createElement('div');tr.className='mt-set-title-row';
+const lbl=document.createElement('span');lbl.className='set-label';lbl.textContent=`BỘ ${si+1}:`;
+const ti=document.createElement('input');ti.value=set.setTitle||`BỘ ${si+1}`;ti.addEventListener('input',()=>{meceData[si].setTitle=ti.value});
+const db=document.createElement('button');db.className='mt-del-set-btn';db.title='Xóa bộ đề';db.textContent='✕';db.addEventListener('click',()=>{meceData.splice(si,1);renderMECE()});
+tr.appendChild(lbl);tr.appendChild(ti);tr.appendChild(db);card.appendChild(tr);
+(set.questions||[]).forEach((_,qi)=>card.appendChild(mkMECEQ(si,qi)));
+const addQ=document.createElement('div');addQ.className='add-btn-row';
+const addQBtn=document.createElement('button');addQBtn.className='add-btn';addQBtn.textContent='+';
+addQBtn.addEventListener('click',()=>{(meceData[si].questions=meceData[si].questions||[]).push({id:Date.now(),topic:'',topicConcept:'',categories:[{name:'',concept:''}],answer:'mece'});renderMECE()});
+const addQSpan=document.createElement('span');addQSpan.textContent='Thêm câu hỏi';
+addQ.appendChild(addQBtn);addQ.appendChild(addQSpan);card.appendChild(addQ);list.appendChild(card)})}
+function mkMECEQ(si,qi){const item=(meceData[si].questions||[])[qi];if(!item)return document.createElement('div');
+const div=document.createElement('div');div.className='entry-card';div.style.marginTop='10px';
+const hdr=document.createElement('div');hdr.className='entry-head';
+const num=document.createElement('span');num.className='entry-num';num.textContent=`CÂU HỎI ${qi+1}`;
+const del=document.createElement('button');del.className='entry-remove';del.title='Xóa câu';del.textContent='✕';del.addEventListener('click',()=>{meceData[si].questions.splice(qi,1);renderMECE()});
+hdr.appendChild(num);hdr.appendChild(del);div.appendChild(hdr);
+const mkFG=(lbl,el)=>{const fg=document.createElement('div');fg.className='field-group';const lb=document.createElement('label');lb.className='field-label';lb.textContent=lbl;fg.appendChild(lb);fg.appendChild(el);return fg};
+const topicInp=document.createElement('input');topicInp.className='field-input';topicInp.value=item.topic;topicInp.placeholder='Tên chủ đề';topicInp.addEventListener('input',()=>{meceData[si].questions[qi].topic=topicInp.value});
+const conceptTA=document.createElement('textarea');conceptTA.className='field-textarea';conceptTA.placeholder='Giải thích ngắn';conceptTA.value=item.topicConcept||'';conceptTA.addEventListener('input',()=>{meceData[si].questions[qi].topicConcept=conceptTA.value;autoResize(conceptTA)});
+const catsFG=document.createElement('div');catsFG.className='field-group';
+const catsLbl=document.createElement('label');catsLbl.className='field-label';catsLbl.textContent='Danh mục phân loại';
+const catsDiv=document.createElement('div');catsDiv.id=`mece-cats-${si}-${qi}`;
+const addCatRow=document.createElement('div');addCatRow.className='add-btn-row';addCatRow.style.marginTop='6px';
+const addCatBtn=document.createElement('button');addCatBtn.className='add-btn';addCatBtn.textContent='+';addCatBtn.title='Thêm danh mục';addCatBtn.addEventListener('click',()=>{meceData[si].questions[qi].categories.push({name:'',concept:''});renderMECE()});
+const addCatSpan=document.createElement('span');addCatSpan.textContent='Thêm danh mục';
+addCatRow.appendChild(addCatBtn);addCatRow.appendChild(addCatSpan);catsFG.appendChild(catsLbl);catsFG.appendChild(catsDiv);catsFG.appendChild(addCatRow);
+const ansSel=document.createElement('select');ansSel.className='field-input';ansSel.style.cssText='width:200px;cursor:pointer';
+MECE_AO.forEach(opt=>{const o=document.createElement('option');o.value=opt.value;o.textContent=opt.label;if(opt.value===item.answer)o.selected=true;ansSel.appendChild(o)});
+ansSel.addEventListener('change',()=>{meceData[si].questions[qi].answer=ansSel.value});
+div.appendChild(mkFG('Chủ đề',topicInp));div.appendChild(mkFG('Khái niệm chủ đề (tùy chọn)',conceptTA));div.appendChild(catsFG);div.appendChild(mkFG('Đáp án',ansSel));
+autoResize(conceptTA);renderMECECats(si,qi);return div}
+function renderMECECats(si,qi){const c=document.getElementById(`mece-cats-${si}-${qi}`);if(!c)return;c.innerHTML='';
+((meceData[si].questions||[])[qi]?.categories||[]).forEach((cat,ci)=>{const row=document.createElement('div');row.style.cssText='display:flex;gap:8px;align-items:center;margin-bottom:6px';
+const ni=document.createElement('input');ni.className='field-input';ni.style.flex='1';ni.placeholder='Tên danh mục';ni.value=cat.name;ni.addEventListener('input',()=>{meceData[si].questions[qi].categories[ci].name=ni.value});
+const ci2=document.createElement('input');ci2.className='field-input';ci2.style.flex='1';ci2.placeholder='Khái niệm (tùy chọn)';ci2.value=cat.concept||'';ci2.addEventListener('input',()=>{meceData[si].questions[qi].categories[ci].concept=ci2.value});
+const del=document.createElement('button');del.className='entry-remove';del.textContent='✕';del.style.flexShrink='0';del.addEventListener('click',()=>{meceData[si].questions[qi].categories.splice(ci,1);renderMECE()});
 row.appendChild(ni);row.appendChild(ci2);row.appendChild(del);c.appendChild(row)})}
 // GAME SETTINGS
 const GAMES_LIST=[{id:'pros-cons',label:'Đoán Ưu / Nhược',emoji:'🐺'},{id:'mind-map',label:'Sơ đồ Tư Duy',emoji:'🐙'},{id:'matching',label:'Nối Từ',emoji:'🐿️'},
