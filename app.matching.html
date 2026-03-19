@@ -18,12 +18,12 @@
 .dot.pending{background:var(--accent);box-shadow:0 0 6px var(--accent)}.dot.connected{background:var(--success)}
 .match-svg-wrap{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;z-index:5}
 .match-svg-wrap svg{width:100%;height:100%;overflow:visible}
-.conn-line{stroke:var(--accent);stroke-width:2;fill:none;opacity:0.7}
-.conn-line.correct{stroke:var(--success);opacity:1}.conn-line.wrong{stroke:var(--error);opacity:1}
+.conn-line{stroke:var(--accent);stroke-width:2.5;fill:none;opacity:1}
+.conn-line.correct{stroke:var(--success);stroke-width:2.5;opacity:1}.conn-line.wrong{stroke:var(--error);stroke-width:2.5;opacity:1}
 .conn-group{cursor:pointer}.conn-hit{stroke:transparent;stroke-width:20;pointer-events:stroke;fill:none}
-.conn-del-group{visibility:hidden;pointer-events:none}.conn-group:hover .conn-del-group{visibility:visible}
-.conn-del-bg{fill:var(--bg-base);stroke:var(--error);stroke-width:1.5}
-.conn-del-txt{fill:var(--error);font-size:11px;text-anchor:middle;dominant-baseline:central}
+.conn-del-group{opacity:0;pointer-events:none;transition:opacity .15s}.conn-group:hover .conn-del-group{opacity:1;pointer-events:all}
+.conn-del-circle{fill:var(--bg-elevated);stroke:var(--border-subtle);stroke-width:1;transition:fill .15s,stroke .15s}.conn-group:hover .conn-del-circle{fill:var(--error);stroke:var(--error)}
+.conn-del-cross{stroke:var(--text-tertiary);stroke-width:1.5;stroke-linecap:round;transition:stroke .15s}.conn-group:hover .conn-del-cross{stroke:#fff}
 /* removed: set-nav, set-dot, action-btn — now using unified .control-bar */
 .result-banner{padding:20px;margin-top:20px;border:1px solid var(--border-default);border-left:3px solid var(--success);background:var(--bg-surface);border-radius:var(--radius-md)}
 .result-banner.error{border-left-color:var(--error)}
@@ -64,9 +64,10 @@ const hit=document.createElementNS(ns,'line');hit.setAttribute('x1',pA.x);hit.se
 const ln=document.createElementNS(ns,'line');ln.setAttribute('x1',pA.x);ln.setAttribute('y1',pA.y);ln.setAttribute('x2',pB.x);ln.setAttribute('y2',pB.y);ln.classList.add('conn-line');ln.style.pointerEvents='none';
 if(cSet)ln.classList.add(cSet.has(key)?'correct':'wrong');g.appendChild(hit);g.appendChild(ln);
 if(!chk){const dg=document.createElementNS(ns,'g');dg.setAttribute('class','conn-del-group');
-const bg=document.createElementNS(ns,'rect');bg.setAttribute('x',mx-9);bg.setAttribute('y',my-9);bg.setAttribute('width',18);bg.setAttribute('height',18);bg.setAttribute('rx',3);bg.setAttribute('class','conn-del-bg');
-const txt=document.createElementNS(ns,'text');txt.setAttribute('x',mx);txt.setAttribute('y',my);txt.setAttribute('class','conn-del-txt');txt.textContent='✕';
-dg.appendChild(bg);dg.appendChild(txt);g.appendChild(dg);g.addEventListener('click',()=>{SFX.click();conns.delete(key);sConns[cs]=new Set(conns);upDots();renderLines()})}
+const circle=document.createElementNS(ns,'circle');circle.setAttribute('cx',mx);circle.setAttribute('cy',my);circle.setAttribute('r',8);circle.setAttribute('class','conn-del-circle');
+const c1=document.createElementNS(ns,'line');c1.setAttribute('x1',mx-4);c1.setAttribute('y1',my-4);c1.setAttribute('x2',mx+4);c1.setAttribute('y2',my+4);c1.setAttribute('class','conn-del-cross');
+const c2=document.createElementNS(ns,'line');c2.setAttribute('x1',mx+4);c2.setAttribute('y1',my-4);c2.setAttribute('x2',mx-4);c2.setAttribute('y2',my+4);c2.setAttribute('class','conn-del-cross');
+dg.appendChild(circle);dg.appendChild(c1);dg.appendChild(c2);g.appendChild(dg);g.addEventListener('click',()=>{SFX.click();conns.delete(key);sConns[cs]=new Set(conns);upDots();renderLines()})}
 svg.appendChild(g)})}
 function upDots(){document.querySelectorAll('[data-dot]').forEach(d=>{const id=d.dataset.dot;const has=[...conns].some(k=>k.split('|').includes(id));
 d.classList.toggle('connected',has);d.classList.toggle('pending',pd&&pd.id===id);

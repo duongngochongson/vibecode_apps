@@ -1,7 +1,8 @@
 <!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>PIXELVERSE — Admin</title><link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙</text></svg>">
 <link rel="stylesheet" href="style.css"/><script src="app.js"></script>
-<style>*{font-family:'Montserrat',sans-serif}
+<style>:root{--cyan:#00fff5;--orange:#ff6b00;--bg:#111111;--card:#1a1a1a;--card2:#0f0f0f;--grey:#555555;--yellow:#ffe600;--white:#ffffff;--magenta:#ff00cc;--green:#00ff88}
+*{font-family:'Montserrat',sans-serif}
 .admin-page{max-width:860px;margin:0 auto;padding:32px 20px 100px}
 .auth-section{text-align:center;padding:48px 0 32px}.auth-title{font-family:var(--fh);font-size:20px;font-weight:700;color:var(--yellow);text-shadow:0 0 14px var(--yellow);letter-spacing:3px;margin-bottom:32px}
 .auth-form{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
@@ -49,10 +50,11 @@
 .map-node.selected .node-dot{background:var(--yellow);box-shadow:0 0 8px rgba(255,230,0,.8);transform:translateX(-50%) scale(1.3)}
 .node-conn-count{position:absolute;top:-7px;left:-7px;background:var(--yellow);color:var(--bg);font-size:9px;width:14px;height:14px;display:none;align-items:center;justify-content:center;border-radius:50%}
 .node-conn-count.has-conn{display:flex}
-.map-line{stroke:var(--cyan);stroke-width:2;stroke-dasharray:6 3;fill:none;opacity:.85}
+.map-line{stroke:var(--cyan);stroke-width:2.5;stroke-dasharray:8 4;fill:none;opacity:1}
 .conn-group{cursor:pointer}.conn-hit{stroke:transparent;stroke-width:20;pointer-events:stroke;fill:none}
-.conn-del-group{visibility:hidden;pointer-events:none}.conn-group:hover .conn-del-group{visibility:visible}
-.conn-del-bg{fill:var(--bg);stroke:var(--orange);stroke-width:1.5}.conn-del-txt{fill:var(--orange);font-size:11px;text-anchor:middle;dominant-baseline:central}
+.conn-del-group{opacity:0;pointer-events:none;transition:opacity .15s}.conn-group:hover .conn-del-group{opacity:1;pointer-events:all}
+.conn-del-circle{fill:#111;stroke:rgba(255,255,255,.2);stroke-width:1;transition:fill .15s,stroke .15s}.conn-group:hover .conn-del-circle{fill:var(--orange);stroke:var(--orange)}
+.conn-del-cross{stroke:rgba(255,255,255,.4);stroke-width:1.5;stroke-linecap:round;transition:stroke .15s}.conn-group:hover .conn-del-cross{stroke:#fff}
 .map-node.highlight,.mt-item.highlight{border-color:var(--magenta)!important;box-shadow:0 0 10px rgba(255,0,204,.45)!important}
 .kw-pool-sidebar{width:140px;flex-shrink:0;display:flex;flex-direction:column;gap:6px}
 .kw-pool-hdr{font-size:11px;color:var(--magenta);letter-spacing:2px}
@@ -75,7 +77,7 @@
 .mt-col-l .mt-item{flex-direction:row}.mt-col-r .mt-item{flex-direction:row-reverse}
 .mt-col-add{display:flex;justify-content:center;margin-top:4px}
 .mt-svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;z-index:2}
-.mt-conn-line{stroke:var(--cyan);stroke-width:2;stroke-dasharray:5 3;fill:none;opacity:.85}
+.mt-conn-line{stroke:var(--cyan);stroke-width:2.5;stroke-dasharray:8 4;fill:none;opacity:1}
 .mt-hint{font-size:12px;color:var(--grey);margin-bottom:8px;font-style:italic}
 .game-toggle-row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.07)}
 .game-toggle-row:last-child{border-bottom:none}.game-toggle-label{display:flex;align-items:center;gap:10px;font-size:16px}
@@ -183,7 +185,7 @@ mmRenderKwList();mmRenderCanvas();
 document.getElementById('mm-add-kw').addEventListener('click',()=>{mmData.keywords.push({id:'k'+Date.now(),text:'',correctRow:null});mmRenderKwList();mmRenderPool();
 const inputs=document.querySelectorAll('#mm-kw-list .field-input');if(inputs.length)inputs[inputs.length-1].focus()});
 document.getElementById('mm-row-minus').addEventListener('click',()=>mmChangeRows(-1));document.getElementById('mm-row-plus').addEventListener('click',()=>mmChangeRows(1));
-document.getElementById('mm-canvas').addEventListener('click',()=>mmClearSel());window.addEventListener('resize',()=>mmRefreshConn())}
+document.getElementById('mm-canvas').addEventListener('click',()=>{mmClearSel();mmAutoLayout()});window.addEventListener('resize',()=>mmRefreshConn())}
 function mmChangeRows(d){const n=mmData.rowCount+d;if(n<1||n>6)return;if(d<0){const rm=mmData.rowCount-1;Object.keys(mmPlacements).forEach(kid=>{if(mmPlacements[kid]===rm)delete mmPlacements[kid]});
 mmConnections.forEach(k=>{const[a,b]=mmPair(k);if(mmPlacements[a]===undefined||mmPlacements[b]===undefined)mmConnections.delete(k)})}
 mmData.rowCount=n;document.getElementById('mm-row-count').textContent=n;mmRenderCanvas()}
@@ -199,7 +201,7 @@ for(let i=0;i<mmData.rowCount;i++)canvas.insertBefore(mmMakeRow(i),document.getE
 const poolEl=document.getElementById('mm-pool'),newPool=poolEl.cloneNode(false);poolEl.replaceWith(newPool);
 newPool.addEventListener('dragover',e=>{if(mmDragKid)e.preventDefault()});
 newPool.addEventListener('drop',e=>{e.preventDefault();if(!mmDragKid)return;const kid=mmDragKid;
-mmConnections.forEach(k=>{const[a,b]=mmPair(k);if(a===kid||b===kid)mmConnections.delete(k)});delete mmPlacements[kid];mmDragKid=null;mmRenderPool();mmRenderPlaced();mmRefreshConn()});
+mmConnections.forEach(k=>{const[a,b]=mmPair(k);if(a===kid||b===kid)mmConnections.delete(k)});delete mmPlacements[kid];mmDragKid=null;mmRenderPool();mmAutoLayout()});
 mmRenderPool();mmRenderPlaced();mmRefreshConn()}
 function mmMakeRow(idx){const r=document.createElement('div');r.className='map-row';r.dataset.row=idx;r.id='mm-row-'+idx;
 const lbl=document.createElement('span');lbl.className='row-label';lbl.textContent=String(idx+1).padStart(2,'0');
@@ -208,7 +210,7 @@ r.addEventListener('dragover',e=>{if(mmDragKid){e.preventDefault();r.classList.a
 r.addEventListener('dragleave',e=>{if(!r.contains(e.relatedTarget))r.classList.remove('drag-over')});
 r.addEventListener('drop',e=>{e.preventDefault();r.classList.remove('drag-over');if(!mmDragKid)return;mmPlacements[mmDragKid]=idx;
 mmConnections.forEach(k=>{const[a,b]=mmPair(k);if(mmPlacements[a]!==undefined&&mmPlacements[b]!==undefined&&mmPlacements[a]===mmPlacements[b])mmConnections.delete(k)});
-mmDragKid=null;mmRenderPool();mmRenderPlaced();mmRefreshConn()});return r}
+mmDragKid=null;mmRenderPool();mmAutoLayout()});return r}
 function mmRenderPool(){const pool=document.getElementById('mm-pool');pool.innerHTML='';const placed=new Set(Object.keys(mmPlacements));
 mmData.keywords.forEach(kw=>{if(!placed.has(kw.id))pool.appendChild(mmMakeChip(kw))});
 if(mmData.keywords.length>0&&placed.size===mmData.keywords.length){const e=document.createElement('div');e.className='pool-empty';e.textContent='ĐÃ ĐẶT HẾT ✓';pool.appendChild(e)}}
@@ -226,7 +228,7 @@ d.addEventListener('dragend',()=>{d.classList.remove('dragging');document.queryS
 function mmNodeClick(kid){if(mmSelectedNode===null){mmSelectedNode=kid;document.querySelectorAll('#mm-canvas .map-node').forEach(n=>n.classList.remove('selected'));
 document.querySelector(`#mm-canvas .map-node[data-kid="${kid}"]`)?.classList.add('selected')}
 else if(mmSelectedNode===kid)mmClearSel();else{const rA=mmPlacements[mmSelectedNode],rB=mmPlacements[kid];
-if(rA===undefined||rB===undefined){mmClearSel();return}if(rA!==rB){const key=mmCk(mmSelectedNode,kid);if(mmConnections.has(key))mmConnections.delete(key);else mmConnections.add(key);mmRefreshConn()}mmClearSel()}}
+if(rA===undefined||rB===undefined){mmClearSel();return}if(rA!==rB){const key=mmCk(mmSelectedNode,kid);if(mmConnections.has(key))mmConnections.delete(key);else mmConnections.add(key);mmAutoLayout()}mmClearSel()}}
 function mmClearSel(){mmSelectedNode=null;document.querySelectorAll('#mm-canvas .map-node').forEach(n=>n.classList.remove('selected'))}
 function mmGetDotPos(kid,dt){const canvas=document.getElementById('mm-canvas'),svg=document.getElementById('mm-svg');
 const n=canvas.querySelector(`.map-node[data-kid="${kid}"]`);if(!n)return null;const dot=n.querySelector(`.node-dot--${dt}`);if(!dot)return null;
@@ -238,15 +240,29 @@ const mx=(p1.x+p2.x)/2,my=(p1.y+p2.y)/2;const g=document.createElementNS(ns,'g')
 const hit=document.createElementNS(ns,'line');hit.setAttribute('x1',p1.x);hit.setAttribute('y1',p1.y);hit.setAttribute('x2',p2.x);hit.setAttribute('y2',p2.y);hit.setAttribute('class','conn-hit');
 const line=document.createElementNS(ns,'line');line.setAttribute('x1',p1.x);line.setAttribute('y1',p1.y);line.setAttribute('x2',p2.x);line.setAttribute('y2',p2.y);line.setAttribute('class','map-line');line.style.pointerEvents='none';
 const dg=document.createElementNS(ns,'g');dg.setAttribute('class','conn-del-group');
-const bg=document.createElementNS(ns,'rect');bg.setAttribute('x',mx-9);bg.setAttribute('y',my-9);bg.setAttribute('width',18);bg.setAttribute('height',18);bg.setAttribute('rx',3);bg.setAttribute('class','conn-del-bg');
-const txt=document.createElementNS(ns,'text');txt.setAttribute('x',mx);txt.setAttribute('y',my);txt.setAttribute('class','conn-del-txt');txt.textContent='✕';
-dg.appendChild(bg);dg.appendChild(txt);g.appendChild(hit);g.appendChild(line);g.appendChild(dg);
+const circle=document.createElementNS(ns,'circle');circle.setAttribute('cx',mx);circle.setAttribute('cy',my);circle.setAttribute('r',8);circle.setAttribute('class','conn-del-circle');
+const c1=document.createElementNS(ns,'line');c1.setAttribute('x1',mx-4);c1.setAttribute('y1',my-4);c1.setAttribute('x2',mx+4);c1.setAttribute('y2',my+4);c1.setAttribute('class','conn-del-cross');
+const c2=document.createElementNS(ns,'line');c2.setAttribute('x1',mx+4);c2.setAttribute('y1',my-4);c2.setAttribute('x2',mx-4);c2.setAttribute('y2',my+4);c2.setAttribute('class','conn-del-cross');
+dg.appendChild(circle);dg.appendChild(c1);dg.appendChild(c2);g.appendChild(hit);g.appendChild(line);g.appendChild(dg);
 g.addEventListener('click',e=>{e.stopPropagation();mmConnections.delete(key);mmRefreshConn()});svg.appendChild(g)});
 const counts={};mmConnections.forEach(k=>{const[a,b]=mmPair(k);counts[a]=(counts[a]||0)+1;counts[b]=(counts[b]||0)+1});
 document.getElementById('mm-canvas').querySelectorAll('.map-node').forEach(n=>{const badge=n.querySelector('.node-conn-count'),cnt=counts[n.dataset.kid]||0;if(badge){badge.textContent=cnt;badge.classList.toggle('has-conn',cnt>0)}})}
 function mmHighlight(kid){document.querySelectorAll('#mm-canvas .map-node.highlight').forEach(n=>n.classList.remove('highlight'));
 mmConnections.forEach(k=>{if(k.split('|').includes(kid)){const p=k.split('|').find(x=>x!==kid);document.querySelector(`#mm-canvas .map-node[data-kid="${p}"]`)?.classList.add('highlight')}})}
 function mmClearHL(){document.querySelectorAll('#mm-canvas .map-node.highlight').forEach(n=>n.classList.remove('highlight'))}
+function mmAutoLayout(){
+  const allRows=[...new Set(Object.values(mmPlacements))].sort((a,b)=>a-b);
+  if(!allRows.length)return;
+  const children={};
+  mmConnections.forEach(key=>{const[a,b]=mmPair(key);const rA=mmPlacements[a],rB=mmPlacements[b];if(rA===undefined||rB===undefined)return;const parent=rA<rB?a:b,child=rA<rB?b:a;if(!children[parent])children[parent]=[];children[parent].push(child)});
+  const rowOrder={};
+  const r0=document.getElementById('mm-nodes-0');
+  rowOrder[0]=r0?[...r0.querySelectorAll('.map-node')].map(n=>n.dataset.kid).filter(Boolean):mmData.keywords.filter(kw=>mmPlacements[kw.id]===0).map(kw=>kw.id);
+  const maxRow=Math.max(...allRows);
+  for(let row=1;row<=maxRow;row++){const rowKids=mmData.keywords.filter(kw=>mmPlacements[kw.id]===row).map(kw=>kw.id);if(!rowKids.length){rowOrder[row]=[];continue}const parentOrder=rowOrder[row-1]||[];rowKids.sort((a,b)=>{const rank=kid=>{let best=Infinity;parentOrder.forEach((p,i)=>{if((children[p]||[]).includes(kid))best=Math.min(best,i)});return best};return rank(a)-rank(b)});rowOrder[row]=rowKids}
+  for(let i=0;i<mmData.rowCount;i++){const c=document.getElementById('mm-nodes-'+i);if(!c)continue;c.innerHTML='';const order=rowOrder[i]||[];const allInRow=mmData.keywords.filter(kw=>mmPlacements[kw.id]===i).map(kw=>kw.id);const tail=allInRow.filter(id=>!order.includes(id));[...order,...tail].forEach(kid=>{const kw=mmData.keywords.find(k=>k.id===kid);if(kw)c.appendChild(mmMakeNode(kw))})}
+  mmRefreshConn();
+}
 function mmBuildSave(){return{...mmData,keywords:mmData.keywords.map(kw=>({...kw,correctRow:mmPlacements[kw.id]!==undefined?mmPlacements[kw.id]:null})),connections:[...mmConnections].map(k=>{const[from,to]=mmPair(k);return{from,to}})}}
 // MATCHING
 let mtData=[],mtConns={},mtPending=null;const mtCk=(a,b)=>a<b?a+'|'+b:b+'|'+a;
@@ -313,9 +329,10 @@ const g=document.createElementNS(ns,'g');g.setAttribute('class','conn-group');
 const hit=document.createElementNS(ns,'line');hit.setAttribute('x1',pA.x);hit.setAttribute('y1',pA.y);hit.setAttribute('x2',pB.x);hit.setAttribute('y2',pB.y);hit.setAttribute('class','conn-hit');
 const line=document.createElementNS(ns,'line');line.setAttribute('x1',pA.x);line.setAttribute('y1',pA.y);line.setAttribute('x2',pB.x);line.setAttribute('y2',pB.y);line.setAttribute('class','mt-conn-line');line.style.pointerEvents='none';
 const dg=document.createElementNS(ns,'g');dg.setAttribute('class','conn-del-group');
-const bg=document.createElementNS(ns,'rect');bg.setAttribute('x',mx-9);bg.setAttribute('y',my-9);bg.setAttribute('width',18);bg.setAttribute('height',18);bg.setAttribute('rx',3);bg.setAttribute('class','conn-del-bg');
-const txt=document.createElementNS(ns,'text');txt.setAttribute('x',mx);txt.setAttribute('y',my);txt.setAttribute('class','conn-del-txt');txt.textContent='✕';
-dg.appendChild(bg);dg.appendChild(txt);g.appendChild(hit);g.appendChild(line);g.appendChild(dg);
+const circle=document.createElementNS(ns,'circle');circle.setAttribute('cx',mx);circle.setAttribute('cy',my);circle.setAttribute('r',8);circle.setAttribute('class','conn-del-circle');
+const c1=document.createElementNS(ns,'line');c1.setAttribute('x1',mx-4);c1.setAttribute('y1',my-4);c1.setAttribute('x2',mx+4);c1.setAttribute('y2',my+4);c1.setAttribute('class','conn-del-cross');
+const c2=document.createElementNS(ns,'line');c2.setAttribute('x1',mx+4);c2.setAttribute('y1',my-4);c2.setAttribute('x2',mx-4);c2.setAttribute('y2',my+4);c2.setAttribute('class','conn-del-cross');
+dg.appendChild(circle);dg.appendChild(c1);dg.appendChild(c2);g.appendChild(hit);g.appendChild(line);g.appendChild(dg);
 g.addEventListener('click',e=>{e.stopPropagation();mtConns[si].delete(key);mtRenderLines(si);mtUpdateColors(si)});svg.appendChild(g)});mtUpdateColors(si)}
 function mtUpdateColors(si){const conns=mtConns[si]||new Set();document.querySelectorAll(`[data-msi="${si}"]`).forEach(item=>{const id=item.dataset.mid;
 const hasPend=mtPending&&+mtPending.si===si&&mtPending.id===id;const hasConn=[...conns].some(k=>k.split('|').includes(id));

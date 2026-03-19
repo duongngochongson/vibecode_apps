@@ -15,19 +15,20 @@
 .map-node.correct{border-color:var(--success);background:var(--success-subtle);color:var(--success)}.map-node.wrong{border-color:var(--error);background:var(--error-subtle);color:var(--error)}
 .map-node.shake{animation:nsh 0.3s ease}@keyframes nsh{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
 .map-node.dragging{opacity:0.4}.map-node.highlight{border-color:var(--accent)!important;background:var(--accent-muted)!important}
-.node-remove{position:absolute;top:-7px;right:-7px;width:16px;height:16px;border-radius:50%;background:var(--error);color:var(--text-inverse);font-size:9px;line-height:16px;text-align:center;cursor:pointer;display:none;z-index:6;font-weight:bold}
-.map-node:not(.correct):not(.wrong):hover .node-remove{display:block}
+.node-remove{position:absolute;top:-7px;right:-7px;width:16px;height:16px;border-radius:50%;background:var(--bg-elevated);border:1px solid var(--border-subtle);color:var(--text-tertiary);font-size:9px;line-height:16px;text-align:center;cursor:pointer;opacity:0;pointer-events:none;z-index:6;transition:opacity .15s,background .15s,color .15s}
+.map-node:not(.correct):not(.wrong):hover .node-remove{opacity:1;pointer-events:auto;background:var(--error);border-color:var(--error);color:#fff}
 .node-dot{position:absolute;width:10px;height:10px;border-radius:50%;background:var(--border-default);left:50%;transform:translateX(-50%);z-index:5;pointer-events:none;transition:all 0.12s}
 .node-dot--top{top:-6px}.node-dot--bottom{bottom:-6px}
 .map-node.selected .node-dot{background:var(--accent);box-shadow:0 0 6px var(--accent);transform:translateX(-50%) scale(1.2)}
 .map-node.correct .node-dot{background:var(--success)}.map-node.wrong .node-dot{background:var(--error)}
 .node-conn-count{position:absolute;top:-7px;left:-7px;width:16px;height:16px;border-radius:50%;background:var(--bg-elevated);border:1px solid var(--border-default);color:var(--text-secondary);font-size:9px;line-height:16px;text-align:center;font-family:monospace;pointer-events:none;display:none}
 .node-conn-count.has-conn{display:block;color:var(--accent);border-color:var(--accent)}
-.map-line{stroke:var(--accent);stroke-width:2;stroke-dasharray:6 3;fill:none;opacity:0.8}
-.map-line.correct{stroke:var(--success);stroke-dasharray:none;opacity:1}.map-line.wrong{stroke:var(--error);stroke-dasharray:none;opacity:1}
+.map-line{stroke:var(--accent);stroke-width:2.5;stroke-dasharray:8 4;fill:none;opacity:1}
+.map-line.correct{stroke:var(--success);stroke-width:2.5;stroke-dasharray:none;opacity:1}.map-line.wrong{stroke:var(--error);stroke-width:2.5;stroke-dasharray:none;opacity:1}
 .conn-group{cursor:pointer}.conn-hit{stroke:transparent;stroke-width:20;pointer-events:stroke;fill:none}
-.conn-del-group{visibility:hidden;pointer-events:none}.conn-group:hover .conn-del-group{visibility:visible}
-.conn-del-bg{fill:var(--bg-base);stroke:var(--error);stroke-width:1.5}.conn-del-txt{fill:var(--error);font-size:11px;text-anchor:middle;dominant-baseline:central}
+.conn-del-group{opacity:0;pointer-events:none;transition:opacity .15s}.conn-group:hover .conn-del-group{opacity:1;pointer-events:all}
+.conn-del-circle{fill:var(--bg-elevated);stroke:var(--border-subtle);stroke-width:1;transition:fill .15s,stroke .15s}.conn-group:hover .conn-del-circle{fill:var(--error);stroke:var(--error)}
+.conn-del-cross{stroke:var(--text-tertiary);stroke-width:1.5;stroke-linecap:round;transition:stroke .15s}.conn-group:hover .conn-del-cross{stroke:#fff}
 .kw-pool-section{display:flex;flex-direction:column;gap:6px}
 .kw-pool-header{font-family:var(--font-sans);font-size:12px;color:var(--text-secondary);letter-spacing:0.5px;display:flex;align-items:center;gap:6px;font-weight:600}
 .kw-pool-count{color:var(--text-tertiary);font-size:11px}
@@ -135,9 +136,10 @@ const g=document.createElementNS(ns,'g');g.setAttribute('class',!chk?'conn-group
 const hit=document.createElementNS(ns,'line');hit.setAttribute('x1',p1.x);hit.setAttribute('y1',p1.y);hit.setAttribute('x2',p2.x);hit.setAttribute('y2',p2.y);hit.setAttribute('class','conn-hit');
 const ln=document.createElementNS(ns,'line');ln.setAttribute('x1',p1.x);ln.setAttribute('y1',p1.y);ln.setAttribute('x2',p2.x);ln.setAttribute('y2',p2.y);ln.setAttribute('class',lc);ln.style.pointerEvents='none';
 g.appendChild(hit);g.appendChild(ln);if(!chk){const dg=document.createElementNS(ns,'g');dg.setAttribute('class','conn-del-group');
-const bg=document.createElementNS(ns,'rect');bg.setAttribute('x',mx-9);bg.setAttribute('y',my-9);bg.setAttribute('width',18);bg.setAttribute('height',18);bg.setAttribute('rx',3);bg.setAttribute('class','conn-del-bg');
-const txt=document.createElementNS(ns,'text');txt.setAttribute('x',mx);txt.setAttribute('y',my);txt.setAttribute('class','conn-del-txt');txt.textContent='✕';
-dg.appendChild(bg);dg.appendChild(txt);g.appendChild(dg);g.addEventListener('click',e=>{e.stopPropagation();conns.delete(key);saveSetState();refreshConns();upSetNav()})}
+const circle=document.createElementNS(ns,'circle');circle.setAttribute('cx',mx);circle.setAttribute('cy',my);circle.setAttribute('r',8);circle.setAttribute('class','conn-del-circle');
+const c1=document.createElementNS(ns,'line');c1.setAttribute('x1',mx-4);c1.setAttribute('y1',my-4);c1.setAttribute('x2',mx+4);c1.setAttribute('y2',my+4);c1.setAttribute('class','conn-del-cross');
+const c2=document.createElementNS(ns,'line');c2.setAttribute('x1',mx+4);c2.setAttribute('y1',my-4);c2.setAttribute('x2',mx-4);c2.setAttribute('y2',my+4);c2.setAttribute('class','conn-del-cross');
+dg.appendChild(circle);dg.appendChild(c1);dg.appendChild(c2);g.appendChild(dg);g.addEventListener('click',e=>{e.stopPropagation();conns.delete(key);saveSetState();refreshConns();upSetNav()})}
 svg.appendChild(g)});upBadges()}
 function hlConn(kid){document.querySelectorAll('#mapCanvas .map-node.highlight').forEach(n=>n.classList.remove('highlight'));
 conns.forEach(k=>{if(k.split('|').includes(kid)){const p=k.split('|').find(x=>x!==kid);document.querySelector(`#mapCanvas .map-node[data-kid="${p}"]`)?.classList.add('highlight')}})}
